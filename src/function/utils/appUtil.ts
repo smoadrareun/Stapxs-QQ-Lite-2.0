@@ -410,7 +410,7 @@ export function loadAppendStyle() {
     } catch (e) {
         logger.info('未找到对应平台的附加样式')
     }
-    if (platform != 'linux') {
+    if (platform != 'linux' && runtimeData.tags.isElectron) {
         import('@/assets/css/append/append_vibrancy.css').then(() => {
             logger.info('透明 UI 附加样式加载完成')
         })

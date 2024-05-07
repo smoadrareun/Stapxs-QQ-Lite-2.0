@@ -8,6 +8,7 @@ body {
 }
 
 .top-bar {
+    margin-bottom: 0 !important;
     border-radius: 7px 7px 0 0;
     background: transparent;
     box-shadow: unset;
@@ -20,6 +21,10 @@ body {
     font-size: .8rem;
     line-height: 35px;
     font-weight: normal;
+}
+.top-bar>span,
+.top-bar>img, .top-bar>svg {
+    display: none;
 }
 .top-bar>div.controller>div {
     padding: 7px;
@@ -38,16 +43,8 @@ body {
     padding-left: 5px;
 }
 
-.top-bar {
-    margin-bottom: 0 !important;
-}
-.top-bar>span,
-.top-bar>img, .top-bar>svg {
-    display: none;
-}
-
 .chat-pan.withBar {
-    left: 275px !important;
+    left: 275px;
     top: 0;
     height: calc(100% - 20px);
     padding-top: 20px;
@@ -61,4 +58,64 @@ body {
 .opt-main>div:last-child {
     padding-top: 25px !important;
     height: calc(100% - 17px) !important;
+}
+
+@media (max-width: 700px) {
+    .friend-list {
+        width: 60px !important;
+    }
+    .opt-main>div:last-child {
+        padding-top: 25px !important;
+        height: calc(100% - 37px) !important;
+    }
+    .chat-pan.withBar {
+        left: 60px !important;
+        height: calc(100% - 75px);
+        padding-top: 20px;
+    }
+    .chat-pan.open.withBar {
+        left: 80px !important;
+    }
+    .chat-info {
+        width: calc(100% - 70px);
+        margin: calc(50vh - 20px) 0 0 20px !important;
+    }
+    .chat-info-pan {
+        height: calc(100% + 55px);
+        margin-top: -20px;
+    }
+    .friend-list>div:first-child {
+        margin: 55px 15px 0 10px !important;
+    }
+    .friend-list>div:first-child>div.small>div {
+        width: 35px;
+        height: 35px;
+        margin-right: 0;
+    }
+    .friend-list.open>div:first-child>div.small > div {
+        height: 44px;
+        width: 44px;
+    }
+
+    .friend-list>div:first-child>div.small {
+        margin-top: -20px;
+        margin-left: 5px;
+        margin-bottom: 5px;
+    }
+}
+
+@media (max-width: 500px) {
+    .chat-pan.withBar {
+        padding-top: 0;
+        left: 0 !important;
+    }
+    .friend-list>div:first-child {
+        margin: 80px 15px 0 10px !important;
+    }
+    .chat-info-pan {
+        height: calc(100% + 95px);
+    }
+    .chat-info {
+        margin: calc(50vh - 20px) 0 -20px 0 !important;
+    }
 }

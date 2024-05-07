@@ -63,6 +63,13 @@
     font-size: 0.8rem;
     border-bottom: 1px solid var(--color-font-2);
 }
+.friend-list > div:first-child > div.small > span {
+    background: transparent;
+    color: var(--color-font);
+    font-weight: bold;
+    padding: 10px;
+    height: 44px;
+}
 
 .friend-body {
     margin-bottom: 5px;
@@ -249,6 +256,11 @@
 .chat-pan > div.new-msg > div > span {
     margin-left: 0;
 }
+.chat-pan > div.info > svg {
+    width: 14px;
+    height: 14px;
+    padding: 14px;
+}
 .menu,
 .msg-menu-body {
     padding: 5px !important;
@@ -382,7 +394,6 @@
     line-height: 28px;
     height: 28px;
     font-size: 0.75rem;
-    width: 140px !important;
 }
 .opt-body label[class=ss-switch] {
     --switch-height: 24px;
@@ -475,7 +486,8 @@
 
 .app-msg > div {
     border-radius: 7px;
-    height: 15px;
+    padding: 9px 15px;
+    max-width: 30%;
 }
 .app-msg > div > a {
     font-size: 0.87rem;
@@ -490,6 +502,54 @@
 
 @media (max-width: 700px) {
     .main-body > ul {
+        background: var(--color-card-2) !important;
         height: 60px !important;
+    }
+    .friend-list {
+        width: 75px !important;
+    }
+    .chat-pan {
+        height: calc(100% - 60px);
+        left: 75px !important;
+    }
+    .chat-info {
+        width: calc(100% - 70px);
+    }
+    .friend-list {
+        background: var(--color-card-1) !important;
+    }
+    .friend-list > div:first-child {
+        margin: 5px 15px 5px 0;
+    }
+    .friend-list > div:last-child {
+        padding: 0 7px 0 5px !important;
+    }
+    .friend-list > div:first-child > div.small {
+        margin-top: 10px;
+        height: 44px;
+    }
+    .friend-list > div:first-child > div.small > div {
+        margin-right: 10px;
+        width: 44px;
+    }
+    .friend-list > div:first-child > div.small > div > svg {
+        height: 14px;
+    }
+    .friend-list > div:first-child > div.small > label {
+        margin-top: 1px;
+        height: 44px;
+    }
+}
+@media (max-width: 500px) {
+    .pop-box-body {
+        width: fit-content !important;
+    }
+    .chat-pan {
+        left: 0 !important;
+    }
+    .chat-info {
+        width: calc(100% - 30px);
+        height: calc(100% - 125px);
+        padding-top: 40px;
     }
 }

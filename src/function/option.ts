@@ -290,7 +290,6 @@ export function load(): { [key: string]: any } {
 }
 
 function loadOptData(data: { [key: string]: any }) {
-    console.log(data)
     const options: { [key: string]: any } = {}
     Object.keys(data).forEach(function (key) {
         const value = data[key]
@@ -322,7 +321,6 @@ function loadOptData(data: { [key: string]: any }) {
     })
     // 保存返回
     cacheConfigs = options
-    console.log(cacheConfigs)
     return options
 }
 

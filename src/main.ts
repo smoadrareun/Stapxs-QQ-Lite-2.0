@@ -51,5 +51,7 @@ const colorList = ['50534f', 'f9a633', '8076a3', 'f0a1a8', '92aa8a', '606E7A', '
 const color = colorList[Math.floor(Math.random() * colorList.length)]
 const str = strList[Math.floor(Math.random() * strList.length)]
 console.log(`%c${str}%c Stapxs QQ Lite - ${packageInfo.version} ( ${process.env.NODE_ENV} ) `, `font-weight:bold;background:#${color};color:#fff;border-radius:7px 0 0 7px;display:inline-block;padding:7px 14px;margin:7px 0 7px 7px;`, 'background:#F8F9FA;color:#000;border-radius:0 7px 7px 0;display:inline-block;padding:7px 14px;margin:7px 7px 7px 0;');
-
-console.log(app)
+console.log(' _____ _____ _____ _____ __ __  \n' +
+            '|   __|_   _|  _  |  _  |  |  | \n' +
+            '|__   | | | |     |   __|-   -| \n' +
+            '|_____| |_| |__|__|__|  |__|__| CopyRight © Stapx Steve')

@@ -134,8 +134,19 @@ export default defineComponent({
     min-height: unset;
     display: flex;
 }
+.dept > div {
+    margin: 0 -5px 5px 0 !important;
+    align-items: center;
+    padding: 10px 20px;
+}
 .dept > div > header {
     color: var(--color-font);
+    font-size: 0.8rem !important;
+    display: flex;
+    align-items: center;
+}
+.dept > div > svg {
+    height: 15px;
 }
 .dept > div > header > span {
     font-size: 0.7rem;
@@ -149,7 +160,7 @@ export default defineComponent({
     color: var(--color-font-r);
     border-radius: 2rem;
     margin-right: 10px;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
 }
 .dept > div:not(:first-child) {
     margin-top: 10px;

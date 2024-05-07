@@ -44,7 +44,7 @@
     display: block !important;
 }
 .opt-main-tab.layui-show .opt-main > div:last-child {
-    margin-left: 0 !important;
+    margin-left: -5px !important;
 }
 .opt-main {
     background: rgba(var(--color-card-rgb), 0.6);
@@ -83,7 +83,7 @@
 }
 .chat-pan {
     box-shadow: -5px 0px 4px -5px var(--color-shader);
-    left: 270px !important;
+    left: 270px;
 }
 
 @media (max-width: 500px) {

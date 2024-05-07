@@ -83,7 +83,20 @@ module.exports = {
                 },
                 
                 linux: {
-                    target: process.env.NODEJS_ENV === 'github-actions' ? ['AppImage', 'tar.gz'] : 'pacman',
+                    target: [
+                        {
+                            target: 'deb',
+                            arch: ['x64', 'arm64']
+                        },
+                        {
+                            target: 'AppImage',
+                            arch: ['x64', 'arm64']
+                        },
+                        {
+                            target: 'tar.gz',
+                            arch: ['x64', 'arm64']
+                        }
+                    ],
                     maintainer: 'Stapx Steve [林槐]',
                     vendor: 'Stapxs Steve Team',
                     synopsis: '一个兼容 OneBot 的非官方网页版 QQ 客户端。',
@@ -105,27 +118,14 @@ module.exports = {
                     target: [
                         {
                             target: 'portable',
-                            arch: 'x64'
-                        },
-                        // {
-                        //     target: 'appx',
-                        //     arch: 'x64'
-                        // }
+                            arch: ['x64', 'arm64']
+                        }
                     ],
                     appId: 'com.stapxs.qqweb',
                     icon: 'public/img/icons/icon.png',
                     legalTrademarks: 'Copyright © 2022-2024 Stapx Steve [林槐]',
                     publisherName: 'stapxs',
                 },
-                // appx: {
-                //     applicationId: "com.stapxs.qqweb",
-                //     backgroundColor: "#606E7A",
-                //     displayName: "Stapxs QQ Lite",
-                //     identityName: "stapxs-qq-lite",
-                //     languages: ["en-US", "zh-CN", "zh-HK", "zh-TW"],
-                    
-                //     publisherDisplayName: "Stapx Steve [林槐]"
-                // },
 
                 mac: {
                     target: [

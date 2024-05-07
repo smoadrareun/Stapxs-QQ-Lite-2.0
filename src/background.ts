@@ -22,13 +22,11 @@ export let win = undefined as BrowserWindow | undefined
 
 async function createWindow() {
     console.log('')
-    console.log('███████╗████████╗ █████╗ ██████╗ ██╗  ██╗')
-    console.log('██╔════╝╚══██╔══╝██╔══██╗██╔══██╗╚██╗██╔╝')
-    console.log('███████╗   ██║   ███████║██████╔╝ ╚███╔╝ ')
-    console.log('╚════██║   ██║   ██╔══██║██╔═══╝  ██╔██╗ ')
-    console.log('███████║   ██║   ██║  ██║██║     ██╔╝ ██╗')
-    console.log('╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝')
-    console.log('===========================================')
+    console.log(' _____ _____ _____ _____ __ __  \n' +
+                '|   __|_   _|  _  |  _  |  |  | \n' +
+                '|__   | | | |     |   __|-   -| \n' +
+                '|_____| |_| |__|__|__|  |__|__| CopyRight © Stapx Steve')
+    console.log('=======================================================')
     console.log('Welcome to Stapxs QQ Lite, current version: ' + appVersion)
     console.log('The background language component will be initialized after the frontend is loaded.')
     
@@ -62,7 +60,9 @@ async function createWindow() {
             trafficLightPosition: { x: 11, y: 10 },
             vibrancy: 'fullscreen-ui',
             transparent: true,
-            // visualEffectState: 'active'
+
+            visualEffectState: process.env.NODE_ENV 
+                    === 'development' ? 'active' : 'followWindow'
         }
     } else if(process.platform === 'win32') {
         // Windows
@@ -71,6 +71,15 @@ async function createWindow() {
             backgroundColor: '#00000000',
             backgroundMaterial: 'acrylic',
             frame: false
+        }
+        store.set('opt_no_window', 'true')
+    } else if(process.platform === 'linux') {
+        // Linux
+        windowConfig = {
+            ...windowConfig,
+            transparent: true,
+            frame: false,
+            icon: path.join(__dirname,'./public/img/icons/icon.png')
         }
         store.set('opt_no_window', 'true')
     }
