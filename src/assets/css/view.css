@@ -520,9 +520,8 @@ input::placeholder {
     pointer-events: all;
     min-height: unset;
     min-width: 100px;
-    max-width: 150px;
+    max-width: 130px;
     padding: 10px;
-    width: 20%;
 }
 .msg-menu-body.topOut {
     transition: transform .1s, margin-top .1s;
@@ -566,6 +565,7 @@ input::placeholder {
     transition: color .3s;
     white-space: nowrap;
     overflow: hidden;
+    margin-right: 10px;
 }
 .msg-menu-body > div:hover > a {
     color: var(--color-font-r);

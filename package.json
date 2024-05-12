@@ -1,6 +1,6 @@
 {
   "name": "stapxs-qq-lite",
-  "version": "2.7.4",
+  "version": "2.7.7",
   "private": false,
   "author": "Stapx Steve [林槐]",
   "description": "一个兼容 OneBot 的非官方网页版 QQ 客户端，使用 Vue 重制的全新版本。",
@@ -16,7 +16,6 @@
   "dependencies": {
     "@bitprojects/umami-logger-typescript": "^1.0.10",
     "@jakejarrett/gtk-theme": "^2.0.1",
-    "@types/semver-compare": "^1.0.1",
     "browser-image-compression": "^2.0.0",
     "char-dust": "^0.1.0",
     "core-js": "^3.8.3",
@@ -50,6 +49,7 @@
     "@types/css": "^0.0.33",
     "@types/electron-devtools-installer": "^2.2.0",
     "@types/jsonpath": "^0.2.3",
+    "@types/semver-compare": "^1.0.3",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
     "@vue/cli-plugin-babel": "~5.0.0",

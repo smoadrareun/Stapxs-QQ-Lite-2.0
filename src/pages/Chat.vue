@@ -288,6 +288,12 @@
         <div :class="'msg-menu' + (runtimeData.sysConfig.opt_no_window ? ' withBar': '')">
             <div v-show="tags.showMsgMenu" class="msg-menu-bg" @click="closeMsgMenu"></div>
             <div :class="tags.showMsgMenu ? 'ss-card msg-menu-body show' : 'ss-card msg-menu-body'" id="msgMenu">
+                <div v-if="runtimeData.chatInfo.show.type == 'group'" :class="'ss-card respond' + (tags.menuDisplay.respond ? ' open': '')">
+                    <template v-for="(num, index) in respondIds" :key="'respond-' + num">
+                        <img v-if="getFace(num) != false" @click="sendRespond(num)" loading="lazy" :src="(getFace(num) as any)">
+                        <svg v-if="index == 4" @click="tags.menuDisplay.respond = true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M201.4 137.4c12.5-12.5 32.8-12.5 45.3 0l160 160c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L224 205.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l160-160z"/></svg>
+                    </template>
+                </div>
                 <div @click="replyMsg(true)" v-show="tags.menuDisplay.relpy">
                     <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M511.1 63.1v287.1c0 35.25-28.75 63.1-64 63.1h-144l-124.9 93.68c-7.875 5.75-19.12 .0497-19.12-9.7v-83.98h-96c-35.25 0-64-28.75-64-63.1V63.1c0-35.25 28.75-63.1 64-63.1h384C483.2 0 511.1 28.75 511.1 63.1z"/></svg></div>
                     <a>{{ $t('chat_msg_menu_reply') }}</a>
@@ -311,6 +317,10 @@
                 <div @click="downloadImg" v-show="tags.menuDisplay.downloadImg != false">
                     <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V173.3c0-17-6.7-33.3-18.7-45.3L352 50.7C340 38.7 323.7 32 306.7 32H64zm0 96c0-17.7 14.3-32 32-32H288c17.7 0 32 14.3 32 32v64c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V128zM224 288a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg></div>
                     <a>{{ $t('chat_msg_menu_download_img') }}</a>
+                </div>
+                <div @click="addStoreFace" v-show="tags.menuDisplay.addStoreFace != false">
+                    <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"/></svg></div>
+                    <a>{{ $t('chat_msg_menu_add_store_face') }}</a>
                 </div>
                 <div @click="revokeMsg" v-show="tags.menuDisplay.revoke">
                     <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg></div>
@@ -397,18 +407,17 @@ import MsgBody from '@/components/MsgBody.vue'
 import NoticeBody from '@/components/NoticeBody.vue'
 import FacePan from '@/components/FacePan.vue'
 import imageCompression from 'browser-image-compression'
-import jp from 'jsonpath'
 
 import { defineComponent, markRaw } from 'vue'
 import { downloadFile, loadHistory as loadHistoryFirst } from '@/function/utils/appUtil'
 import { getTrueLang } from '@/function/utils/systemUtil'
-import { getMsgRawTxt } from '@/function/utils/msgUtil'
+import { getMsgRawTxt, sendMsgRaw, getFace } from '@/function/utils/msgUtil'
 import { scrollToMsg } from '@/function/utils/appUtil'
 import { Logger, LogType, PopInfo, PopType } from '@/function/base'
 import { Connector, login as loginInfo } from '@/function/connect'
 import { runtimeData} from '@/function/msg'
 import { BaseChatInfoElem, MsgItemElem, SQCodeElem, GroupMemberInfoElem, UserFriendElem, UserGroupElem } from '@/function/elements/information'
-import { v4 as uuid } from 'uuid'
+import option from '@/function/option'
 
 export default defineComponent({
     name: 'ViewChat',
@@ -420,6 +429,7 @@ export default defineComponent({
                 getMsgRawTxt: getMsgRawTxt
             },
             Option: Option,
+            getFace: getFace,
             Connector: Connector,
             runtimeData: runtimeData,
             forwardList: runtimeData.userList,
@@ -442,9 +452,11 @@ export default defineComponent({
                     copy: true,
                     copySelect: false,
                     downloadImg: false as string | false,
+                    addStoreFace: false,
                     revoke: false,
                     at: true,
-                    remove: false
+                    remove: false,
+                    respond: false
                 },
                 msgTouch: {
                     x: -1,
@@ -462,11 +474,20 @@ export default defineComponent({
             selectedMsg: null as { [key: string]: any } | null,
             selectCache: '',
             replyMsgInfo: null,
-            atFindList: null as GroupMemberInfoElem[] | null
+            atFindList: null as GroupMemberInfoElem[] | null,
+            respondIds: [
+                4, 5, 8, 9, 10, 12, 14, 16, 21, 23, 24, 25, 26, 27, 28, 29, 30,
+                32, 33, 34, 38, 39, 41, 42, 43, 49, 53, 60, 63, 66, 74, 75, 76,
+                78, 79, 85, 89, 96, 97, 98, 99, 100, 101, 102, 103, 104, 106, 109,
+                111, 116, 118, 120, 122, 123, 124, 125, 129, 144, 147, 171, 173, 174,
+                175, 176, 179, 180, 181, 182, 183, 201, 203, 212, 214, 219, 222, 227,
+                232, 240, 243, 246, 262, 264, 265, 266, 267, 268, 269, 270, 271, 272,
+                273, 277, 278, 281, 282, 284, 285, 287, 289, 290, 293, 294, 297, 298,
+                299, 305, 306, 307, 314, 315, 318, 319, 320, 322, 324, 326
+            ]
         }
     },
     methods: {
-        
         /**
          * 判断是否需要显示时间戳（上下超过五分钟的消息）
          * @param timePrv 上条消息的时间戳（10 位）
@@ -778,7 +799,9 @@ export default defineComponent({
                             this.tags.menuDisplay.forward = false
                         }
                     })
-                    if(select.nodeName == 'IMG') {
+                    if(data.message[0].type == 'mface') {
+                        this.tags.menuDisplay.addStoreFace = true
+                    } else if(select.nodeName == 'IMG') {
                         // 右击图片需要显示的内容，这边特例设置为链接
                         this.tags.menuDisplay.downloadImg = (select as HTMLImageElement).src
                     }
@@ -832,9 +855,11 @@ export default defineComponent({
                 copy: true,
                 copySelect: false,
                 downloadImg: false,
+                addStoreFace: false,
                 revoke: false,
                 at: false,
-                remove: false
+                remove: false,
+                respond: false
             }
         },
 
@@ -939,8 +964,7 @@ export default defineComponent({
                             text: this.$t('btn_yes'),
                             master: true,
                             fun: () => {
-                                let msgSend = msg.message
-                                this.sendMsgRaw(msgSend)
+                                sendMsgRaw(this.chat.show.id, this.chat.show.type, msg.message)
                                 runtimeData.popBoxList.shift()
                             }
                         }
@@ -948,6 +972,47 @@ export default defineComponent({
                 }
                 runtimeData.popBoxList.push(popInfo)
             }
+        },
+
+        /**
+         * 添加商城表情
+         */
+        addStoreFace() {
+            const popInfo = new PopInfo()
+            const msg = this.selectedMsg
+            if (msg !== null) {
+            const mface = msg.message[0]
+                const storeFace = option.get('store_face') ?? '[]'
+                const storeFaceList = JSON.parse(storeFace)
+                const face = storeFaceList.find((item: any) => {
+                    return item.emoji_package_id == mface.emoji_package_id && 
+                        item.emoji_id == mface.emoji_id
+                })
+                if(face) {
+                    popInfo.add(PopType.INFO, this.$t('pop_chat_msg_menu_store_face_exist'))
+                } else {
+                    storeFaceList.push(mface)
+                    option.save('store_face', JSON.stringify(storeFaceList))
+                    popInfo.add(PopType.INFO, this.$t('pop_chat_msg_menu_store_face_success'))
+                }
+            }
+            this.closeMsgMenu()
+        },
+
+        /**
+         * 发送消息回应
+         * @param num 
+         */
+        sendRespond(num :number) {
+            const msg = this.selectedMsg
+            if (msg !== null) {
+                const msgId = msg.message_id
+                Connector.send(runtimeData.jsonMap.send_respond.name, {
+                    'message_id': msgId,
+                    'emoji_id': num
+                }, 'SendRespondBack')
+            }
+            this.closeMsgMenu()
         },
 
         /**
@@ -1325,7 +1390,11 @@ export default defineComponent({
             //                     ^^^^^^^ 0 ^^^^^^^   ^^^^^^^^^^ 1 ^^^^^^^^^^
             // 在发送操作触发之后，将会解析此条字符串排列出最终需要发送的消息结构用于发送。
             let msg = SendUtil.parseMsg(this.msg, this.sendCache, this.imgCache)
-            this.sendMsgRaw(msg)
+            if(this.chat.show.temp) {
+                sendMsgRaw(this.chat.show.id + '/' + this.chat.show.temp, this.chat.show.type, msg)
+            } else {
+                sendMsgRaw(this.chat.show.id, this.chat.show.type, msg)
+            }
             // 发送后事务
             this.msg = ''
             this.sendCache = []
@@ -1334,104 +1403,28 @@ export default defineComponent({
             this.cancelReply()
         },
 
-        sendMsgRaw(msg: string | { type: string; text: string; }[] | undefined) {
-            // 将消息构建为完整消息体先显示出去
-            const msgUUID = uuid()
-            let showMsg = {
-                revoke: true,
-                fake_msg: true,
-                message_id: msgUUID,
-                message_type: runtimeData.chatInfo.show.type,
-                time: parseInt(String(new Date().getTime() / 1000)),
-                post_type: "message",
-                sender: {
-                    user_id: runtimeData.loginInfo.uin,
-                    nickname: runtimeData.loginInfo.nickname
-                },
-                message: JSON.parse(JSON.stringify(msg)),
-                raw_message: this.$t('chat_msg_sending'),
-            } as {[key: string]: any}
-            if(showMsg.message_type == 'group') {
-                showMsg.group_id = runtimeData.chatInfo.show.id
-            } else {
-                showMsg.user_id = runtimeData.chatInfo.show.id
-            }
-            runtimeData.messageList = runtimeData.messageList.concat([showMsg])
-            // 检查消息体是否需要处理
-            const messageType = runtimeData.jsonMap.message_list.type.split('|')[0]
-            switch (messageType) {
-                case 'json_with_data': {
-                    const map = runtimeData.jsonMap.message_list.type.split('|')[1]
-                    const path = jp.parse(map)
-                    const keys = [] as string[]
-                    path.forEach((item) => {
-                        if (item.expression.value != '*' && item.expression.value != '$') {
-                            keys.push(item.expression.value)
-                        }
-                    })
-                    if(msg && typeof msg != 'string') {
-                        const newMsg = [] as any
-                        msg.forEach((item) => {
-                            const result = {} as any
-                            keys.reduce((acc, key, index) => {
-                                if (index === keys.length - 1) {
-                                    acc[key] = item
-                                } else {
-                                    acc[key] = {}
-                                }
-                                return acc[key]
-                            }, result)
-                            let newResult = {} as {[key: string]: any}
-                            newResult.type = item.type
-                            newResult.data = item
-                            delete newResult.data.type
-                            newMsg.push(newResult)
-                        })
-                        msg = newMsg
-                    }
-                    break
-                }
-            }
-            if (msg !== undefined && msg.length > 0) {
-                switch (this.chat.show.type) {
-                    case 'group': 
-                        Connector.send(
-                            runtimeData.jsonMap.message_list.name_group_send ?? 'send_group_msg',
-                            { 'group_id': this.chat.show.id, 'message': msg },'sendMsgBack_uuid_' + msgUUID); break
-                    case 'user': 
-                    {
-                        if(this.chat.show.temp) {
-                            Connector.send(
-                                runtimeData.jsonMap.message_list.name_temp_send ?? 'send_temp_msg', 
-                                { 'user_id': this.chat.show.id, 'group_id': this.chat.show.temp, 'message': msg }, 'sendMsgBack_uuid_' + msgUUID);
-                        } else {
-                            Connector.send(
-                                runtimeData.jsonMap.message_list.name_user_send ?? 'send_private_msg',
-                                 { 'user_id': this.chat.show.id, 'message': msg }, 'sendMsgBack_uuid_' + msgUUID);
-                        }
-                        break
-                    }
-                }
-            }
-        },
-
         updateList(newLength: number, oldLength: number) {
 
             // =================== 首次加载消息 ===================
 
             if(oldLength == 0 && newLength > 0) {
+                const name = runtimeData.jsonMap.set_message_read.private_name
+                let private_name = runtimeData.jsonMap.set_message_read.private_name
+                if(!private_name) private_name = name
                 // 设置最后一条消息以上都为已读
-                Connector.send(
-                    'set_message_read',
-                    { message_id: this.list[this.list.length - 1].message_id },
-                    'setMessageRead'
-                )
-                // go-cqhttp：他们名字不一样
-                Connector.send(
-                    'mark_msg_as_read',
-                    { message_id: this.list[this.list.length - 1].message_id },
-                    'setMessageRead'
-                )
+                if(runtimeData.chatInfo.show.type == 'group') {
+                    Connector.send(
+                        name,
+                        { group_id: this.chat.show.id, message_id: this.list[this.list.length - 1].message_id },
+                        'setMessageRead'
+                    )
+                } else {
+                    Connector.send(
+                        private_name,
+                        { user_id: this.chat.show.id, message_id: this.list[this.list.length - 1].message_id },
+                        'setMessageRead'
+                    )
+                }
             }
 
             // =================== 刷新统计数据 ===================

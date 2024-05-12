@@ -118,7 +118,7 @@ module.exports = {
                     target: [
                         {
                             target: 'portable',
-                            arch: ['x64', 'arm64']
+                            arch: 'x64'
                         }
                     ],
                     appId: 'com.stapxs.qqweb',

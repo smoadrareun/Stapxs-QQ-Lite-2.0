@@ -476,6 +476,7 @@ export function remove(name: string) {
 
 export default {
     get,
+    getRaw,
     load,
     save,
     run,

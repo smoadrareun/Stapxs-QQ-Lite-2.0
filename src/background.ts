@@ -2,7 +2,7 @@
 
 import Store from 'electron-store'
 import windowStateKeeper from 'electron-window-state'
-import { regIpcListener } from './function/electron/ipc'
+import { noticeList, regIpcListener } from './function/electron/ipc'
 import path from 'path'
 import { version as appVersion } from '../package.json'
 
@@ -13,6 +13,7 @@ import { app, protocol, BrowserWindow } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
+const isPrimary = app.requestSingleInstanceLock()
 
 protocol.registerSchemesAsPrivileged([
     { scheme: 'app', privileges: { secure: true, standard: true } }
@@ -104,6 +105,12 @@ async function createWindow() {
                 'https://gchat.qpic.cn/gchatpic_new',
                 'https://multimedia.nt.qq.com.cn/download'
             ]
+            const ignoreAddress = [
+                'devtools://',
+                'chrome-extension://',
+                'http://localhost:8080',
+                'https://registry.npmjs.org'
+            ]
             if(imageAddress.some((address) => details.url.startsWith(address))) {
                 // 给这个域名添加文件名头
                 const contentType = details.responseHeaders['content-type']
@@ -112,7 +119,7 @@ async function createWindow() {
                     details.responseHeaders['content-disposition'] =
                             ['attachment; filename="file.' + typeName]
                 }
-            } else if (!details.url.startsWith('chrome-extension://')) {
+            } else if (!ignoreAddress.some((address) => details.url.startsWith(address))) {
                 // 绕过 CSP 限制，X-Frame-Options 限制
                 details.responseHeaders['content-security-policy'] = ['*']
                 delete details.responseHeaders['x-frame-options']
@@ -122,17 +129,45 @@ async function createWindow() {
     })
 }
 
-app.on('window-all-closed', () => {
-    // if (process.platform !== 'darwin') {
-        app.quit()
-    // }
+app.on('open-url', (event, url) => {
+    sendUrlToWindow(url)
 })
+app.on('second-instance', (event, cmd, workingDirectory) => {
+    sendUrlToWindow(workingDirectory, cmd)
+})
+function sendUrlToWindow(url: string ,args: string[] = []) {
+    win?.webContents.send('sys:handleUri', {
+        url: url,
+        args: args
+    })
+}
 
-app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+app.on('window-all-closed', () => {
+    // 清空通知
+    Object.keys(noticeList).forEach((key) => {
+        noticeList[key].forEach((notice) => {
+            notice.close()
+        })
+    })
+    if (process.platform === 'win32')
+    {
+        app.removeAsDefaultProtocolClient("stapx-qq-lite")   // 取消默认协议
+    }
+    app.quit()
 })
 
 app.on('ready', async () => {
+    // 单例模式
+    if (!isPrimary) {
+        app.quit()
+        return
+    }
+    if (process.platform === 'win32')
+    {
+        app.setAppUserModelId('Stapx QQ Lite')              // 设置应用 ID
+        app.setAsDefaultProtocolClient("stapx-qq-lite")     // 设置为默认协议
+    }
+    // 开发者工具
     if (isDevelopment && !process.env.IS_TEST) {
         try {
             await installExtension('nhdogjmejiglipccpnnnanhbledajbpd')
@@ -141,6 +176,10 @@ app.on('ready', async () => {
         }
     }
     createWindow()
+})
+
+app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
 if (isDevelopment) {

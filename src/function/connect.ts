@@ -75,6 +75,12 @@ export class Connector {
             // 加载初始化数据
             // PS：标记登陆成功在获取用户信息的回调位置，防止无法获取到内容
             Connector.send('get_version_info', {}, 'getVersionInfo')
+            // 更新菜单
+            updateMenu({
+                id: 'logout',
+                action: 'visible',
+                value: true
+            })
         }
         websocket.onmessage = (e) => {
             // 心跳包输出到日志里太烦人了
@@ -86,9 +92,14 @@ export class Connector {
         websocket.onclose = (e) => {
             websocket = undefined
             updateMenu({
-                id: 'account',
+                id: 'logout',
                 action: 'visible',
                 value: false
+            })
+            updateMenu({
+                id: 'userName',
+                action: 'label',
+                value: $t('menu_login')
             })
 
             switch(e.code) {

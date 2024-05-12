@@ -45,7 +45,7 @@
                             <span v-else-if="item.id == 394" class="msg-face-long"><span v-for="i in 15" :key="data.message_id + '-l-' + i">🐲</span></span>
                             <svg v-else :class="'msg-face-svg' + (isMe ? ' me': '')" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-v-658eb408=""><path d="M0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256C512 397.4 397.4 512 256 512C114.6 512 0 397.4 0 256zM256 432C332.1 432 396.2 382 415.2 314.1C419.1 300.4 407.8 288 393.6 288H118.4C104.2 288 92.92 300.4 96.76 314.1C115.8 382 179.9 432 256 432V432zM176.4 160C158.7 160 144.4 174.3 144.4 192C144.4 209.7 158.7 224 176.4 224C194 224 208.4 209.7 208.4 192C208.4 174.3 194 160 176.4 160zM336.4 224C354 224 368.4 209.7 368.4 192C368.4 174.3 354 160 336.4 160C318.7 160 304.4 174.3 304.4 192C304.4 209.7 318.7 224 336.4 224z" data-v-658eb408=""></path></svg>
                         </template>
-                        <img v-else-if="item.type == 'mface' && item.url" @load="scrollButtom" @error="imgLoadFail" :class="imgStyle(data.message.length, index, item.asface)" :src="item.url">
+                        <img v-else-if="item.type == 'mface' && item.url" @load="scrollButtom" @error="imgLoadFail" :class="imgStyle(data.message.length, index, item.asface) + ' msg-mface'" :src="item.url">
                         <span v-else-if="item.type == 'mface' && item.text" class="msg-unknown">{{ item.text }}</span>
                         <span v-else-if="item.type == 'bface'" style="font-style: italic;opacity: 0.7;">[ {{ $t('chat_fun_menu_pic') }}：{{ item.text }} ]</span>
                         <div v-else-if="item.type == 'at'" v-show="isAtShow(data.source, item.qq)" :class="getAtClass(item.qq)">
@@ -121,6 +121,14 @@
         </div>
         <div v-if="data.fake_msg == true" class="sending">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg>
+        </div>
+        <div :class="'emoji-like' + (isMe ? ' me' : '')" v-if="data.emoji_like">
+            <div class="emoji-like-body">
+                <div v-for="info in data.emoji_like" v-show="getFace(info.emoji_id) != false" :key="'respond-' + data.message_id + '-' + info.emoji_id">
+                    <img loading="lazy" :src="(getFace(info.emoji_id) as any)">
+                    <span>{{ info.count }}</span>
+                </div>
+            </div>
         </div>
         <code style="display: none;">{{ data.raw_message }}</code>
     </div>
@@ -579,3 +587,45 @@ export default defineComponent({
     }
 })
 </script>
+<style>
+.emoji-like {
+    flex-direction: row;
+    display: flex;
+    width: 100%;
+}
+.emoji-like-body {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-width: 30%;
+    margin-left: 50px;
+    margin-top: 10px;
+}
+.emoji-like-body div {
+    background: var(--color-card-1);
+    border-radius: 7px;
+    margin-right: 5px;
+    padding: 5px 15px;
+    margin-bottom: 5px;
+}
+.emoji-like-body img {
+    width: 15px;
+    height: 15px;
+}
+.emoji-like-body span {
+    color: var(--color-font-2);
+    margin-left: 10px;
+    font-size: 0.8rem;
+}
+
+@media (min-width: 992px) {
+    .emoji-like.me {
+        flex-direction: row-reverse;
+    }
+    .emoji-like.me > div.emoji-like-body {
+        flex-direction: row-reverse;
+        margin-right: -5px;
+    }
+}
+</style>
+

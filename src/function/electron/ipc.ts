@@ -6,9 +6,11 @@ import { ipcMain, shell, systemPreferences, app, Menu, MenuItemConstructorOption
 import { GtkTheme, GtkData } from '@jakejarrett/gtk-theme'
 import { queryKeys } from './util'
 import { win } from '@/background'
+import { Notification as ELNotification } from 'electron'
 
 const store = new Store()
 let template = [] as any[]
+export const noticeList = {} as {[key: string]: ELNotification[]}
 
 export function regIpcListener() {
     // 获取系统平台
@@ -60,10 +62,6 @@ export function regIpcListener() {
     ipcMain.on('win:openDevTools', () => {
         if(win) win.webContents.openDevTools()
     })
-    // 聚焦窗口
-    ipcMain.on('win:fouesWindow', () => {
-        if(win) win.focus()
-    })
     // 下载文件
     ipcMain.on('sys:download', (evt, args) => {
         const downloadPath = args.downloadPath
@@ -100,6 +98,82 @@ export function regIpcListener() {
                 })
             })
             win.webContents.downloadURL(downloadPath)
+        }
+    })
+    // 通知
+    ipcMain.on('sys:sendNotice', async (event, data) => {
+        const userId = data.tag.split('/')[0]
+        const msgId = data.tag.split('/')[1]
+
+        // console.log(data)
+
+        let showData = {
+            title: data.title,
+            body: data.body,
+            icon: data.icon
+        } as Electron.NotificationConstructorOptions
+        if(process.platform === 'darwin') {
+            showData = {
+                ...showData,
+                replyPlaceholder: '快速回复……',
+                hasReply: true
+            }
+        }
+        if(process.platform === 'win32') {
+            showData = {
+                toastXml: `
+                <toast launch="stapx-qq-lite:action=click" activationType="protocol">
+                    <visual>
+                        <binding template="ToastGeneric">
+                            <image placement="appLogoOverride" hint-crop="circle" src="${(data.icon as string).replaceAll('&', '&amp;')}"/>
+                            <text>${data.title}</text>
+                            <text>${data.body}</text>
+                        </binding>
+                    </visual>
+                    <actions>
+                        <input id="quick" type="text" placeHolderContent="reply"/>
+                        <action
+                            content="▶"
+                            hint-inputId="quick"
+                            arguments="stapx-qq-lite:action=reply&amp;data=%quick%"
+                            activationType="protocol"/>
+                    </actions>
+                </toast>`
+            }
+        }
+        const notification = new ELNotification(showData)
+        notification.show()
+        if(!noticeList[userId]) noticeList[userId] = []
+        noticeList[userId].push(notification)
+        notification.on('click', () => {
+            win?.focus()
+            win?.webContents.send('app:jumpChat', {
+                userId: userId,
+                msgId: msgId
+            })
+        })
+        notification.on('close', () => {
+            noticeList[userId].splice(noticeList[userId].indexOf(notification), 1)
+            // TODO: 通知关闭，愚人节彩蛋备用
+        })
+        notification.on('failed', (event, error) => {
+            win?.webContents.send('app:error', error)
+        })
+        notification.on('reply', (event, reply) => {
+            noticeList[userId].splice(noticeList[userId].indexOf(notification), 1)
+            win?.webContents.send('bot:quickReply', {
+                type: data.type,
+                id: userId,
+                msg: msgId,
+                content: reply
+            })
+        })
+    })
+    ipcMain.on('sys:closeAllNotice', (event, id) => {
+        if(noticeList[id]) {
+            noticeList[id].forEach((notice) => {
+                notice.close()
+            })
         }
     })
 
@@ -176,15 +250,13 @@ export function regIpcListener() {
                         { label: args.selectAll, role: 'selectall' }
                     ],
                 }, {
-                    id: 'account',
                     label: args.account,
                     submenu: [
-                        { id: 'userName', label: '' },
+                        { id: 'userName', label: args.login },
+                        { id: 'logout', label: args.logout, visible: false, click: () => { sendMenuClick('bot:logout') } },
                         { type: 'separator' },
                         { id: 'userList', label: args.userList, click: () => { sendMenuClick('app:changeTab', 'Friends') } },
-                        { label: args.flushUser, click: () => { sendMenuClick('bot:flushUser') } },
-                        { type: 'separator' },
-                        { label: args.logout, click: () => { sendMenuClick('bot:logout') } }
+                        { label: args.flushUser, click: () => { sendMenuClick('bot:flushUser') } }
                     ],
                 }, {
                     label: args.help,
@@ -232,15 +304,10 @@ export function regIpcListener() {
                 }
             }
             if (menuIndex > -1) {
+                const item = itemIndex > -1 ? template[menuIndex].submenu[itemIndex] : template[menuIndex]
                 switch (action) {
-                    case 'label': itemIndex > -1 ?
-                        template[menuIndex].submenu[itemIndex].label = value :
-                        template[menuIndex].label = value
-                        break
-                    case 'visible': itemIndex > -1 ?
-                        template[menuIndex].submenu[itemIndex].visible = value :
-                        template[menuIndex].visible = value
-                        break
+                    case 'label': item.label = value; break
+                    case 'visible': item.visible = value; break
                 }
             }
             Menu.setApplicationMenu(Menu.buildFromTemplate(template))

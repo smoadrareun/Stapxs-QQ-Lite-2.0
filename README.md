@@ -21,7 +21,7 @@
   </p>
 </p>
 
-![card](README/card.png)
+![view](README/view.png)
 
 ## ✨ 特性支持
 - ✅ 使用 Vue.js 全家桶开发，快乐前后端分离
@@ -104,12 +104,6 @@ yarn electron:build --linux
 *为什么会有人对自动构建感兴趣，总之自动构建脚本我写了好久。感兴趣就自己去看好了（无端）。*
 
 ![auto-build](README/auto-build.png)
-
-## 🖼️ 截图
-![1](README/pics/1.png)
-![2](README/pics/2.png)
-![3](README/pics/4.png)
-![3](README/pics/3.png)
 
 ## 🎉 鸣谢
 感谢这些小伙伴们在开发和文本中提供的支持 ——

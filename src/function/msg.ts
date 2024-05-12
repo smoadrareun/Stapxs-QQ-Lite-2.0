@@ -20,8 +20,8 @@ import Umami from '@bitprojects/umami-logger-typescript'
 
 import { buildMsgList, getMsgData, parseMsgList, getMsgRawTxt } from '@/function/utils/msgUtil'
 import { getViewTime, htmlDecodeByRegExp, randomNum } from '@/function/utils/systemUtil'
-import { reloadUsers, downloadFile, updateMenu } from '@/function/utils/appUtil'
-import { reactive, nextTick, markRaw, defineAsyncComponent } from 'vue'
+import { reloadUsers, downloadFile, updateMenu, jumpToChat } from '@/function/utils/appUtil'
+import { reactive, markRaw, defineAsyncComponent } from 'vue'
 import { PopInfo, PopType, Logger, LogType } from './base'
 import { Connector, login } from './connect'
 import { GroupMemberInfoElem, UserFriendElem, UserGroupElem, MsgItemElem, RunTimeDataElem, BotMsgType } from './elements/information'
@@ -89,10 +89,11 @@ export function parse(str: string) {
                 let typeName = msg.notice_type
                 if (!typeName) typeName = msg.sub_type
                 switch (msg.notice_type) {
-                    case 'friend'           : friendNotice(msg); break
+                    case 'friend'                   : friendNotice(msg); break
                     case 'group_recall':
                     case 'friend_recall':
-                    case 'recall'           : revokeMsg(msg); break
+                    case 'recall'                   : revokeMsg(msg); break
+                    case 'group_msg_emoji_like'     : showEmojiLike(msg); break
                 }
                 break
             }
@@ -102,6 +103,21 @@ export function parse(str: string) {
 
 
 // ==============================================================
+
+/**
+ * 显示回应表情
+ * @param data Notice 消息
+ */
+function showEmojiLike(data: any) {
+    const msgId = data.message_id
+    const emojiList = data.likes
+    // 寻找消息
+    runtimeData.messageList.forEach((item, index) => {
+        if (item.message_id === msgId) {
+            runtimeData.messageList[index].emoji_like = emojiList
+        }
+    })
+}
 
 /**
  * 保存 Bot 信息
@@ -291,6 +307,19 @@ function saveClassInfo(data: any) {
         const names = [] as string[]
         list.forEach((item: any) => {
             names.push(Object.values(item)[0] as string)
+            // 如果分组 ID 没有返回在用户列表中而是在这儿……
+            if (item.list != undefined) {
+                item.list.forEach((user: any) => {
+                    const user_id = Number(user.uin)
+                    runtimeData.userList.forEach((get) => {
+                        if (get.user_id == user_id) {
+                            // 保存分组信息，特别关心（9999）优先覆盖
+                            if(get.class_id == undefined || item.class_id == 9999)
+                                get.class_id = item.class_id
+                        }
+                    })
+                })
+            }
         })
         const sortedData = names.sort(pinyin.compare)
 
@@ -706,6 +735,11 @@ function newMsg(data: any) {
         const loginId = runtimeData.loginInfo.uin
         const showId = runtimeData.chatInfo.show.id
         const sender = info.sender
+        // 在好友列表里找一下他
+        const user = runtimeData.userList.find((item) => {
+            return item.user_id == id || item.group_id == id
+        })
+        const isImportant = user?.class_id == 9999
 
         // 消息回调检查
         // PS：如果在新消息中获取到了自己的消息，则自动打开“停止消息回调”设置防止发送的消息重复
@@ -797,21 +831,67 @@ function newMsg(data: any) {
         if (data.sub_type === 'group') {
             data.sender.nickname = data.sender.user_id
         }
-        // (发送者不是自己 && (发送者不是群组 || 群组 AT || 群组 AT 全体 || 打开了通知全部消息)) 这些情况需要进行新消息处理
-        if (sender != loginId && (data.message_type !== 'group' || data.atme || data.atall || Option.get('notice_all') === true)) {
+        // (发送者不是自己 && (在特别关心列表里 || 发送者不是群组 || 群组 AT || 群组 AT 全体 || 打开了通知全部消息)) 这些情况需要进行新消息处理
+        if (sender != loginId && (isImportant || data.message_type !== 'group' || data.atme || data.atall || Option.get('notice_all') === true)) {
             // (发送者没有被打开 || 窗口被最小化) 这些情况需要进行消息通知
             if (id !== showId || document.hidden) {
-                // 检查通知权限，老旧浏览器不支持这个功能
-                if (Notification.permission === 'default') {
-                    Notification.requestPermission(() => {
-                        sendNotice(data)
+                // 准备消息内容
+                let raw = getMsgRawTxt(data.message)
+                raw = raw === '' ? data.raw_message : raw
+                if (data.group_name === undefined) {
+                    // 检查消息内是否有群名，去列表里寻找
+                    runtimeData.userList.filter((item) => {
+                        if (item.group_id == data.group_id) {
+                            data.group_name = item.group_name
+                        }
                     })
-                } else if (Notification.permission !== 'denied') {
-                    sendNotice(data)
                 }
-                // electron：在 windows 下对任务栏图标进行闪烁
-                if (runtimeData.reader) {
-                    runtimeData.reader.send('win:flashWindow')
+                const msgInfo = {
+                    title: data.group_name ?? data.sender.nickname,
+                    body: data.message_type === 'group' ? data.sender.nickname + ':' + raw : raw,
+                    tag: `${id}/${data.message_id}`,
+                    icon: data.message_type === 'group' ? 
+                        `https://p.qlogo.cn/gh/${id}/${id}/0`:
+                        `https://q1.qlogo.cn/g?b=qq&s=0&nk=${id}`,
+                    image: undefined as any,
+                    type: data.group_id ? 'group' : 'user'
+                }
+                data.message.forEach((item: MsgItemElem) => {
+                    // 如果消息有图片，追加第一张图片
+                    if (item.type === 'image' && msgInfo.image === undefined) {
+                        msgInfo.image = item.url
+                    }
+                })
+                // 检查这个用户是否有通知，有的话删除旧的
+                // PS：这儿的是 web 通知，electron 通知在 electron 里处理
+                const index = notificationList.findIndex((item) => {
+                    const tag = item.tag
+                    const userId = Number(tag.split('/')[0])
+                    return userId === id
+                })
+                if (index !== -1) {
+                    notificationList.splice(index, 1)
+                    notificationList[index].close()
+                }
+                // 发送消息
+                if (Option.get('close_notice') !== true) {
+                    if (runtimeData.tags.isElectron) {
+                        if (runtimeData.reader) {
+                            // electron：在 windows 下对任务栏图标进行闪烁
+                            runtimeData.reader.send('win:flashWindow')
+                            // electron：通过 electron 发送消息
+                            runtimeData.reader.send('sys:sendNotice', msgInfo)
+                        }
+                    } else {
+                        // 检查通知权限，老旧浏览器不支持这个功能
+                        if (Notification.permission === 'default') {
+                            Notification.requestPermission(() => {
+                                sendNotice(msgInfo)
+                            })
+                        } else if (Notification.permission !== 'denied') {
+                            sendNotice(msgInfo)
+                        }
+                    }
                 }
             }
             // 如果发送者不在消息列表里，将它添加到消息列表里
@@ -865,108 +945,43 @@ function newMsg(data: any) {
     }
 }
 
-function sendNotice(msg: any) {
-    if (Option.get('close_notice') !== true) {
-        let raw = getMsgRawTxt(msg.message)
-        raw = raw === '' ? msg.raw_message : raw
-        // 检查消息内是否有群名
-        if (msg.group_name === undefined) {
-            // 去列表里寻找
-            runtimeData.userList.filter((item) => {
-                if (item.group_id == msg.group_id) {
-                    msg.group_name = item.group_name
-                }
-            })
-        }
-        // 构建通知
-        let notificationTile = ''
-        const notificationBody = {} as NotificationElem
-        notificationBody.requireInteraction = true
-        if (msg.message_type === 'group') {
-            notificationTile = msg.group_name
-            notificationBody.body = msg.sender.nickname + ':' + raw
-            notificationBody.tag = `${msg.group_id}/${msg.message_id}`
-            notificationBody.icon = `https://p.qlogo.cn/gh/${msg.group_id}/${msg.group_id}/0`
-        } else {
-            notificationTile = msg.sender.nickname
-            notificationBody.body = raw
-            notificationBody.tag = `${msg.user_id}/${msg.message_id}`
-            notificationBody.icon = `https://q1.qlogo.cn/g?b=qq&s=0&nk=${msg.user_id}`
-        }
-        // 如果消息有图片，追加第一张图片
-        msg.message.forEach((item: MsgItemElem) => {
-            if (item.type === 'image' && notificationBody.image === undefined) {
-                notificationBody.image = item.url
+function sendNotice(info: any) {
+    // 构建通知
+    let notificationTile = ''
+    const notificationBody = {} as NotificationElem
+    notificationBody.requireInteraction = true
+    notificationTile = info.title
+    notificationBody.body = info.body
+    notificationBody.tag = info.tag
+    notificationBody.icon = info.icon
+    // 发起通知
+    const notification = new Notification(notificationTile, notificationBody)
+    notification.onclick = (event: Event) => {
+        const info = event.target as NotificationOptions
+        if (info.tag !== undefined) {
+            const userId = info.tag.split('/')[0]
+            const msgId = info.tag.substring(userId.length + 1, info.tag.length)
+            // 在通知列表中删除这条消息
+            const index = notificationList.findIndex((item) => { return item.tag === info.tag })
+            if (index !== -1) {
+                notificationList.splice(index, 1)
             }
-        })
-        // 检查这个用户是否有通知，有的话删除旧的
-        // PS：这个处理逻辑主要用于防止大量消息刷大量的通知
-        const index = notificationList.findIndex((item) => {
-            const tag = item.tag
-            const userId = Number(tag.split('/')[0])
-            return userId === msg.user_id || userId === msg.group_id
-        })
-        if (index !== -1) {
-            notificationList.splice(index, 1)
-            notificationList[index].close()
+            // 跳转到这条消息的发送者页面
+            window.focus()
+            jumpToChat(userId, msgId)
         }
-        // 发起通知
-        const notification = new Notification(notificationTile, notificationBody)
-        notification.onclick = (event: Event) => {
-            const info = event.target as NotificationOptions
-            if (info.tag !== undefined) {
-                const userId = info.tag.split('/')[0]
-                const msgId = Number(info.tag.substring(userId.length + 1, info.tag.length))
-                // 在通知列表中删除这条消息
-                const index = notificationList.findIndex((item) => { return item.tag === info.tag })
-                if (index !== -1) {
-                    notificationList.splice(index, 1)
-                }
-                // 跳转到这条消息的发送者页面
-                window.focus()
-                // electron：需要让 electron 拉起页面
-                if (runtimeData.reader) {
-                    runtimeData.reader.send('win:fouesWindow')
-                }
-                const body = document.getElementById('user-' + userId)
-                if (body === null) {
-                    // 从缓存列表里寻找这个 ID
-                    for (let i = 0; i < runtimeData.userList.length; i++) {
-                        const item = runtimeData.userList[i]
-                        const id = item.user_id !== undefined ? item.user_id : item.group_id
-                        if (String(id) === userId) {
-                            // 把它插入到显示列表的第一个
-                            runtimeData.showList?.unshift(item)
-                            nextTick(() => {
-                                const bodyNext = document.getElementById('user-' + userId)
-                                if (bodyNext !== null) {
-                                    // 添加一个消息跳转标记
-                                    bodyNext.dataset.jump = msgId.toString()
-                                    // 然后点一下它触发聊天框切换
-                                    bodyNext.click()
-                                }
-                            })
-                            break
-                        }
-                    }
-                } else {
-                    body.click()
-                }
-
-            }
-        }
-        notification.onclose = (event: Event) => {
-            const info = event.target as NotificationOptions
-            if (info.tag !== undefined) {
-                // 在通知列表中删除这条消息
-                const index = notificationList.findIndex((item) => { return item.tag === info.tag })
-                if (index !== -1) {
-                    notificationList.splice(index, 1)
-                }
-            }
-        }
-        notificationList.push(notification)
     }
+    notification.onclose = (event: Event) => {
+        const info = event.target as NotificationOptions
+        if (info.tag !== undefined) {
+            // 在通知列表中删除这条消息
+            const index = notificationList.findIndex((item) => { return item.tag === info.tag })
+            if (index !== -1) {
+                notificationList.splice(index, 1)
+            }
+        }
+    }
+    notificationList.push(notification)
 }
 
 /**
@@ -992,13 +1007,20 @@ function saveJin(data: any) {
  * @param data 消息
  */
 function readMemberMessage(data: any) {
-    Connector.send('set_message_read', {
-        message_id: data.message_id
-    }, 'setMessageRead')
-    // go-cqhttp：他们名字不一样
-    Connector.send('mark_msg_as_read', {
-        message_id: data.message_id
-    }, 'setMessageRead')
+    const name = runtimeData.jsonMap.set_message_read.private_name
+    let private_name = runtimeData.jsonMap.set_message_read.private_name
+    if(!private_name) private_name = name
+    if(data.group_id != undefined) {
+        Connector.send(name, {
+            message_id: data.message_id,
+            group_id: data.group_id,
+        }, 'setMessageRead')
+    } else {
+        Connector.send(private_name, {
+            message_id: data.message_id,
+            user_id: data.self_id,
+        }, 'setMessageRead')
+    }
 }
 
 /**

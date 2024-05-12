@@ -13,8 +13,7 @@ user_list:
         member_count: /member_count
         admin_flag: $.admins[?(@ == '<uin>')]
 
-        class_id: /group_id
-        class_name: /group_name
+        class_id: null
         user_id: /user_id
         nickname: /nickname
         remark: /remark
@@ -59,3 +58,16 @@ get_message: $.message
 message_value:
     file:
         name: $.file
+set_message_read:
+    name: mark_group_msg_as_read
+    private_name: mark_private_msg_as_read
+send_respond:
+    name: set_msg_emoji_like
+class_list:
+    name: get_friends_with_category
+    source: $.data[*]
+    list:
+        class_id: /categoryId
+        class_name: /categroyName
+        user_count: /categroyMbCount
+        list: /buddyList

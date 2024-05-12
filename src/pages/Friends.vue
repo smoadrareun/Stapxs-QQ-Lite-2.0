@@ -49,17 +49,17 @@
             </div>
             <div :class="(runtimeData.tags.openSideBar ? 'open' : '')">
                 <template v-if="runtimeData.showList.length <= 0">
-                    <template v-for="name in runtimeData.tags.classes"
-                        :key="'class-' + Object.keys(name)[0]">
-                        <div :class="'list exp-body' + (classStatus[Object.keys(name)[0]] == true ? ' open' : '')">
-                            <header :title="(Object.values(name)[0] as string)" :class="'exp-header' + (runtimeData.tags.openSideBar ? ' open' : '')" @click="classClick(Object.keys(name)[0])">
+                    <template v-for="info in runtimeData.tags.classes"
+                        :key="'class-' + info.class_id">
+                        <div :class="'list exp-body' + (classStatus[info.class_id] == true ? ' open' : '')">
+                            <header :title="info.class_name" :class="'exp-header' + (runtimeData.tags.openSideBar ? ' open' : '')" @click="classClick(info.class_id)">
                                 <div></div>
-                                <span>{{ Object.values(name)[0] }}</span>
-                                <a>{{ runtimeData.userList.filter((get) => { return get.class_id == Number(Object.keys(name)[0]) }).length }}</a>
+                                <span>{{ info.class_name }}</span>
+                                <a>{{ info.user_count ?? runtimeData.userList.filter((get) => { return get.class_id == info.class_id }).length }}</a>
                             </header>
-                            <div :id="'class-' + Object.keys(name)[0]">
+                            <div :id="'class-' + info.class_id">
                                 <FriendBody 
-                                    v-for="item in runtimeData.userList.filter((get) => { return get.class_id == Number(Object.keys(name)[0]) })"
+                                    v-for="item in runtimeData.userList.filter((get) => { return get.class_id == info.class_id })"
                                     :key="'fb-' + (item.user_id ? item.user_id : item.group_id)" :data="item"
                                     @click="userClick(item, $event)">
                                 </FriendBody>

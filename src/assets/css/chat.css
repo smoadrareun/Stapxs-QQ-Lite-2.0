@@ -1311,6 +1311,60 @@ textarea {
     font-size: 0.8rem;
 }
 
+.respond {
+    width: calc(100% + 65px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: row !important;
+    margin-top: -70px !important;
+    margin-bottom: 20px !important;
+    border: 1px solid var(--color-shader);
+    background: var(--color-bg) !important;
+    box-shadow: 0 0 5px var(--color-shader);
+    min-height: 40px !important;
+    height: 40px !important;
+    transition: all .3s !important;
+    margin-left: -12px;
+}
+.respond:hover {
+    background: var(--color-bg) !important;
+}
+.respond > svg {
+    fill: var(--color-font-2);
+    margin-right: 10px;
+    min-width: 20px;
+    height: 20px;
+    padding: 2.5px;
+    border-radius: 7px;
+}
+.respond > img {
+    transition: background .3s;
+    border-radius: 7px;
+    margin-right: 5px;
+    padding: 5px;
+    height: 25px;
+    width: 25px;
+}
+.respond > svg:hover,
+.respond > img:hover {
+    background: var(--color-card-2);
+}
+
+.respond.open {
+    height: 100px !important;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    overflow-y: scroll;
+    padding: 10px !important;
+    margin-top: -140px !important;
+    margin-bottom: 20px !important;
+}
+.respond.open > svg {
+    display: none;
+}
+
 @media (max-width: 700px) {
     /* 消息面板 */
     .chat-pan {

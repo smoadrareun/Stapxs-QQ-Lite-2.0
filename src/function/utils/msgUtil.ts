@@ -3,6 +3,8 @@ import app from '@/main'
 
 import { Logger } from '@/function/base'
 import { runtimeData } from '@/function/msg'
+import { v4 as uuid } from 'uuid'
+import { Connector } from '@/function/connect'
 
 const logger = new Logger()
 
@@ -177,7 +179,7 @@ export function getMsgRawTxt(message: [{ [key: string]: any }]): string {
                 // eslint-disable-next-line
                 case 'text': back += message[i].text.replaceAll('\n', ' ').replaceAll('\r', ' '); break
                 case 'face': back += '[表情]'; break
-                case 'mface':
+                case 'mface': back += message[i].summary ?? message[i].text; break
                 case 'bface': back += message[i].text; break
                 case 'image': back += '[图片]'; break
                 case 'record': back += '[语音]'; break
@@ -293,4 +295,87 @@ export function parseCQ(data: any) {
     logger.debug(app.config.globalProperties.$t('log_cq_msg_parsed') + ': ' + JSON.stringify(back))
     data.message = back
     return data
+}
+
+export function sendMsgRaw(id: string, type: string, msg: string | { type: string; text: string; }[] | undefined, preShow = false) {
+    // 将消息构建为完整消息体先显示出去
+    const msgUUID = uuid()
+    if (preShow) {
+        const showMsg = {
+            revoke: true,
+            fake_msg: true,
+            message_id: msgUUID,
+            message_type: runtimeData.chatInfo.show.type,
+            time: parseInt(String(new Date().getTime() / 1000)),
+            post_type: "message",
+            sender: {
+                user_id: runtimeData.loginInfo.uin,
+                nickname: runtimeData.loginInfo.nickname
+            },
+            message: JSON.parse(JSON.stringify(msg)),
+            raw_message: app.config.globalProperties.$t('chat_msg_sending'),
+        } as { [key: string]: any }
+        if (showMsg.message_type == 'group') {
+            showMsg.group_id = runtimeData.chatInfo.show.id
+        } else {
+            showMsg.user_id = runtimeData.chatInfo.show.id
+        }
+        runtimeData.messageList = runtimeData.messageList.concat([showMsg])
+    }
+    // 检查消息体是否需要处理
+    const messageType = runtimeData.jsonMap.message_list.type.split('|')[0]
+    switch (messageType) {
+        case 'json_with_data': {
+            const map = runtimeData.jsonMap.message_list.type.split('|')[1]
+            const path = jp.parse(map)
+            const keys = [] as string[]
+            path.forEach((item) => {
+                if (item.expression.value != '*' && item.expression.value != '$') {
+                    keys.push(item.expression.value)
+                }
+            })
+            if(msg && typeof msg != 'string') {
+                const newMsg = [] as any
+                msg.forEach((item) => {
+                    const result = {} as any
+                    keys.reduce((acc, key, index) => {
+                        if (index === keys.length - 1) {
+                            acc[key] = item
+                        } else {
+                            acc[key] = {}
+                        }
+                        return acc[key]
+                    }, result)
+                    const newResult = {} as {[key: string]: any}
+                    newResult.type = item.type
+                    newResult.data = item
+                    delete newResult.data.type
+                    newMsg.push(newResult)
+                })
+                msg = newMsg
+            }
+            break
+        }
+    }
+    if (msg !== undefined && msg.length > 0) {
+        switch (type) {
+            case 'group': 
+                Connector.send(
+                    runtimeData.jsonMap.message_list.name_group_send ?? 'send_group_msg',
+                    { 'group_id': id, 'message': msg },'sendMsgBack_uuid_' + msgUUID); break
+            case 'user': 
+            {
+                if(String(id).indexOf('/') > 1) {
+                    Connector.send(
+                        runtimeData.jsonMap.message_list.name_temp_send ?? 'send_temp_msg', 
+                        { 'user_id': id.split('/')[0], 'group_id': id.split('/')[1], 'message': msg }, 'sendMsgBack_uuid_' + msgUUID);
+                } else {
+                    Connector.send(
+                        runtimeData.jsonMap.message_list.name_user_send ?? 'send_private_msg',
+                         { 'user_id': id, 'message': msg }, 'sendMsgBack_uuid_' + msgUUID);
+                }
+                break
+            }
+        }
+    }
 }

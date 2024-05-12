@@ -11,6 +11,7 @@
     border-radius: 7px;
     margin: 5px 0;
     font-size: 1rem;
+    flex-wrap: wrap;
 }
 .message.forward {
     border: 2px solid var(--color-card-2);
@@ -185,6 +186,10 @@
 .msg-face-long > span:nth-child(3n) {
     opacity: 0;
     width: 8px;
+}
+
+.msg-mface {
+    outline: 1px dashed var(--color-main);
 }
 
 .msg-at {
@@ -498,7 +503,7 @@
         display: none;
     }
     .message-body {
-        max-width: 100%;
+        max-width: calc(100% - 50px);
     }
     .message-body > a:first-child {
         color: var(--color-font-1) !important;

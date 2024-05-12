@@ -11,12 +11,14 @@ import UpdatePan from '@/components/UpdatePan.vue'
 import WelPan from '@/components/WelPan.vue'
 
 import { Rule, Stylesheet, Declaration } from 'css'
-import { Logger, PopInfo, PopType } from '@/function/base'
+import { LogType, Logger, PopInfo, PopType } from '@/function/base'
 import { Connector, login } from '@/function/connect'
 import { runtimeData } from '@/function/msg'
 import { BaseChatInfoElem } from '@/function/elements/information'
 import { hslToRgb, rgbToHsl } from '@/function/utils/systemUtil'
-import { toRaw } from 'vue'
+import { toRaw, nextTick } from 'vue'
+import { sendMsgRaw } from './msgUtil'
+import { parseMsg } from '../sender'
 
 const popInfo = new PopInfo()
 const logger = new Logger()
@@ -62,6 +64,10 @@ export function openLink(url: string) {
             html: `<iframe src="${url}" class="view-iframe"></iframe>`,
             full: true,
             button: [
+                {
+                    text: app.config.globalProperties.$t('btn_iframe_tip'),
+                    fun: () => undefined
+                },
                 {
                     text: app.config.globalProperties.$t('btn_open'),
                     fun: () => {
@@ -130,7 +136,39 @@ export function reloadUsers() {
         Connector.send('get_friend_list', {}, 'getFriendList')
         Connector.send('get_group_list', {}, 'getGroupList')
         Connector.send('get_system_msg', {}, 'getSystemMsg')
-        Connector.send('get_class_info', {}, "getClassInfo")
+        Connector.send(runtimeData.jsonMap.class_list.name, {}, "getClassInfo")
+    }
+}
+
+/**
+ * 通过用户和消息 ID 跳转到对应的消息
+ * @param id 
+ * @param msgId 
+ */
+export function jumpToChat(userId: string, msgId: string) {
+    const body = document.getElementById('user-' + userId)
+    if (body === null) {
+        // 从缓存列表里寻找这个 ID
+        for (let i = 0; i < runtimeData.userList.length; i++) {
+            const item = runtimeData.userList[i]
+            const id = item.user_id !== undefined ? item.user_id : item.group_id
+            if (String(id) === userId) {
+                // 把它插入到显示列表的第一个
+                runtimeData.showList?.unshift(item)
+                nextTick(() => {
+                    const bodyNext = document.getElementById('user-' + userId)
+                    if (bodyNext !== null) {
+                        // 添加一个消息跳转标记
+                        bodyNext.dataset.jump = msgId
+                        // 然后点一下它触发聊天框切换
+                        bodyNext.click()
+                    }
+                })
+                break
+            }
+        }
+    } else {
+        body.click()
     }
 }
 
@@ -296,7 +334,6 @@ export async function loadWinColor() {
     if (runtimeData.reader) {
         // 获取系统主题色
         updateWinColor(await runtimeData.reader.invoke('sys:getWinColor'))
-        
     }
 }
 
@@ -345,9 +382,10 @@ export function createMenu() {
         menuTitles.selectAll = $t('menu_select_all')
 
         menuTitles.account = $t('menu_account')
+        menuTitles.login = $t('menu_login')
+        menuTitles.logout = $t('menu_logout')
         menuTitles.userList = $t('menu_user_list', { count: runtimeData.userList.length })
         menuTitles.flushUser = $t('menu_flush_user')
-        menuTitles.logout = $t('menu_logout')
 
         menuTitles.help = $t('menu_help')
         menuTitles.doc = $t('menu_doc')
@@ -375,6 +413,24 @@ export function createIpc() {
             remove('auto_connect')
             Connector.close()
         })
+        runtimeData.reader.on('bot:quickReply', (event, data) => {
+            sendMsgRaw(data.id, data.type, parseMsg(
+                '[SQ:0]' + data.content,
+                [{ type: 'reply', id: String(data.msg) }],
+                []
+            ))
+            // 去消息列表内寻找，去除新消息标记
+            for (let i = 0; i < runtimeData.onMsgList.length; i++) {
+                if (runtimeData.onMsgList[i].group_id == data.id || runtimeData.onMsgList[i].user_id == data.id) {
+                    runtimeData.onMsgList[i].new_msg = false
+                    break
+                }
+            }
+        })
+
+        runtimeData.reader.on('sys:handleUri', (event, data) => {
+            logger.info(JSON.stringify(data))
+        })
         runtimeData.reader.on('app:about', () => {
             const popInfo = {
                 title: app.config.globalProperties.$t('menu_about') + ' ' + app.config.globalProperties.$t('name'),
@@ -389,8 +445,11 @@ export function createIpc() {
         runtimeData.reader.on('app:openLink', (event, link) => {
             openLink(link)
         })
-        runtimeData.reader.on('app:logger', (event, config) => {
-            new Logger().add(config.type, config.text)
+        runtimeData.reader.on('app:error', (event, text) => {
+            new Logger().add(LogType.ERR, text)
+        })
+        runtimeData.reader.on('app:jumpChat', (event, info) => {
+            jumpToChat(info.userId, info.msgId)
         })
     }
 }

@@ -160,6 +160,17 @@
     margin: 7px;
 }
 
+.replay-tag.show {
+    margin: 10px 20px 0 20px;
+    margin-top: 10px;
+}
+.face-pan {
+    border: 1px solid var(--color-card-2);
+}
+.ss-card:hover {
+    box-shadow: 0 0 3px var(--color-shader);
+}
+
 .message > img {
     border: 1px solid var(--color-card-2);
     height: 30px;
@@ -322,6 +333,9 @@
     border-bottom: 1px solid var(--color-font-2) !important;
     height: 30px !important;
     font-size: 0.8rem;
+}
+.chat-info-tab {
+    padding: 0;
 }
 .chat-info-tab-member > div > img {
     height: 25px;
@@ -498,6 +512,70 @@
 }
 .app-msg > div > div:last-child {
     margin-right: -5px;
+}
+
+.fase-pan-tab > li > svg {
+    margin-top: 0;
+    margin-left: 0;
+    height: 17px;
+    width: 17px;
+}
+.base-face {
+    height: calc(300px - 100px);
+    padding: 0;
+}
+.base-face > div {
+    width: 35px;
+    height: 35px;
+}
+.base-face > div > img {
+    margin: 8px;
+    height: 19px;
+    width: 19px;
+}
+.store-face-list {
+    height: calc(300px - 100px);
+}
+
+.respond {
+    width: calc(100% + 40px);
+    margin-top: -50px !important;
+    margin-bottom: 10px !important;
+    margin-left: -5px;
+    min-height: 30px !important;
+    height: 30px !important;
+}
+.respond.open {
+    margin-bottom: 10px !important;
+    margin-top: -125px !important;
+    padding: 5px !important;
+}
+.respond > svg {
+    min-width: 15px;
+    height: 15px;
+}
+.respond > img {
+    margin-right: 3px;
+    padding: 3px;
+    height: 20px;
+    width: 20px;
+}
+
+.emoji-like-body {
+    margin-left: 47px;
+    margin-top: 5px;
+}
+.emoji-like-body div {
+    padding: 3px 10px;
+}
+.emoji-like-body img {
+    width: 13px;
+    height: 13px;
+}
+
+.emoji-like-body span {
+    margin-left: 5px;
+    font-size: 0.65rem;
 }
 
 @media (max-width: 700px) {
