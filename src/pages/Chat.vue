@@ -1167,13 +1167,22 @@ export default defineComponent({
                     )
                 }
                 // 加载群公告列表
+                const noticeName = runtimeData.jsonMap.group_notices.name
                 if (this.chat.show.type === 'group' && (this.chat.info.group_notices === undefined || Object.keys(this.chat.info.group_notices).length === 0)) {
-                    const url = `https://web.qun.qq.com/cgi-bin/announce/get_t_list?bkn=${runtimeData.loginInfo.bkn}&qid=${this.chat.show.id}&ft=23&s=-1&n=20`
-                    Connector.send(
-                        'http_proxy',
-                        { 'url': url },
-                        'getGroupNotices'
-                    )
+                    if(noticeName && noticeName != 'http_proxy') {
+                        Connector.send(
+                            noticeName,
+                            { 'group_id': this.chat.show.id },
+                            'getGroupNotices'
+                        )
+                    } else {
+                        const url = `https://web.qun.qq.com/cgi-bin/announce/get_t_list?bkn=${runtimeData.loginInfo.bkn}&qid=${this.chat.show.id}&ft=23&s=-1&n=20`
+                        Connector.send(
+                            'http_proxy',
+                            { 'url': url },
+                            'getGroupNotices'
+                        )
+                    }
                 }
                 // 加载群文件列表
                 if (this.chat.show.type === 'group' && Object.keys(this.chat.info.group_files).length === 0) {

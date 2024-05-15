@@ -3,6 +3,7 @@
 import { register } from 'register-service-worker'
 import { PopInfo, PopType, Logger } from './function/base'
 import app from './main'
+import { runtimeData } from './function/msg'
 
 const popInfo = new PopInfo()
 const logger = new Logger()
@@ -14,6 +15,7 @@ if (process.env.NODE_ENV === 'production') {
         },
         registered() {
             logger.debug(app.config.globalProperties.$t('sw_registered'))
+            runtimeData.tags.sw = true
         },
         cached() {
             console.log(app.config.globalProperties.$t('sw_cached'))
@@ -33,6 +35,7 @@ if (process.env.NODE_ENV === 'production') {
         },
         error(error) {
             console.error(app.config.globalProperties.$t('sw_error') + ': ', error)
+            runtimeData.tags.sw = false
         }
     })
 }

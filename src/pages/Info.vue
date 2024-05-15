@@ -99,7 +99,7 @@
                 style="overflow: hidden; display: flex;flex-direction: column;height: 100%;margin: 0;">
                 <ul class="layui-tab-title chat-info-tab">
                     <li id="info-pan-mumber" class="layui-this">{{ $t('chat_chat_info_member') }}</li>
-                    <li id="info-pan-notices" v-show="chat.info.group_notices && chat.info.group_notices.feeds && chat.info.group_notices.feeds.length > 0">{{ $t('chat_chat_info_notice') }}</li>
+                    <li id="info-pan-notices" v-show="chat.info.group_notices && chat.info.group_notices.length > 0">{{ $t('chat_chat_info_notice') }}</li>
                     <li v-show="chat.info.group_files.total_cnt && chat.info.group_files.total_cnt > 0">{{ $t('chat_chat_info_file') }}</li>
                     <li>{{ $t('chat_chat_info_config') }}</li>
                 </ul>
@@ -128,7 +128,7 @@
                     </div>
                     <div class="layui-tab-item bulletins">
                         <BulletinBody
-                            v-for="(item, index) in !chat.info.group_notices ? [] : chat.info.group_notices.feeds"
+                            v-for="(item, index) in chat.info.group_notices ?? []"
                             :data="item"
                             :key="'bulletins-' + index"
                             :index="index">

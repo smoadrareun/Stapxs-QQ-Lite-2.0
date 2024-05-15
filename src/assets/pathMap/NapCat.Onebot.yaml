@@ -71,3 +71,12 @@ class_list:
         class_name: /categroyName
         user_count: /categroyMbCount
         list: /buddyList
+group_notices:
+    name: _get_group_notice
+    source: $.data[*]
+    list:
+        content: $.message.text
+        sender: /sender_id
+        time: /publish_time
+        is_read: null
+        read_num: null

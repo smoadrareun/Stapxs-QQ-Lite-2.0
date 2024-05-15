@@ -54,8 +54,7 @@ export function regIpcListener() {
     // 获取补充的调试信息
     ipcMain.handle('opt:getSystemInfo', () => {
         const systemInfo = {} as { [key: string]: any }
-        systemInfo.electron = process.versions.electron
-        systemInfo.os = os.homedir()
+        systemInfo.electron = ['Electron Version', process.versions.electron]
         return systemInfo
     })
     // 打开开发者工具

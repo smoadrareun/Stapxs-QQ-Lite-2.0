@@ -45,6 +45,7 @@ app.component('font-awesome-icon', FontAwesomeIcon)
 
 app.mount('#app')
 export default app
+export const uptime = new Date().getTime()
 
 const strList = ['VERSION', 'WELCOME', 'HELLO']
 const colorList = ['50534f', 'f9a633', '8076a3', 'f0a1a8', '92aa8a', '606E7A', '7abb7e', 'b573f7', 'ff5370', '99b3db', '677480']

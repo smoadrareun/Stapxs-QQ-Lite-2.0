@@ -703,6 +703,11 @@ textarea {
     font-weight: bold;
     font-size: 1rem;
 }
+.bulletins > div.base > header > span:last-child {
+    color: var(--color-font-2);
+    font-size: 0.8rem;
+    font-weight: normal;
+}
 .bulletins > div.base > div.body {
     text-overflow: ellipsis;
     overflow: hidden;

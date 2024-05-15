@@ -30,7 +30,8 @@ export interface RunTimeDataElem {
         isElectron: boolean,
         platform: string | undefined,
         connectSsl: boolean,
-        classes: any[]
+        classes: any[],
+        sw?: boolean
     },
     messageList: any[]
     mergeMessageList?: any[] | undefined,

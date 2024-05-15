@@ -12,7 +12,7 @@
 import qed from '@/assets/qed.txt'
 
 import app from '@/main'
-import Option from './option'
+import Option, { run } from './option'
 import xss from 'xss'
 import pinyin from 'pinyin'
 
@@ -59,7 +59,7 @@ export function parse(str: string) {
                 case 'getRoamingStamp'          : runtimeData.stickerCache = msg.data.reverse(); break
                 case 'getMoreGroupInfo'         : runtimeData.chatInfo.info.group_info = msg.data.data; break
                 case 'getMoreUserInfo'          : runtimeData.chatInfo.info.user_info = msg.data.data.result.buddy.info_list[0]; break
-                case 'getGroupNotices'          : runtimeData.chatInfo.info.group_notices = msg.data.data; break
+                case 'getGroupNotices'          : saveGroupNotices(msg); break
                 case 'getGroupFiles'            : saveFileList(msg.data.data); break
                 case 'getMoreGroupFiles'        : saveMoreFileList(msg.data.data); break
                 case 'getJin'                   : saveJin(msg.data.data); break
@@ -188,6 +188,13 @@ function saveLoginInfo(msg: { [key: string]: any }) {
         )
         // 加载列表消息
         reloadUsers()
+    }
+}
+
+function saveGroupNotices(msg: any) {
+    const list = getMsgData('group_notices', msg, msgPath.group_notices)
+    if (list != undefined) {
+        runtimeData.chatInfo.info.group_notices = list
     }
 }
 
@@ -832,7 +839,7 @@ function newMsg(data: any) {
             data.sender.nickname = data.sender.user_id
         }
         // (发送者不是自己 && (在特别关心列表里 || 发送者不是群组 || 群组 AT || 群组 AT 全体 || 打开了通知全部消息)) 这些情况需要进行新消息处理
-        if (sender != loginId && (isImportant || data.message_type !== 'group' || data.atme || data.atall || Option.get('notice_all') === true)) {
+        if (sender != loginId && sender != 0 && (isImportant || data.message_type !== 'group' || data.atme || data.atall || Option.get('notice_all') === true)) {
             // (发送者没有被打开 || 窗口被最小化) 这些情况需要进行消息通知
             if (id !== showId || document.hidden) {
                 // 准备消息内容

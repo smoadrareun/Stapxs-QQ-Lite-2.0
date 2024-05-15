@@ -29,8 +29,23 @@ export function getMsgData(name: string, msg: { [key: string]: any }, map: strin
                             if (map.list[key] && map.list[key] != '') {
                                 if (map.list[key].startsWith('/'))
                                     itemObj[key] = item[map.list[key].substring(1)]
-                                else
-                                    itemObj[key] = jp.query(item, replaceJPValue(map.list[key]))[0]
+                                else {
+                                    let nameKey = map.list[key]
+                                    let regexKey = null
+                                    if(nameKey.indexOf('@') > -1) {
+                                        const [name, key] = nameKey.split('@')
+                                        nameKey = name
+                                        regexKey = key
+                                    }
+                                    itemObj[key] = jp.query(item, replaceJPValue(nameKey))[0]
+                                    if(regexKey != null) {
+                                        const regex = new RegExp(regexKey)
+                                        const match = itemObj[key].match(regex)
+                                        if(match != null) {
+                                            itemObj[key] = match[0]
+                                        }
+                                    }
+                                }
                             }
                         })
                         backList.push(itemObj)

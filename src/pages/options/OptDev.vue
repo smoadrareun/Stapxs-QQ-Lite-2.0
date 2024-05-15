@@ -213,6 +213,7 @@ import app from '@/main'
 import { BrowserInfo, detect } from 'detect-browser'
 import packageInfo from '../../../package.json'
 import { BotMsgType } from '@/function/elements/information'
+import { uptime } from '@/main'
 
 export default defineComponent({
     name: 'ViewOptDev',
@@ -260,6 +261,7 @@ export default defineComponent({
             }
         },
         async printVersionInfo() {
+            new PopInfo().add(PopType.INFO, app.config.globalProperties.$t('option_dev_get_version_info'))
 
             // electron：索要 electron 信息
             let addInfo = undefined
@@ -268,30 +270,61 @@ export default defineComponent({
             }
 
             const browser = detect() as BrowserInfo
-
-            let html = '<div class="debug-info">'
-            html += `<span>1 - ${packageInfo.version}</span>`
-            html += `<span>2 - ${process.env.NODE_ENV}</span>`
-            html += `<span style="width: 100%">3 - ${window.location.host}</span>`
-            html += `<span>4 - ${browser.name}</span>`
-            html += `<span>5 - ${browser.version}</span>`
-            html += `<span>6 - ${browser.os}</span>`
-            html += `<span>7 - ${runtimeData.botInfo.app_name}</span>`
-            html += `<span>8 - ${runtimeData.botInfo.app_version !== undefined ? runtimeData.botInfo.app_version : runtimeData.botInfo.version}</span>`
-            html += `<span>9 - ${document.getElementById('app')?.offsetWidth} px</span>`
-            const lastIndex = 9
+            let info = '```\n'
+            info += 'Debug Info - ' + new Date().toLocaleString() + '\n================================\n'
+            info += `System Info:\n`
+            info += `    OS Name          -> ${browser.os}\n`
+            info += `    Browser Name     -> ${browser.name}\n`
+            info += `    Browser Version  -> ${browser.version}\n`
             if(addInfo) {
-                const info = addInfo as {[key: string]: any}
-                Object.keys(info).forEach((name: string, index) => {
-                    html += `<span>${lastIndex + index + 1} - ${info[name]}</span>`
+                const get = addInfo as {[key: string]: any}
+                Object.keys(get).forEach((name: string) => {
+                    info += `    ${get[name][0]} -> ${get[name][1]}\n`
                 })
             }
-            html += '</div>'
+
+            info += `Application Info:\n`
+            info += `    Uptime           -> ${new Date().getTime() - uptime} ms\n` 
+            info += `    Package Version  -> ${packageInfo.version}\n`
+            info += `    Runtime env      -> ${process.env.NODE_ENV}\n`
+            info += `    Service Work     -> ${runtimeData.tags.sw}\n`
+
+            info += `Backend Info:\n`
+            info += `    Bot Info Name    -> ${runtimeData.botInfo.app_name}\n`
+            info += `    Bot Info Version -> ${runtimeData.botInfo.app_version !== undefined ? runtimeData.botInfo.app_version : runtimeData.botInfo.version}\n`
+            info += `    Loaded Config    -> ${runtimeData.jsonMap.name}\n`
+
+            info += `View Info:\n`
+            info += `    Doc Width        -> ${document.getElementById('app')?.offsetWidth} px\n`
+
+            info += `Network Info:\n`
+            const testList = [
+                     ['Github          ', 'https://api.github.com'],
+                     ['Link API        ', 'https://api.stapxs.cn']
+            ]
+            for (const item of testList) {
+                const start = new Date().getTime()
+                try {
+                    await fetch(item[1], { method: 'GET' })
+                    const end = new Date().getTime()
+                    info += `    ${item[0]} -> ${end - start} ms\n`
+                } catch (e) {
+                    info += `    ${item[0]} -> failed\n`
+                }
+            }
+            info += '```'
             // 构建 popBox 内容
             const popInfo = {
-                html: html,
+                html: '<textarea class="debug-info">' + info + '</textarea>',
                 title: this.$t('option_dev_test_info'),
                 button: [
+                    {
+                        text: app.config.globalProperties.$t('chat_msg_menu_copy'),
+                        fun: () => { 
+                            app.config.globalProperties.$copyText(info)
+                            new PopInfo().add(PopType.INFO, app.config.globalProperties.$t('pop_chat_msg_menu_copy_success'))
+                         }
+                    },
                     {
                         text: app.config.globalProperties.$t('btn_yes'),
                         master: true,
@@ -312,6 +345,7 @@ export default defineComponent({
                         text: app.config.globalProperties.$t('chat_msg_menu_copy'),
                         fun: () => { 
                             app.config.globalProperties.$copyText(json)
+                            new PopInfo().add(PopType.INFO, app.config.globalProperties.$t('pop_chat_msg_menu_copy_success'))
                          }
                     },
                     {
