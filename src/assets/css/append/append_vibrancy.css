@@ -16,6 +16,9 @@
     opacity: 0.8;
     background: unset;
 }
+.login-pan-card label:focus-within {
+    background: transparent;
+}
 
 .main-body > ul {
     background: rgba(var(--color-card-rgb), 0.6);
@@ -40,16 +43,13 @@
     margin-left: 0;
 }
 
-.opt-main-tab {
-    display: block !important;
-}
-.opt-main-tab.layui-show .opt-main > div:last-child {
-    margin-left: -5px !important;
-}
 .opt-main {
     background: rgba(var(--color-card-rgb), 0.6);
     height: calc(100% - 10px);
     padding-left: 3px;
+}
+.opt-main.active > div:last-child {
+    margin-left: -5px !important;
 }
 .opt-main > div:first-child {
     width: 285px !important;
@@ -62,7 +62,7 @@
     box-shadow: -5px 0px 4px -5px var(--color-shader);
     transition: margin .3s;
     height: calc(100% + 7px);
-    padding: 3px 10px 0 10px;
+    padding: 10px 10px 0 10px;
 }
 
 .about-pan > div {

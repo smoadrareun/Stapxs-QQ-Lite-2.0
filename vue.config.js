@@ -3,6 +3,11 @@
  */
 
 module.exports = {
+    devServer: {
+        client: {
+            overlay: false
+        }
+    },
     publicPath: process.env.NODEJS_ENV === 'github-actions'
         ? '/Stapxs-QQ-Lite-2.0/'
         : undefined

@@ -29,8 +29,6 @@
   "chat_chat_info_file_num": "總共有 {num} 個 file",
   "chat_chat_info_group": "Group 資料",
   "chat_chat_info_introduction": "簡介",
-  "chat_chat_info_is_admin": "你喺管理員",
-  "chat_chat_info_is_owner": "你喺 group owner",
   "chat_chat_info_lnick": "Bio",
   "chat_chat_info_member": "成員",
   "chat_chat_info_nointroduction": "Group owner 好懶，仲未寫簡介",

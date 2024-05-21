@@ -29,8 +29,6 @@
   "chat_chat_info_file_num": "{num} file in total | {num} files in total",
   "chat_chat_info_group": "Group Profile",
   "chat_chat_info_introduction": "Introduction",
-  "chat_chat_info_is_admin": "You are admin",
-  "chat_chat_info_is_owner": "You are the owner",
   "chat_chat_info_lnick": "Bio",
   "chat_chat_info_member": "Members",
   "chat_chat_info_nointroduction": "No introduction available",

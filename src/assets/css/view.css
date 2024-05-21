@@ -76,11 +76,11 @@ input::placeholder {
     background: #f20000dd;
 }
 .top-bar > div.controller > div > svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     height: 16px;
 }
 .top-bar > div.controller > div.close:hover > svg {
-    fill: #fff;
+    color: #fff;
 }
 .top-bar > div.controller.mac {
     align-items: center;
@@ -114,11 +114,11 @@ input::placeholder {
     transition: opacity .2s;
     cursor: pointer;
     height: 8px;
-    fill: #000;
+    color: #000;
     opacity: 0;
 }
 .top-bar > div.controller.mac:hover > div > svg {
-    fill: #000 !important;
+    color: #000 !important;
     opacity: 1;
 }
 .top-bar > span.mac {
@@ -143,29 +143,42 @@ input::placeholder {
     height: 100%;
 }
 .main-body > ul {
+    cursor: pointer;
+    list-style-type: none;
     background: var(--color-card-2);
     flex-direction: column;
     display: flex;
     height: 100%;
     border: none;
     min-width: 75px;
+    padding: 0;
+    margin: 0;
+}
+.side-bar-space {
+    flex: 1;
 }
 .main-body > ul > li {
     padding: 0 3px;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
 }
 .main-body > ul > li:first-child {
-    padding-top: 15px;
+    margin-top: 10px;
+}
+.main-body > ul > li:last-child {
+    margin-bottom: 10px;
 }
 .main-body > ul > li::after {
     display: none;
 }
-.main-body > ul > li.layui-this > svg {
+.main-body > ul > li.active > svg {
     background-color: var(--color-main);
-    fill: var(--color-font-r);
+    color: var(--color-font-r);
 }
 .main-body > ul > li > svg {
     transition: background .3s, fill .3s;
-    fill: var(--color-font-1);
+    color: var(--color-font-1);
     border-radius: 7px;
     padding: 15px;
     height: 20px;
@@ -199,7 +212,8 @@ input::placeholder {
     overflow: hidden;
  }
  .login-pan-card > svg {
-    fill: var(--color-main);
+    color: var(--color-main);
+    height: 25%;
     width: 25%;
  }
 .login-pan-card p {
@@ -221,7 +235,7 @@ input::placeholder {
     background: var(--color-card-2);
 }
 .login-pan-card label:focus-within > svg {
-    fill: var(--color-main);
+    color: var(--color-main);
 }
 .login-pan-card label:focus-within > input {
     outline: none;
@@ -233,7 +247,7 @@ input::placeholder {
     flex: 1;
 }
 .login-pan-card label > svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     transition: fill .3s;
     height: 15px;
     width: 15px;
@@ -303,8 +317,9 @@ input::placeholder {
     padding: 40px;
 }
 .friend-view > div:last-child > div > svg {
-    fill: var(--color-main);
+    color: var(--color-main);
     width: 50px;
+    height: 50px;
 }
 .friend-view > div:last-child > div > span {
     font-size: 0.9rem;
@@ -353,7 +368,7 @@ input::placeholder {
     flex: 1;
 }
 .friend-list > div:first-child > div > svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     cursor: pointer;
     opacity: 0.7;
     height: 1rem;
@@ -370,7 +385,7 @@ input::placeholder {
     opacity: 0.7;
 }
 .friend-list > div:first-child label > svg {
-    fill: var(--color-font-1);
+    color: var(--color-font-1);
     margin: 0 10px;
     height: 0.9rem;
 }
@@ -432,7 +447,7 @@ input::placeholder {
 }
 .friend-body > svg {
     background: var(--color-main);
-    fill: var(--color-font-1-r);
+    color: var(--color-font-1-r);
     pointer-events: none;
     border-radius: 7px;
     padding: 15px;
@@ -464,7 +479,8 @@ input::placeholder {
 }
 .friend-body > div p {
     font-weight: bold;
-    margin-bottom: 0;
+    margin: 0;
+    margin-top: 3px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -493,13 +509,13 @@ input::placeholder {
 }
 .friend-body > div > div svg {
     width: 0.6rem;
-    fill: var(--color-font);
+    color: var(--color-font);
     opacity: 0.7;
     transform: rotate(45deg);
     margin-right: 5px;
 }
 .friend-body.active > div > div svg {
-    fill: var(--color-font-r);
+    color: var(--color-font-r);
 }
 .friend-body > a {
     font-size: 0.9rem;
@@ -550,14 +566,14 @@ input::placeholder {
     width: 1rem !important;
 }
 .msg-menu-body > div > div > svg {
-    fill: var(--color-font-1);
+    color: var(--color-font-1);
     transition: fill .3s;
     margin-top: 7px;
     height: 1rem;
     width: 1rem;
 }
 .msg-menu-body > div:hover > div > svg {
-    fill: var(--color-font-r);
+    color: var(--color-font-r);
 }
 .msg-menu-body > div > a {
     color: var(--color-font);
@@ -636,7 +652,7 @@ input::placeholder {
     display: flex;
 }
 .app-msg > div svg {
-    fill: var(--color-font-r);
+    color: var(--color-font-r);
 }
 .app-msg > div > div:first-child > svg {
     color: var(--color-font-r);
@@ -717,7 +733,7 @@ input::placeholder {
     width: unset;
 }
 .pop-box-body > header svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     height: 1rem;
 }
 .pop-box-body > header svg:last-child {
@@ -925,8 +941,8 @@ input::placeholder {
 }
 
 .hiden-home {
-    margin-top: calc(-100% + 5px);
-    transform: translateY(-100%);
+    margin-top: calc(-100% + 15px) !important;
+    transform: translateY(-100%) !important;
 }
 
 .qq-err-card {
@@ -956,7 +972,7 @@ input::placeholder {
     cursor: pointer;
     height: 1.5rem;
     width: 1.5rem;
-    fill: var(--color-font-2);
+    color: var(--color-font-2);
 }
 .qq-err-card > div:last-child {
     margin: 0 -8px;
@@ -1056,14 +1072,14 @@ input::placeholder {
         z-index: 20;
     }
     .main-body > ul > li {
-        padding-top: 15px !important;
+        margin: 0 !important;
     }
     .side-bar-space {
         display: none;
     }
     .hiden-home {
-        margin-top: calc(100% + 5px);
-        transform: translateY(0);
+        margin-top: calc(100% + 5px) !important;
+        transform: translateY(0) !important;
         margin-left: -70px;
     }
     /* 二级侧栏 */
@@ -1092,7 +1108,7 @@ input::placeholder {
         margin-right: 10px;
     }
     .friend-list.open > div:first-child > div.small > div.reload > svg {
-        fill: var(--color-font);
+        color: var(--color-font);
     }
     .friend-list > div:first-child > div.small > div {
         background: var(--color-main);
@@ -1113,7 +1129,7 @@ input::placeholder {
         display: flex !important;
     }
     .friend-list > div:first-child > div.small > div > svg {
-        fill: var(--color-font-r);
+        color: var(--color-font-r);
         height: 17px;
         opacity: 1;
     }

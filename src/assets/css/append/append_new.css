@@ -24,6 +24,7 @@
 }
 .main-body > ul > li {
     line-height: 30px;
+    margin-top: 10px;
     min-width: 50px;
     padding: 0;
 }
@@ -38,6 +39,7 @@
     padding: 30px 20px;
 }
 .login-pan-card > svg {
+    height: 20%;
     width: 20%;
 }
 .login-pan-card p {
@@ -167,6 +169,16 @@
 .face-pan {
     border: 1px solid var(--color-card-2);
 }
+.store-face-list > div {
+    width: calc(20% - 10px) !important;
+}
+.face-pan div.tab-main {
+    margin-top: 10px !important;
+}
+.face-pan div.tab-main > div {
+    margin-bottom: 0 !important;
+}
+
 .ss-card:hover {
     box-shadow: 0 0 3px var(--color-shader);
 }
@@ -233,7 +245,7 @@
 }
 
 .end-card {
-    margin: 10px 10px 20px 10px;
+    margin: 10px 0 20px 0;
     padding: 15px 20px;
 }
 .end-card>div>div>span {
@@ -282,7 +294,7 @@
 }
 .menu div.item > svg,
 .msg-menu-body > div > div > svg {
-    fill: var(--color-font-1);
+    color: var(--color-font-1);
     margin-top: 4px;
     height: 0.8rem;
     width: 0.8rem !important;
@@ -334,8 +346,10 @@
     height: 30px !important;
     font-size: 0.8rem;
 }
-.chat-info-tab {
-    padding: 0;
+
+.chat-info-tab .tab-bar > li span {
+    font-size: 0.8rem;
+
 }
 .chat-info-tab-member > div > img {
     height: 25px;
@@ -343,14 +357,6 @@
 }
 .chat-info-tab-member > div > div > a {
     font-size: 0.8rem;
-}
-.opt-tab {
-    color: var(--color-font);
-    display: flex;
-    padding: 10px !important;
-    border: 0;
-    min-height: 30px;
-    height: 30px;
 }
 .account-info>img {
     height: 26px;
@@ -385,6 +391,7 @@
     margin: 0 15px 0 5px;
     min-width: unset;
     width: 2rem;
+    height: 2rem;
 }
 .bot-info > div > span > span:first-child {
     font-size: 0.9rem;
@@ -393,6 +400,12 @@
     font-size: 0.75rem;
 }
 
+.opt-tab {
+    height: calc(100% - 105px);
+}
+.opt-tab .tab-bar > li span {
+    font-size: 0.8rem;
+}
 .opt-item>div > span:first-child {
     font-size: 0.85rem;
 }

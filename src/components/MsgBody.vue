@@ -26,11 +26,7 @@
                 <!-- 回复指示框（独立版本） -->
                 <div v-if="data.source && data.source.seq" :class="isMe ? (type == 'merge' ? 'msg-replay' : 'msg-replay me') : 'msg-replay'"
                     @click="scrollToMsg(data.source.seq)">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                        <path
-                            d="M8.31 189.9l176-151.1c15.41-13.3 39.69-2.509 39.69 18.16v80.05C384.6 137.9 512 170.1 512 322.3c0 61.44-39.59 122.3-83.34 154.1c-13.66 9.938-33.09-2.531-28.06-18.62c45.34-145-21.5-183.5-176.6-185.8v87.92c0 20.7-24.31 31.45-39.69 18.16l-176-151.1C-2.753 216.6-2.784 199.4 8.31 189.9z">
-                        </path>
-                    </svg>
+                    <font-awesome-icon :icon="['fas', 'reply']"/>
                     <a> {{ getRepInfo((data.source ? data.source.message : ''), data) }} </a>
                 </div>
                 <!-- 消息体 -->
@@ -43,7 +39,7 @@
                         <template v-else-if="item.type == 'face'">
                             <img v-if="getFace(item.id)" :alt="item.text" class="msg-face" :src="getFace(item.id)" :title="item.text">
                             <span v-else-if="item.id == 394" class="msg-face-long"><span v-for="i in 15" :key="data.message_id + '-l-' + i">🐲</span></span>
-                            <svg v-else :class="'msg-face-svg' + (isMe ? ' me': '')" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-v-658eb408=""><path d="M0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256C512 397.4 397.4 512 256 512C114.6 512 0 397.4 0 256zM256 432C332.1 432 396.2 382 415.2 314.1C419.1 300.4 407.8 288 393.6 288H118.4C104.2 288 92.92 300.4 96.76 314.1C115.8 382 179.9 432 256 432V432zM176.4 160C158.7 160 144.4 174.3 144.4 192C144.4 209.7 158.7 224 176.4 224C194 224 208.4 209.7 208.4 192C208.4 174.3 194 160 176.4 160zM336.4 224C354 224 368.4 209.7 368.4 192C368.4 174.3 354 160 336.4 160C318.7 160 304.4 174.3 304.4 192C304.4 209.7 318.7 224 336.4 224z" data-v-658eb408=""></path></svg>
+                            <font-awesome-icon v-else :class="'msg-face-svg' + (isMe ? ' me': '')" icon="fa-solid fa-face-grin-wide"/>
                         </template>
                         <img v-else-if="item.type == 'mface' && item.url" @load="scrollButtom" @error="imgLoadFail" :class="imgStyle(data.message.length, index, item.asface) + ' msg-mface'" :src="item.url">
                         <span v-else-if="item.type == 'mface' && item.text" class="msg-unknown">{{ item.text }}</span>
@@ -52,12 +48,12 @@
                             <a @mouseenter="showUserInfo" :data-id="item.qq" :data-group="data.group_id">{{ getAtName(item) }}</a>
                         </div>
                         <div v-else-if="item.type == 'file'" :class="'msg-file' + (isMe ? ' me' : '')">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M0 64C0 28.65 28.65 0 64 0H224V128C224 145.7 238.3 160 256 160H384V448C384 483.3 355.3 512 320 512H64C28.65 512 0 483.3 0 448V64zM256 128V0L384 128H256z"/></svg>
+                            <font-awesome-icon :icon="['fas', 'file']"/>
                             <div>
                                 <div><p>{{ loadFileBase(item, item.name, data.message_id) }}</p><a>（{{ getSizeFromBytes(item.size) }}）</a></div><i>{{ item.md5 }}</i>
                             </div>
                             <div>
-                                <svg @click="downloadFile(item, data.message_id)" v-if="item.downloadingPercentage === undefined" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M374.6 310.6l-160 160C208.4 476.9 200.2 480 192 480s-16.38-3.125-22.62-9.375l-160-160c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 370.8V64c0-17.69 14.33-31.1 31.1-31.1S224 46.31 224 64v306.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0S387.1 298.1 374.6 310.6z"/></svg>
+                                <font-awesome-icon @click="downloadFile(item, data.message_id)" v-if="item.downloadingPercentage === undefined" icon="fa-solid fa-angle-down"/>
                                 <svg v-if="item.downloadingPercentage !== undefined" class="download-bar" xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="50%" cy="50%" r="40%" stroke-width="15%" fill="none" stroke-linecap="round" />
                                     <circle cx="50%" cy="50%" r="40%" stroke-width="15%" fill="none" :stroke-dasharray="item.downloadingPercentage === undefined ?
@@ -83,11 +79,7 @@
                         </div>
                         <span v-else-if="item.type == 'forward'" class="msg-unknown" style="cursor: pointer;" @click="View.getForwardMsg(item.id)">{{ $t('chat_show_forward') }}</span>
                         <div v-else-if="item.type == 'reply'" @click="scrollToMsg(item.id)" :class="isMe ? (type == 'merge' ? 'msg-replay' : 'msg-replay me') : 'msg-replay'">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                                <path
-                                    d="M8.31 189.9l176-151.1c15.41-13.3 39.69-2.509 39.69 18.16v80.05C384.6 137.9 512 170.1 512 322.3c0 61.44-39.59 122.3-83.34 154.1c-13.66 9.938-33.09-2.531-28.06-18.62c45.34-145-21.5-183.5-176.6-185.8v87.92c0 20.7-24.31 31.45-39.69 18.16l-176-151.1C-2.753 216.6-2.784 199.4 8.31 189.9z">
-                                </path>
-                            </svg>
+                            <font-awesome-icon :icon="['fas', 'reply']"/>
                             <a :class="getRepMsg(item.id) ? '' : 'msg-unknown'" style="cursor: pointer;"> {{ getRepMsg(item.id) ?? $t('chat_jump_reply') }} </a>
                         </div>
 
@@ -119,8 +111,8 @@
                 </div>
             </div>
         </div>
-        <div v-if="data.fake_msg == true" class="sending">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg>
+        <div class="sending" v-if="data.fake_msg == true">
+            <font-awesome-icon :icon="['fas', 'spinner']"/>
         </div>
         <div :class="'emoji-like' + (isMe ? ' me' : '')" v-if="data.emoji_like">
             <div class="emoji-like-body">
@@ -139,7 +131,7 @@
 import Option from '@/function/option'
 import CardMessage from './msg-component/CardMessage.vue'
 import app from '@/main'
-import Umami from '@bitprojects/umami-logger-typescript'
+import Umami from '@stapxs/umami-logger-typescript'
 
 import { MsgBodyFuns as ViewFuns } from '@/function/model/msg-body'
 import { defineComponent } from 'vue'

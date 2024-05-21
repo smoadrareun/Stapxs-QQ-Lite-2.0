@@ -16,8 +16,7 @@
         id="chat-pan">        
         <!-- 聊天基本信息 -->
         <div class="info">
-            <svg @click="openLeftBar" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM64 256c0-17.7 14.3-32 32-32H480c17.7 0 32 14.3 32 32s-14.3 32-32 32H96c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"></path></svg>
-            <img :src="chat.show.avatar">
+            <font-awesome-icon @click="openLeftBar" icon="fa-solid fa-bars-staggered"/><img :src="chat.show.avatar">
             <div class="info">
                 <p>{{ chat.show.name }}</p>
                 <span v-if="chat.show.temp">
@@ -34,15 +33,12 @@
             </div>
             <div class="space"></div>
             <div class="more">
-                <svg @click="openChatInfoPan" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512">
-                    <path
-                        d="M64 360c30.9 0 56 25.1 56 56s-25.1 56-56 56s-56-25.1-56-56s25.1-56 56-56zm0-160c30.9 0 56 25.1 56 56s-25.1 56-56 56s-56-25.1-56-56s25.1-56 56-56zM120 96c0 30.9-25.1 56-56 56S8 126.9 8 96S33.1 40 64 40s56 25.1 56 56z" />
-                </svg>
+                <font-awesome-icon @click="openChatInfoPan" icon="fa-solid fa-ellipsis-vertical"/>
             </div>
         </div>
         <!-- 加载中指示器 -->
         <div :class="'loading' + (tags.nowGetHistroy && runtimeData.tags.canLoadHistory ? ' show': '')">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg>
+            <font-awesome-icon :icon="['fas', 'spinner']"/>
             <span>{{ $t('loading') }}</span>
         </div>
         <!-- 消息显示区 -->
@@ -77,10 +73,7 @@
         <!-- 滚动到底部悬浮标志 -->
         <div class="new-msg" v-show="tags.showBottomButton" @click="scrollBottom(true)">
             <div class="ss-card">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                    <path
-                        d="M256 32C114.6 32 .0272 125.1 .0272 240c0 49.63 21.35 94.98 56.97 130.7c-12.5 50.37-54.27 95.27-54.77 95.77c-2.25 2.25-2.875 5.734-1.5 8.734C1.979 478.2 4.75 480 8 480c66.25 0 115.1-31.76 140.6-51.39C181.2 440.9 217.6 448 256 448c141.4 0 255.1-93.13 255.1-208S397.4 32 256 32z" />
-                </svg>
+                <font-awesome-icon :icon="['fas', 'comment']" />
                 <span v-if="NewMsgNum > 0">{{ NewMsgNum }}</span>
             </div>
         </div>
@@ -97,9 +90,9 @@
                     <Transition name="pan">
                         <div v-show="details[2].open && runtimeData.chatInfo.info.jin_info && runtimeData.chatInfo.info.jin_info.data.msg_list" class="ss-card jin-pan">
                             <div>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="margin-top: 5px;"><path d="M511.1 63.1v287.1c0 35.25-28.75 63.1-64 63.1h-144l-124.9 93.68c-7.875 5.75-19.12 .0497-19.12-9.7v-83.98h-96c-35.25 0-64-28.75-64-63.1V63.1c0-35.25 28.75-63.1 64-63.1h384C483.2 0 511.1 28.75 511.1 63.1z"></path></svg>
+                                <font-awesome-icon :icon="['fas', 'message']" />
                                 <span>{{ $t('chat_fun_menu_jin') }}</span>
-                                <svg @click="details[2].open = !details[2].open" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"></path></svg>
+                                <font-awesome-icon @click="details[2].open = !details[2].open" :icon="['fas', 'xmark']" />
                             </div>
                             <div class="jin-pan-body" @scroll="jinScroll">
                                 <div v-for="(item, index) in runtimeData.chatInfo.info.jin_info ? 
@@ -128,7 +121,7 @@
                                                 .format(new Date(item.add_digest_time * 1000)),name: item.add_digest_nick }) }}</span>
                                 </div>
                                 <div class="jin-pan-load" v-show="tags.isJinLoading">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M120 256c0 30.9-25.1 56-56 56s-56-25.1-56-56s25.1-56 56-56s56 25.1 56 56zm160 0c0 30.9-25.1 56-56 56s-56-25.1-56-56s25.1-56 56-56s56 25.1 56 56zm104 56c-30.9 0-56-25.1-56-56s25.1-56 56-56s56 25.1 56 56s-25.1 56-56 56z"></path></svg>
+                                    <font-awesome-icon :icon="['fas', 'spinner']" />
                                 </div>
                             </div>
                         </div>
@@ -136,18 +129,10 @@
                 </div>
                 <!-- 回复指示器 -->
                 <div :class="tags.isReply ? 'replay-tag show' : 'replay-tag'">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                        <path
-                            d="M8.31 189.9l176-151.1c15.41-13.3 39.69-2.509 39.69 18.16v80.05C384.6 137.9 512 170.1 512 322.3c0 61.44-39.59 122.3-83.34 154.1c-13.66 9.938-33.09-2.531-28.06-18.62c45.34-145-21.5-183.5-176.6-185.8v87.92c0 20.7-24.31 31.45-39.69 18.16l-176-151.1C-2.753 216.6-2.784 199.4 8.31 189.9z">
-                        </path>
-                    </svg>
+                    <font-awesome-icon :icon="['fas', 'reply']" />
                     <span>{{ selectedMsg === null ? '' : (selectedMsg.sender.nickname + ': ' + (selectedMsg.raw_message ?? fun.getMsgRawTxt(selectedMsg.message)))
                     }}</span>
-                    <div @click="cancelReply"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                            <path
-                                d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z">
-                            </path>
-                        </svg></div>
+                    <div @click="cancelReply"><font-awesome-icon :icon="['fas', 'xmark']" /></div>
                 </div>
                 <!-- At 指示器 -->
                 <div :class="atFindList != null ? 'at-tag show' : 'at-tag'" contenteditable="true" @blur="choiceAt(undefined)">
@@ -165,32 +150,25 @@
                 <!-- 更多功能 -->
                 <div :class="tags.showMoreDetail ? 'more-detail show' : 'more-detail'">
                     <div :title="$t('chat_fun_menu_pic')" @click="runSelectImg">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M0 96C0 60.7 28.7 32 64 32H448c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM323.8 202.5c-4.5-6.6-11.9-10.5-19.8-10.5s-15.4 3.9-19.8 10.5l-87 127.6L170.7 297c-4.6-5.7-11.5-9-18.7-9s-14.2 3.3-18.7 9l-64 80c-5.8 7.2-6.9 17.1-2.9 25.4s12.4 13.6 21.6 13.6h96 32H424c8.9 0 17.1-4.9 21.2-12.8s3.6-17.4-1.4-24.7l-120-176zM112 192c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48z"/></svg>
+                        <font-awesome-icon :icon="['fas', 'image']" />
                         <input id="choice-pic" type="file" style="display: none;" @change="selectImg">
                     </div>
                     <div :title="$t('chat_fun_menu_file')" @click="runSelectFile">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M64 480H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H288c-10.1 0-19.6-4.7-25.6-12.8L243.2 57.6C231.1 41.5 212.1 32 192 32H64C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64z"/></svg>
+                        <font-awesome-icon :icon="['fas', 'folder']" />
                         <input id="choice-file" type="file" style="display: none;" @change="selectFile">
                     </div>
                     <div :title="$t('chat_fun_menu_face')"
                         @click="details[1].open = !details[1].open, tags.showMoreDetail = false">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                            <path
-                                d="M0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256C512 397.4 397.4 512 256 512C114.6 512 0 397.4 0 256zM256 432C332.1 432 396.2 382 415.2 314.1C419.1 300.4 407.8 288 393.6 288H118.4C104.2 288 92.92 300.4 96.76 314.1C115.8 382 179.9 432 256 432V432zM176.4 160C158.7 160 144.4 174.3 144.4 192C144.4 209.7 158.7 224 176.4 224C194 224 208.4 209.7 208.4 192C208.4 174.3 194 160 176.4 160zM336.4 224C354 224 368.4 209.7 368.4 192C368.4 174.3 354 160 336.4 160C318.7 160 304.4 174.3 304.4 192C304.4 209.7 318.7 224 336.4 224z" />
-                        </svg>
+                        <font-awesome-icon :icon="['fas', 'face-laugh']" />
                     </div>
                     <div :title="$t('chat_fun_menu_jin')" v-if="chat.show.type === 'group'" @click="showJin">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"/></svg>
-                    </div>
+                        <font-awesome-icon :icon="['fas', 'star']" /></div>
                 </div>
             </div>
             <!-- 消息发送框 -->
             <div>
                 <div @click="moreFunClick">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                        <path
-                            d="M432 256c0 17.69-14.33 32.01-32 32.01H256v144c0 17.69-14.33 31.99-32 31.99s-32-14.3-32-31.99v-144H48c-17.67 0-32-14.32-32-32.01s14.33-31.99 32-31.99H192v-144c0-17.69 14.33-32.01 32-32.01s32 14.32 32 32.01v144h144C417.7 224 432 238.3 432 256z" />
-                    </svg>
+                    <font-awesome-icon :icon="['fas', 'plus']" />
                 </div>
                 <div>
                     <form @submit.prevent="mainSubmit">
@@ -217,10 +195,7 @@
                         </textarea>
                     </form>
                     <div @click="sendMsg">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512">
-                            <path
-                                d="M64 448c-8.188 0-16.38-3.125-22.62-9.375c-12.5-12.5-12.5-32.75 0-45.25L178.8 256L41.38 118.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0l160 160c12.5 12.5 12.5 32.75 0 45.25l-160 160C80.38 444.9 72.19 448 64 448z" />
-                        </svg>
+                        <font-awesome-icon :icon="['fas', 'angle-right']" />
                     </div>
                 </div>
             </div>
@@ -231,18 +206,12 @@
             <div @click="closeMergeMsg"></div>
             <div class="ss-card">
                 <div>
-                    <svg style="margin-top: 5px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                        <path
-                            d="M511.1 63.1v287.1c0 35.25-28.75 63.1-64 63.1h-144l-124.9 93.68c-7.875 5.75-19.12 .0497-19.12-9.7v-83.98h-96c-35.25 0-64-28.75-64-63.1V63.1c0-35.25 28.75-63.1 64-63.1h384C483.2 0 511.1 28.75 511.1 63.1z" />
-                    </svg>
+                    <font-awesome-icon style="margin-top: 5px;" :icon="['fas', 'message']" />
                     <span>{{ $t('chat_merge_msg') }}</span>
-                    <svg @click="closeMergeMsg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                        <path
-                            d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z" />
-                    </svg>
+                    <font-awesome-icon @click="closeMergeMsg" :icon="['fas', 'xmark']" />
                 </div>
                 <div :class="'loading' + ((mergeList && mergeList.length == 0) ? ' show': '')">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg>
+                    <font-awesome-icon :icon="['fas', 'spinner']" />
                     <span>{{ $t('loading') }}</span>
                 </div>
                 <div>
@@ -291,47 +260,47 @@
                 <div v-if="runtimeData.chatInfo.show.type == 'group'" :class="'ss-card respond' + (tags.menuDisplay.respond ? ' open': '')">
                     <template v-for="(num, index) in respondIds" :key="'respond-' + num">
                         <img v-if="getFace(num) != false" @click="sendRespond(num)" loading="lazy" :src="(getFace(num) as any)">
-                        <svg v-if="index == 4" @click="tags.menuDisplay.respond = true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M201.4 137.4c12.5-12.5 32.8-12.5 45.3 0l160 160c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L224 205.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l160-160z"/></svg>
+                        <font-awesome-icon  v-if="index == 4" @click="tags.menuDisplay.respond = true" :icon="['fas', 'angle-up']" />
                     </template>
                 </div>
                 <div @click="replyMsg(true)" v-show="tags.menuDisplay.relpy">
-                    <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M511.1 63.1v287.1c0 35.25-28.75 63.1-64 63.1h-144l-124.9 93.68c-7.875 5.75-19.12 .0497-19.12-9.7v-83.98h-96c-35.25 0-64-28.75-64-63.1V63.1c0-35.25 28.75-63.1 64-63.1h384C483.2 0 511.1 28.75 511.1 63.1z"/></svg></div>
+                    <div><font-awesome-icon :icon="['fas', 'message']" /></div>
                     <a>{{ $t('chat_msg_menu_reply') }}</a>
                 </div>
                 <div @click="showForWard()" v-show="tags.menuDisplay.forward">
-                   <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M503.7 226.2l-176 151.1c-15.38 13.3-39.69 2.545-39.69-18.16V272.1C132.9 274.3 66.06 312.8 111.4 457.8c5.031 16.09-14.41 28.56-28.06 18.62C39.59 444.6 0 383.8 0 322.3c0-152.2 127.4-184.4 288-186.3V56.02c0-20.67 24.28-31.46 39.69-18.16l176 151.1C514.8 199.4 514.8 216.6 503.7 226.2z"/></svg></div>
+                   <div><font-awesome-icon :icon="['fas', 'share']" /></div>
                    <a>{{ $t('chat_msg_menu_forward') }}</a>
                 </div>
                 <!-- <div v-show="tags.menuDisplay.select">
-           <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M23.19 32C28.86 32 34.34 34.08 38.59 37.86L312.6 281.4C317.3 285.6 320 291.6 320 297.9C320 310.1 310.1 320 297.9 320H179.8L236.6 433.7C244.5 449.5 238.1 468.7 222.3 476.6C206.5 484.5 187.3 478.1 179.4 462.3L121.2 346L38.58 440.5C34.4 445.3 28.36 448 22.01 448C9.855 448 0 438.1 0 425.1V55.18C0 42.38 10.38 32 23.18 32H23.19z"/></svg></div>
+           <div><font-awesome-icon :icon="['fas', 'circle-check']" /></div>
            <a>{{ $t('chat_msg_menu_multiple_choice') }}</a>
         </div> -->
                 <div @click="copyMsg" v-show="tags.menuDisplay.copy">
-                    <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M336 64h-53.88C268.9 26.8 233.7 0 192 0S115.1 26.8 101.9 64H48C21.5 64 0 85.48 0 112v352C0 490.5 21.5 512 48 512h288c26.5 0 48-21.48 48-48v-352C384 85.48 362.5 64 336 64zM192 64c17.67 0 32 14.33 32 32c0 17.67-14.33 32-32 32S160 113.7 160 96C160 78.33 174.3 64 192 64zM272 224h-160C103.2 224 96 216.8 96 208C96 199.2 103.2 192 112 192h160C280.8 192 288 199.2 288 208S280.8 224 272 224z"/></svg></div>
+                    <div><font-awesome-icon :icon="['fas', 'clipboard']" /></div>
                     <a>{{ $t('chat_msg_menu_copy') }}</a>
                 </div>
                 <div @click="copySelectMsg" v-show="tags.menuDisplay.copySelect">
-                    <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M392.8 1.2c-17-4.9-34.7 5-39.6 22l-128 448c-4.9 17 5 34.7 22 39.6s34.7-5 39.6-22l128-448c4.9-17-5-34.7-22-39.6zm80.6 120.1c-12.5 12.5-12.5 32.8 0 45.3L562.7 256l-89.4 89.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l112-112c12.5-12.5 12.5-32.8 0-45.3l-112-112c-12.5-12.5-32.8-12.5-45.3 0zm-306.7 0c-12.5-12.5-32.8-12.5-45.3 0l-112 112c-12.5 12.5-12.5 32.8 0 45.3l112 112c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256l89.4-89.4c12.5-12.5 12.5-32.8 0-45.3z"/></svg></div>
+                    <div><font-awesome-icon :icon="['fas', 'code']" /></div>
                     <a>{{ $t('chat_msg_menu_copy_selected') }}</a>
                 </div>
                 <div @click="downloadImg" v-show="tags.menuDisplay.downloadImg != false">
-                    <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V173.3c0-17-6.7-33.3-18.7-45.3L352 50.7C340 38.7 323.7 32 306.7 32H64zm0 96c0-17.7 14.3-32 32-32H288c17.7 0 32 14.3 32 32v64c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V128zM224 288a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg></div>
+                    <div><font-awesome-icon :icon="['fas', 'floppy-disk']" /></div>
                     <a>{{ $t('chat_msg_menu_download_img') }}</a>
                 </div>
                 <div @click="addStoreFace" v-show="tags.menuDisplay.addStoreFace != false">
-                    <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"/></svg></div>
+                    <div><font-awesome-icon :icon="['fas', 'heart']" /></div>
                     <a>{{ $t('chat_msg_menu_add_store_face') }}</a>
                 </div>
                 <div @click="revokeMsg" v-show="tags.menuDisplay.revoke">
-                    <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg></div>
+                    <div><font-awesome-icon :icon="['fas', 'xmark']" /></div>
                     <a>{{ $t('chat_msg_menu_withdraw') }}</a>
                 </div>
                 <div @click="(selectedMsg ? addSpecialMsg({ msgObj: { type: 'at', qq: selectedMsg.sender.user_id }, addText: true }) : '');toMainInput();closeMsgMenu();" v-show="tags.menuDisplay.at">
-                    <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 64C150 64 64 150 64 256s86 192 192 192c17.7 0 32 14.3 32 32s-14.3 32-32 32C114.6 512 0 397.4 0 256S114.6 0 256 0S512 114.6 512 256v32c0 53-43 96-96 96c-29.3 0-55.6-13.2-73.2-33.9C320 371.1 289.5 384 256 384c-70.7 0-128-57.3-128-128s57.3-128 128-128c27.9 0 53.7 8.9 74.7 24.1c5.7-5 13.1-8.1 21.3-8.1c17.7 0 32 14.3 32 32v80 32c0 17.7 14.3 32 32 32s32-14.3 32-32V256c0-106-86-192-192-192zm64 192c0-35.3-28.7-64-64-64s-64 28.7-64 64s28.7 64 64 64s64-28.7 64-64z"/></svg></div>
+                    <div><font-awesome-icon :icon="['fas', 'at']" /></div>
                     <a>{{ $t('chat_msg_menu_at') }}</a>
                 </div>
                 <div @click="removeUser" v-show="tags.menuDisplay.remove">
-                    <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L353.3 251.6C407.9 237 448 187.2 448 128C448 57.3 390.7 0 320 0C250.2 0 193.5 55.8 192 125.2L38.8 5.1zM264.3 304.3C170.5 309.4 96 387.2 96 482.3c0 16.4 13.3 29.7 29.7 29.7H514.3c3.9 0 7.6-.7 11-2.1l-261-205.6z"/></svg></div>
+                    <div><font-awesome-icon :icon="['fas', 'trash-can']" /></div>
                     <a>{{ $t('chat_msg_menu_remove') }}</a>
                 </div>
             </div>
@@ -351,16 +320,13 @@
                     <div class="imgs">
                         <div v-for="(img64, index) in imgCache" :key="'sendImg-' + index">
                             <div @click="deleteImg(index)">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                    <path
-                                        d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z" />
-                                </svg>
+                                <font-awesome-icon :icon="['fas', 'xmark']" />
                             </div>
                             <img :src="img64">
                         </div>
                     </div>
                     <div class="sender">
-                        <svg @click="runSelectImg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-v-658eb408=""><path d="M0 96C0 60.7 28.7 32 64 32H448c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM323.8 202.5c-4.5-6.6-11.9-10.5-19.8-10.5s-15.4 3.9-19.8 10.5l-87 127.6L170.7 297c-4.6-5.7-11.5-9-18.7-9s-14.2 3.3-18.7 9l-64 80c-5.8 7.2-6.9 17.1-2.9 25.4s12.4 13.6 21.6 13.6h96 32H424c8.9 0 17.1-4.9 21.2-12.8s3.6-17.4-1.4-24.7l-120-176zM112 192c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48z" data-v-658eb408=""></path></svg>
+                        <font-awesome-icon @click="runSelectImg" :icon="['fas', 'image']" />
                         <input type="text" @paste="addImg" :disabled="runtimeData.tags.openSideBar" @click="toMainInput" v-model="msg">
                     </div>
                 </div>
@@ -373,7 +339,7 @@
                 <div class="ss-card card">
                     <header>
                         <span>{{ $t('chat_msg_forward_pan') }}</span>
-                        <svg @click="cancelForward" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" data-v-658eb408=""><path d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z" data-v-658eb408=""></path></svg>
+                        <font-awesome-icon  @click="cancelForward" :icon="['fas', 'xmark']" />
                     </header>
                     <input @input="searchForward" :placeholder="$t('base_search')">
                     <div>

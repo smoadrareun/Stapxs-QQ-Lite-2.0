@@ -17,32 +17,31 @@
         </div>
         <div class="dept-list">
             <div class="ss-card info">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>
+                <font-awesome-icon :icon="['fas', 'circle-info']"/>
                 <span id="deptLink">{{ $t('dept_info') }}</span>
             </div>
             <div class="dept">
                 <div class="ss-card jump-card" @click="openLink('https://lbs.amap.com/api/javascript-api/summary')">
                     <header><div></div>aMap<span>高德地图</span></header>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg>
+                    <font-awesome-icon :icon="['fas', 'angle-right']"/>
                 </div>
                 <div class="ss-card jump-card" @click="openLink('https://github.com/Stapxs/Border-Card-UI/tree/js-bcui')">
                     <header><div></div>Border Card UI<span>bcui.js</span></header>
                     <div>Apache 2.0</div>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg>
+                    <font-awesome-icon :icon="['fas', 'angle-right']"/>
                 </div>
                 <div class="ss-card jump-card" @click="openLink('http://fontawesome.com')">
                     <header><div></div>Font Awesome</header>
                     <div>SIL OFL 1.1</div>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg>
-                </div>
+                    <font-awesome-icon :icon="['fas', 'angle-right']"/></div>
                 <div class="ss-card jump-card" @click="openLink('https://github.com/koishijs/QFace')">
                     <header><div></div>QFace</header>
                     <div>MIT</div>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg>
+                    <font-awesome-icon :icon="['fas', 'angle-right']"/>
                 </div>
                 <div class="ss-card jump-card" @click="openLink('https://github.com/SAWARATSUKI/KawaiiLogos')">
                     <header><div></div>ServiceLogos<span>vue.js logo</span></header>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg>
+                    <font-awesome-icon :icon="['fas', 'angle-right']"/>
                 </div>
             </div>
         </div>
@@ -116,9 +115,10 @@ export default defineComponent({
 }
 
 .info > svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     margin-right: 10px;
-    height: 1.6rem;
+    margin-top: 5px;
+    height: 1rem;
 }
 
 .dept {

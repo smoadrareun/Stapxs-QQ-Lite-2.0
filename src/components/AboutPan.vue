@@ -47,7 +47,7 @@
                 <a class="ss-button" @click="openLink('https://github.com/Stapxs/Stapxs-QQ-Lite-2.0')">{{
                 $t('option_info_visit_github') }}</a>
                 <a class="ss-button" style="width: 30px;" @click="openLink('https://blog.stapxs.cn/About.html')">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>
+                    <font-awesome-icon :icon="['fas', 'circle-info']"/>
                 </a>
             </div>
             <div v-if="constList.length > 0" class="ss-card contributors-card">
@@ -60,7 +60,7 @@
         </div>
         <div class="ss-card jump-card" @click="dependencies" :style="showUI ? '' : 'background: var(--color-card-1);'">
             <header><div></div>{{ $t('list_of_dependencies') }}</header>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg>
+            <font-awesome-icon :icon="['fas', 'angle-right']"/>
         </div>
         <div v-if="showUI" class="ss-card bcd-about" @click="openLink('https://stapxs.github.io/Border-Card-UI/docs/')">
             <div>

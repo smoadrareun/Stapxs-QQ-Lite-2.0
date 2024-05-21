@@ -29,8 +29,6 @@
   "chat_chat_info_file_num": "共 {num} 個檔案",
   "chat_chat_info_group": "群組資料",
   "chat_chat_info_introduction": "簡介",
-  "chat_chat_info_is_admin": "你是管理員",
-  "chat_chat_info_is_owner": "你是群組擁有者",
   "chat_chat_info_lnick": "簽名檔",
   "chat_chat_info_member": "群組成員",
   "chat_chat_info_nointroduction": "群組擁有者很懶，還沒有寫群簡介哦～",

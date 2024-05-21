@@ -1,91 +1,52 @@
 <template>
-    <TransitionGroup class="top-bar" name="appbar" tag="div" v-if="runtimeData.sysConfig.opt_no_window">
-        <template v-if="runtimeData.sysConfig.opt_no_window_mac_style">
-            <div class="controller mac">
-                <div @click="controllWin('close')" class="close"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"/></svg></div>
-                <div @click="controllWin('minimize')" class="min"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M416 256c0 17.7-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l352 0c17.7 0 32 14.3 32 32z"/></svg></div>
-                <div @click="controllWin('maximize')" class="min"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M320 0c-17.7 0-32 14.3-32 32s14.3 32 32 32h82.7L201.4 265.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L448 109.3V192c0 17.7 14.3 32 32 32s32-14.3 32-32V32c0-17.7-14.3-32-32-32H320zM80 32C35.8 32 0 67.8 0 112V432c0 44.2 35.8 80 80 80H400c44.2 0 80-35.8 80-80V320c0-17.7-14.3-32-32-32s-32 14.3-32 32V432c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16V112c0-8.8 7.2-16 16-16H192c17.7 0 32-14.3 32-32s-14.3-32-32-32H80z"/></svg></div>
-                <div @click="flushPage" v-if="dev"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M447.5 224H456c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L397.4 96.6c-87.6-86.5-228.7-86.2-315.8 1c-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L311 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H447.5z"/></svg></div>
-            </div>
-            <span class="mac">
-                Stapxs QQ Lite
-                {{ dev ? '(Dev)' : '' }}
-            </span>
-        </template>
-        <template v-else>
-            <img src="img/icons/icon.svg">
-            <span>
-                Stapxs QQ Lite
-                {{ dev ? '(Dev)' : '' }}
-            </span>
-            <div class="space"></div>
-            <div class="controller">
-                <div @click="flushPage" v-if="dev" class="reflush"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M447.5 224H456c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L397.4 96.6c-87.6-86.5-228.7-86.2-315.8 1c-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L311 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H447.5z"/></svg></div>
-                <div @click="controllWin('minimize')" class="min"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M416 256c0 17.7-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l352 0c17.7 0 32 14.3 32 32z"/></svg></div>
-                <div @click="controllWin('maximize')" class="max"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M384 32C419.3 32 448 60.65 448 96V416C448 451.3 419.3 480 384 480H64C28.65 480 0 451.3 0 416V96C0 60.65 28.65 32 64 32H384zM384 80H64C55.16 80 48 87.16 48 96V416C48 424.8 55.16 432 64 432H384C392.8 432 400 424.8 400 416V96C400 87.16 392.8 80 384 80z"/></svg></div>
-                <div @click="controllWin('close')" class="close"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"/></svg></div>
-            </div>
-        </template>
-    </TransitionGroup>
+    <div class="top-bar" name="appbar" v-if="runtimeData.sysConfig.opt_no_window">
+        <img src="img/icons/icon.svg">
+        <span>
+            Stapxs QQ Lite
+            {{ dev ? '(Dev)' : '' }}
+        </span>
+        <div class="space"></div>
+        <div class="controller">
+            <div @click="flushPage" v-if="dev" class="reflush"><font-awesome-icon :icon="['fas', 'rotate-right']" /></div>
+            <div @click="controllWin('minimize')" class="min"><font-awesome-icon :icon="['fas', 'minus']" /></div>
+            <div @click="controllWin('maximize')" class="max"><font-awesome-icon :icon="['far', 'square']" /></div>
+            <div @click="controllWin('close')" class="close"><font-awesome-icon :icon="['fas', 'xmark']" /></div>
+        </div>
+    </div>
     <div v-if="runtimeData.tags.platform == 'darwin'" class="controller mac-controller"></div>
     <div id="base-app">
-        <div class="layui-tab layui-tab-brief main-body">
-            <ul class="layui-tab-title" :style="get('fs_adaptation') > 0 ? `padding-bottom: ${get('fs_adaptation')}px;` : ''">
-                <li id="bar-home" @click="changeTab('主页', 'Home', true)" :class="loginInfo.status ? 'hiden-home' : 'layui-this'">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">>
-                        <path
-                            d="M575.8 255.5c0 18-15 32.1-32 32.1h-32l.7 160.2c0 2.7-.2 5.4-.5 8.1V472c0 22.1-17.9 40-40 40H456c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1H416 392c-22.1 0-40-17.9-40-40V448 384c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v64 24c0 22.1-17.9 40-40 40H160 128.1c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2H104c-22.1 0-40-17.9-40-40V360c0-.9 0-1.9 .1-2.8V287.6H32c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z" />
-                    </svg>
+        <div class="main-body">
+            <ul :style="get('fs_adaptation') > 0 ? `padding-bottom: ${get('fs_adaptation')}px;` : ''">
+                <li id="bar-home" @click="changeTab('主页', 'Home', true)"
+                    :class="(tags.page == 'Home' ? 'active' : '') + (loginInfo.status ? ' hiden-home' : '')">
+                    <font-awesome-icon :icon="['fas', 'home']"/>
                 </li>
-                <li id="bar-msg" @click="changeTab('信息', 'Messages', false)"
-                    :class="!loginInfo.status ? '' : 'layui-this'">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                        <path
-                            d="M464 64C490.5 64 512 85.49 512 112C512 127.1 504.9 141.3 492.8 150.4L275.2 313.6C263.8 322.1 248.2 322.1 236.8 313.6L19.2 150.4C7.113 141.3 0 127.1 0 112C0 85.49 21.49 64 48 64H464zM217.6 339.2C240.4 356.3 271.6 356.3 294.4 339.2L512 176V384C512 419.3 483.3 448 448 448H64C28.65 448 0 419.3 0 384V176L217.6 339.2z" />
-                    </svg>
+                <li id="bar-msg" @click="changeTab('信息', 'Messages', false)" :class="tags.page == 'Messages' ? 'active' : ''">
+                    <font-awesome-icon :icon="['fas', 'envelope']"/>
                 </li>
-                <li id="bar-friends" @click="changeTab('列表', 'Friends', false)">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                        <path
-                            d="M224 256c70.7 0 128-57.31 128-128s-57.3-128-128-128C153.3 0 96 57.31 96 128S153.3 256 224 256zM274.7 304H173.3C77.61 304 0 381.6 0 477.3c0 19.14 15.52 34.67 34.66 34.67h378.7C432.5 512 448 496.5 448 477.3C448 381.6 370.4 304 274.7 304z" />
-                    </svg>
+                <li id="bar-friends" @click="changeTab('列表', 'Friends', false)" :class="tags.page == 'Friends' ? 'active' : ''">
+                    <font-awesome-icon :icon="['fas', 'user']"/>
                 </li>
-                <div style="flex: 1;" class="side-bar-space"></div>
-                <li @click="changeTab('设置', 'Options', true);Connector.send('get_version_info', {}, 'getVersionInfo')">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                        <path
-                            d="M495.9 166.6C499.2 175.2 496.4 184.9 489.6 191.2L446.3 230.6C447.4 238.9 448 247.4 448 256C448 264.6 447.4 273.1 446.3 281.4L489.6 320.8C496.4 327.1 499.2 336.8 495.9 345.4C491.5 357.3 486.2 368.8 480.2 379.7L475.5 387.8C468.9 398.8 461.5 409.2 453.4 419.1C447.4 426.2 437.7 428.7 428.9 425.9L373.2 408.1C359.8 418.4 344.1 427 329.2 433.6L316.7 490.7C314.7 499.7 307.7 506.1 298.5 508.5C284.7 510.8 270.5 512 255.1 512C241.5 512 227.3 510.8 213.5 508.5C204.3 506.1 197.3 499.7 195.3 490.7L182.8 433.6C167 427 152.2 418.4 138.8 408.1L83.14 425.9C74.3 428.7 64.55 426.2 58.63 419.1C50.52 409.2 43.12 398.8 36.52 387.8L31.84 379.7C25.77 368.8 20.49 357.3 16.06 345.4C12.82 336.8 15.55 327.1 22.41 320.8L65.67 281.4C64.57 273.1 64 264.6 64 256C64 247.4 64.57 238.9 65.67 230.6L22.41 191.2C15.55 184.9 12.82 175.3 16.06 166.6C20.49 154.7 25.78 143.2 31.84 132.3L36.51 124.2C43.12 113.2 50.52 102.8 58.63 92.95C64.55 85.8 74.3 83.32 83.14 86.14L138.8 103.9C152.2 93.56 167 84.96 182.8 78.43L195.3 21.33C197.3 12.25 204.3 5.04 213.5 3.51C227.3 1.201 241.5 0 256 0C270.5 0 284.7 1.201 298.5 3.51C307.7 5.04 314.7 12.25 316.7 21.33L329.2 78.43C344.1 84.96 359.8 93.56 373.2 103.9L428.9 86.14C437.7 83.32 447.4 85.8 453.4 92.95C461.5 102.8 468.9 113.2 475.5 124.2L480.2 132.3C486.2 143.2 491.5 154.7 495.9 166.6V166.6zM256 336C300.2 336 336 300.2 336 255.1C336 211.8 300.2 175.1 256 175.1C211.8 175.1 176 211.8 176 255.1C176 300.2 211.8 336 256 336z" />
-                    </svg>
+                <div class="side-bar-space"></div>
+                <li @click="changeTab('设置', 'Options', true);Connector.send('get_version_info', {}, 'getVersionInfo')"
+                    :class="tags.page == 'Options' ? 'active' : ''">
+                    <font-awesome-icon :icon="['fas', 'gear']"/>
                 </li>
             </ul>
-            <div class="layui-tab-content" :style="get('fs_adaptation') > 0 ? `height: calc(100% - ${75 + Number(get('fs_adaptation'))}px);` : ''">
-                <div :class="!loginInfo.status ? 'layui-tab-item layui-show' : 'layui-tab-item'"
-                    :name="$t('home_title')">
+            <div :style="get('fs_adaptation') > 0 ? `height: calc(100% - ${75 + Number(get('fs_adaptation'))}px);` : ''">
+                <div :name="$t('home_title')" v-if="tags.page == 'Home'">
                     <div class="home-body">
                         <div class="login-pan-card ss-card">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                                <path
-                                    d="M380.6 365.6C401.1 379.9 416 404.3 416 432C416 476.2 380.2 512 336 512C291.8 512 256 476.2 256 432C256 423.6 257.3 415.4 259.7 407.8L114.1 280.4C103.8 285.3 92.21 288 80 288C35.82 288 0 252.2 0 208C0 163.8 35.82 128 80 128C101.9 128 121.7 136.8 136.2 151.1L320 77.52C321.3 34.48 356.6 0 400 0C444.2 0 480 35.82 480 80C480 117.9 453.7 149.6 418.4 157.9L380.6 365.6zM156.3 232.2L301.9 359.6C306.9 357.3 312.1 355.4 317.6 354.1L355.4 146.4C351.2 143.6 347.4 140.4 343.8 136.9L159.1 210.5C159.7 218 158.5 225.3 156.3 232.2V232.2z">
-                                </path>
-                            </svg>
+                            <font-awesome-icon :icon="['fas', 'circle-nodes']"/>
                             <p>{{ $t('home_card_title') }}</p>
                             <form @submit.prevent @submit="connect">
                                 <label>
-                                    <svg style="padding: 0 2px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
-                                        <path
-                                            d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z">
-                                        </path>
-                                    </svg>
+                                    <font-awesome-icon :icon="['fas', 'link']"/>
                                     <input v-model="loginInfo.address" :placeholder="$t('home_card_address')"
                                         class="ss-input" id="sev_address" autocomplete="off">
                                 </label>
                                 <label>
-                                    <svg style="padding: 0 2px;" xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 448 512">
-                                        <path
-                                            d="M80 192V144C80 64.47 144.5 0 224 0C303.5 0 368 64.47 368 144V192H384C419.3 192 448 220.7 448 256V448C448 483.3 419.3 512 384 512H64C28.65 512 0 483.3 0 448V256C0 220.7 28.65 192 64 192H80zM144 192H304V144C304 99.82 268.2 64 224 64C179.8 64 144 99.82 144 144V192z">
-                                        </path>
-                                    </svg>
+                                    <font-awesome-icon :icon="['fas', 'lock']"/>
                                     <input v-model="loginInfo.token" :placeholder="$t('home_card_key')" class="ss-input"
                                         type="password" id="access_token" autocomplete="off">
                                 </label>
@@ -106,7 +67,7 @@
                             <a href="https://github.com/Stapxs/Stapxs-QQ-Lite-2.0#%E5%BF%AB%E9%80%9F%E4%BD%BF%E7%94%A8"
                                 target="_blank" style="margin-bottom: -20px;">{{ $t('home_card_how_to_connect') }}</a>
                             <div class="wave-pan" style="margin-left: -30px;">
-                                <svg id="login-wave" class="waves-svg" xmlns="http://www.w3.org/2000/svg"
+                                <svg id="login-wave" xmlns="http://www.w3.org/2000/svg"
                                     xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 170 70"
                                     preserveAspectRatio="none" shape-rendering="auto">
                                     <defs>
@@ -125,22 +86,23 @@
                         </div>
                     </div>
                 </div>
-                <div id="messageTab" :class="loginInfo.status ? 'layui-tab-item layui-show' : 'layui-tab-item'">
+                <div id="messageTab" v-if="tags.page == 'Messages'">
                     <Messages
                         :chat="runtimeData.chatInfo"
                         @userClick="changeChat"
                         @loadHistory="loadHistory">
                     </Messages>
                 </div>
-                <div class="layui-tab-item">
+                <div v-if="tags.page == 'Friends'">
                     <Friends
                         :list="runtimeData.userList"
                         @loadHistory="loadHistory"
                         @userClick="changeChat">
                     </Friends>
                 </div>
-                <div class="layui-tab-item opt-main-tab">
+                <div class="opt-main-tab">
                     <Options
+                        :class="tags.page == 'Options' ? 'active' : ''"
                         :config="runtimeData.sysConfig"
                         :info="runtimeData.loginInfo"
                         :status="loginInfo">
@@ -161,10 +123,10 @@
         </component>
         <TransitionGroup class="app-msg" name="appmsg" tag="div">
           <div v-for="msg in appMsgs" :key="'appmsg-' + msg.id">
-            <div v-html="msg.svg"></div>
+            <div><font-awesome-icon :icon="'fa-solid fa-' + msg.svg"/></div>
             <a>{{ msg.text }}</a>
             <div v-if="!msg.autoClose" @click="popInfo.remove(msg.id)">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg>
+                <font-awesome-icon :icon="['fas', 'xmark']"/>
             </div>
           </div>
         </TransitionGroup>
@@ -174,11 +136,11 @@
                     :style="'transform: translate(-50%, calc(-50% - ' + ((runtimeData.popBoxList.length > 3 ? 3 : runtimeData.popBoxList.length) * 10) + 'px));' + (get('fs_adaptation') > 0 ? ` margin-bottom: ${40 + Number(get('fs_adaptation'))}px;` : '')">
                     <header v-show="runtimeData.popBoxList[0].title != undefined">
                         <div
-                            v-if="runtimeData.popBoxList[0].svg != undefined"
-                            v-html="runtimeData.popBoxList[0].svg">
+                            v-if="runtimeData.popBoxList[0].svg != undefined">
+                            <font-awesome-icon :icon="['fas', runtimeData.popBoxList[0].svg]" />
                         </div>
                         <a>{{ runtimeData.popBoxList[0].title }}</a>
-                        <svg @click="removePopBox" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"></path></svg>
+                        <font-awesome-icon @click="removePopBox" icon="fa-solid fa-xmark"/>
                     </header>
                     <div v-if="runtimeData.popBoxList[0].html" v-html="runtimeData.popBoxList[0].html"></div>
                     <component v-else
@@ -226,7 +188,7 @@
 import Spacing from 'spacingjs/src/spacing'
 import app from '@/main'
 import Option from '@/function/option'
-import Umami from '@bitprojects/umami-logger-typescript'
+import Umami from '@stapxs/umami-logger-typescript'
 
 import { defineComponent, defineAsyncComponent } from 'vue'
 import { Connector, login as loginInfo } from '@/function/connect'
@@ -262,6 +224,7 @@ export default defineComponent({
             runtimeData: runtimeData,
             notificationList: notificationList,
             tags: {
+                page: 'Home',
                 showChat: false,
                 isSavePwdClick: false,
                 savePassword: false
@@ -304,6 +267,7 @@ export default defineComponent({
             // UM：发送页面路由分析
             Umami.trackPageView('/' + view)
             this.tags.showChat = !show
+            this.tags.page = view
         },
 
         /**
@@ -499,13 +463,14 @@ export default defineComponent({
             // UM：加载 Umami 统计功能
             if (!Option.get('close_ga') && process.env.NODE_ENV == 'production') {
                 // 给页面添加一个来源域名方便在 electron 中获取
-                if(runtimeData.tags.isElectron) {
-                    document.cookie = 'origin=electron'
-                }
-                Umami.initialize({
+                const config = {
                     baseUrl: process.env.VUE_APP_MU_ADDRESS,
-                    websiteId: process.env.VUE_APP_MU_ID,
-                })
+                    websiteId: process.env.VUE_APP_MU_ID
+                } as any
+                if(runtimeData.tags.isElectron) {
+                    config.hostName = 'electron.stapxs.cn'
+                }
+                Umami.initialize(config)
             } else if (process.env.NODE_ENV == 'development') {
                 logger.debug(this.$t('log_GA_auto_closed'))
             }

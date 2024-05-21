@@ -16,7 +16,7 @@ import Option, { run } from './option'
 import xss from 'xss'
 import pinyin from 'pinyin'
 
-import Umami from '@bitprojects/umami-logger-typescript'
+import Umami from '@stapxs/umami-logger-typescript'
 
 import { buildMsgList, getMsgData, parseMsgList, getMsgRawTxt } from '@/function/utils/msgUtil'
 import { getViewTime, htmlDecodeByRegExp, randomNum } from '@/function/utils/systemUtil'

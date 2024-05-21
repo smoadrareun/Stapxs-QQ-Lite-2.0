@@ -8,11 +8,12 @@ import App from './App.vue'
 import { createApp } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+import { faSquare } from '@fortawesome/free-regular-svg-icons'
 
 import './registerServiceWorker'
 
-import 'layui/dist/css/layui.css'
-import 'layui/dist/layui.js'
 import 'viewerjs/dist/viewer.css'
 
 import './assets/css/view.css'
@@ -41,6 +42,8 @@ app.use(VueViewer)
 app.use(VueClipboard)
 app.use(InfiniteScroll)
 
+library.add(fas)
+library.add(faSquare)
 app.component('font-awesome-icon', FontAwesomeIcon)
 
 app.mount('#app')

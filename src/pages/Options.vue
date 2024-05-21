@@ -9,35 +9,13 @@
     <div class="opt-main">
         <AboutPan :showUI="true"></AboutPan>
         <div>
-            <div class="layui-tab layui-tab-brief"
-                style="display: flex;flex-direction: column;margin: 0;overflow: hidden;height: 100%;padding: 10px;">
-                <ul class="layui-tab-title opt-tab ss-card">
-                    <li class="option-title">{{ $t('option_title') }}</li>
-                    <li class="layui-this">{{ $t('option_bar_account') }}</li>
-                    <li>{{ $t('option_bar_view') }}</li>
-                    <li>{{ $t('option_bar_function') }}</li>
-                    <li>{{ $t('option_bar_dev') }}</li>
-                    <li class="opt-about">{{ $t('menu_about') }}</li>
-                </ul>
-                <div class="opt-body layui-tab-content">
-                    <div class="layui-tab-item"></div>
-                    <div class="layui-tab-item layui-show">
-                        <OptAccount :config="config"></OptAccount>
-                    </div>
-                    <div class="layui-tab-item">
-                        <OptView></OptView>
-                    </div>
-                    <div class="layui-tab-item">
-                        <OptFunction :config="config"></OptFunction>
-                    </div>
-                    <div class="layui-tab-item">
-                        <OptDev></OptDev>
-                    </div>
-                    <div class="layui-tab-item">
-                        <AboutPan :showUI="true"></AboutPan>
-                    </div>
-                </div>
-            </div>
+            <BcTab :title="$t('option_title')" class="opt-tab">
+                <div :name="$t('option_bar_account')"><OptAccount :config="config"></OptAccount></div>
+                <div :name="$t('option_bar_view')"><OptView></OptView></div>
+                <div :name="$t('option_bar_function')"><OptFunction :config="config"></OptFunction></div>
+                <div :name="$t('option_bar_dev')"><OptDev></OptDev></div>
+                <div :name="$t('menu_about')"><AboutPan class="opt-about" :showUI="true"></AboutPan></div>
+            </BcTab>
             <div class="ss-card end-card">
                 <div>
                     <div>
@@ -86,6 +64,7 @@ import { defineComponent } from 'vue'
 
 import packageInfo from '../../package.json'
 
+import BcTab from 'vue3-bcui/packages/bc-tab'
 import OptAccount from './options/OptAccount.vue'
 import OptView from './options/OptView.vue'
 import OptDev from './options/OptDev.vue'
@@ -99,7 +78,7 @@ export default defineComponent({
     props: {
         config: {} as { [key: string]: string | number | boolean }
     },
-    components: { OptAccount, OptView, OptDev, OptFunction, AboutPan },
+    components: { BcTab, OptAccount, OptView, OptDev, OptFunction, AboutPan },
     data() {
         return {
             packageInfo: packageInfo,

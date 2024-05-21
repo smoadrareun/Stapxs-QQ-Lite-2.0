@@ -1,6 +1,9 @@
 textarea {
     caret-color: var(--color-main);
 }
+input {
+    outline: none;
+}
 
 .chat-pan {
     background-color: var(--color-card);
@@ -54,7 +57,7 @@ textarea {
 }
 .chat-pan > div.info > svg {
     background: var(--color-main);
-    fill: var(--color-font-r);
+    color: var(--color-font-r);
     margin-right: 10px;
     border-radius: 7px;
     cursor: pointer;
@@ -73,6 +76,7 @@ textarea {
 .chat-pan > div.info > div.info p {
     font-weight: bold;
     font-size: 1rem;
+    margin: 0;
 }
 .chat-pan > div.info > div.info span {
     font-size: 0.8rem;
@@ -91,7 +95,7 @@ textarea {
     width: 45px;
 }
 .chat-pan > div.info > div.more > svg {
-    fill: var(--color-main);
+    color: var(--color-main);
     margin: 10px;
     height: 25px;
     width: 25px;
@@ -136,7 +140,7 @@ textarea {
     padding: 0;
 }
 .chat-pan > div.new-msg > div > svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     padding: 16px;
     height: 17px;
     width: 17px;
@@ -168,7 +172,7 @@ textarea {
     width: 50px;
 }
 .chat-pan > div.more > div:nth-child(2) > div:first-child > svg {
-    fill: var(--color-font-1);
+    color: var(--color-font-1);
     margin: 15px;
     height: 20px;
     width: 20px;
@@ -211,7 +215,7 @@ textarea {
     background: var(--color-card-2);
 }
 .chat-pan > div.more > div:nth-child(2) > div svg {
-    fill: var(--color-font-1);
+    color: var(--color-font-1);
     width: 20px;
     height: 20px;
     margin: 11px;
@@ -242,7 +246,7 @@ textarea {
 }
 .chat-pan > div.loading svg {
     animation: rotate 1.5s linear infinite;
-    fill: var(--color-font);
+    color: var(--color-font);
     margin-right: 5px;
     margin-top: 2px;
     height: 0.9rem;
@@ -264,7 +268,7 @@ textarea {
     padding: 10px 20px;
 }
 .sys-not-pan > div:first-child > svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     margin-right: 20px;
     cursor: pointer;
     height: 1.1rem;
@@ -306,7 +310,7 @@ textarea {
     margin-left: 20px;
 }
 .more-detail > div > svg {
-    fill: var(--color-font-1);
+    color: var(--color-font-1);
     margin: 15px;
     height: 20px;
     width: 20px;
@@ -375,7 +379,7 @@ textarea {
     flex: 1;
 }
 .merge-pan > div:last-child > div:first-child svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     height: 1.5rem;
 }
 .merge-pan > div:last-child > div:last-child {
@@ -393,8 +397,9 @@ textarea {
 }
 .merge-pan .loading > svg {
     animation: rotate 1.5s linear infinite;
-    fill: var(--color-main);
+    color: var(--color-main);
     width: 2rem;
+    height: 2rem;
 }
 .merge-pan .loading > span {
     color: var(--color-main);
@@ -508,7 +513,7 @@ textarea {
     flex: 1;
 }
 .chat-info > header > svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     cursor: pointer;
     height: 1.5rem;
 }
@@ -565,7 +570,7 @@ textarea {
     width: 20px;
 }
 .chat-info-base > div:first-child > div:nth-child(3) > svg {
-    fill: var(--color-font);
+    color: var(--color-font);
 }
 .chat-info-base > div:last-child {
     padding: 0 10px;
@@ -607,17 +612,6 @@ textarea {
 .chat-info-base > div:last-child > div.outher > span > span {
     color: var(--color-font-1);
 }
-
-.chat-info-tab {
-    color: var(--color-font);
-    justify-content: center;
-    display: flex;
-    padding: 5px;
-    border: 0;
-}
-.chat-info-tab > li {
-    min-width: 50px;
-}
 .chat-info-tab-member {
     padding: 0 20px;
 }
@@ -647,7 +641,7 @@ textarea {
     color: var(--color-font);
 }
 .chat-info-tab-member > div > div > svg {
-    fill: var(--color-main);
+    color: var(--color-main);
     margin-left: 5px;
     height: 0.8rem;
 }
@@ -655,12 +649,24 @@ textarea {
     color: var(--color-font-2);
 }
 
-.chat-info-tab-body {
-    flex-direction: column;
+.chat-info-tab {
+    height: 100%;
     overflow: hidden;
+    margin-top: 20px;
     display: flex;
+    flex-direction: column;
 }
-.chat-info-tab-body > div {
+.chat-info-tab > div:first-child {
+    min-height: 30px;
+}
+.chat-info-tab > div:first-child:hover {
+    box-shadow: unset;
+}
+.chat-info-tab .tab-bar {
+    --bc-tab-margin: 10px;
+    padding-left: 0;
+}
+.chat-info-tab .tab-body {
     overflow-y: scroll;
 }
 
@@ -693,7 +699,7 @@ textarea {
     display: flex;
 }
 .bulletins > div.base > header > svg {
-    fill: var(--color-main);
+    color: var(--color-main);
     margin-right: 10px;
     margin-top: 2px;
     height: 1.1rem;
@@ -772,7 +778,7 @@ textarea {
     background: var(--color-card-1);
 }
 .group-files > div > div > svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     margin: 0 15px 0 10px;
     height: 1.2rem;
 }
@@ -791,7 +797,7 @@ textarea {
     width: 1.9rem;
 }
 .group-files > div > div > div.download > svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     height: 0.8rem;
     margin: 10px;
 }
@@ -816,7 +822,7 @@ textarea {
     display: flex;
 }
 .group-files-loader > svg {
-    fill: var(--color-font-1);
+    color: var(--color-font-1);
     width: 1rem;
 }
 
@@ -947,7 +953,7 @@ textarea {
     z-index: 1;
 }
 .img-sender > div.card > div.imgs > div > div > svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     height: 1rem;
 }
 .img-sender > div.card > div.sender {
@@ -964,7 +970,7 @@ textarea {
 }
 .img-sender > div.card > div.sender > svg {
     background: var(--color-card-1);
-    fill: var(--color-font-1);
+    color: var(--color-font-1);
     border-radius: 7px;
     margin-right: 20px;
     padding: 15px;
@@ -986,14 +992,29 @@ textarea {
     margin: 0;
 }
 .fase-pan-tab > li > svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     margin-top: 10px;
     margin-left: 5px;
     height: 1.1rem;
     width: 1.1rem;
 }
 .fase-pan-tab > li.layui-this > svg {
-    fill: var(--color-main) !important;
+    color: var(--color-main) !important;
+}
+
+.face-pan .tab-bar {
+    --bc-tab-margin: 5px;
+    width: 100%;
+}
+.face-pan div.tab-main {
+    margin-top: 30px !important;
+}
+.face-pan div.tab-main > div {
+    background: transparent;
+    min-height: 40px;
+}
+.face-pan div.tab-main > div:hover {
+    box-shadow: unset;
 }
 
 .base-face {
@@ -1050,7 +1071,7 @@ textarea {
     margin-top: 10px;
 }
 .face-stickers > div > svg {
-    fill: var(--color-main);
+    color: var(--color-main);
     width: 25px;
 }
 
@@ -1073,7 +1094,7 @@ textarea {
     padding: 20px;
 }
 .jin-pan > div:first-child > svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     cursor: pointer;
     height: 1.5rem;
 }
@@ -1149,7 +1170,7 @@ textarea {
     display: flex;
 }
 .jin-pan-load > svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     width: 1rem;
 }
 
@@ -1171,7 +1192,7 @@ textarea {
     height: auto;
 }
 .replay-tag svg {
-    fill: var(--color-font-2);
+    color: var(--color-font-2);
     margin-right: 10px;
     height: 1rem;
 }
@@ -1192,7 +1213,7 @@ textarea {
 }
 .replay-tag > div > svg {
     margin-right: 0 !important;
-    fill: var(--color-font-1);
+    color: var(--color-font-1);
 }
 
 .at-tag {
@@ -1273,7 +1294,7 @@ textarea {
     flex: 1;
 }
 .forward-pan > div.card > header > svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     cursor: pointer;
     height: 1.5rem;
 }
@@ -1310,6 +1331,7 @@ textarea {
 }
 .forward-pan > div.card > div > div p {
     color: var(--color-font);
+    margin: 0;
 }
 .forward-pan > div.card > div > div span {
     color: var(--color-font-1);
@@ -1335,7 +1357,7 @@ textarea {
     background: var(--color-bg) !important;
 }
 .respond > svg {
-    fill: var(--color-font-2);
+    color: var(--color-font-2);
     margin-right: 10px;
     min-width: 20px;
     height: 20px;

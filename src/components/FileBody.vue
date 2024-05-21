@@ -8,14 +8,8 @@
 <template>
     <div :class="(item.type === 2 ? ' folder' : '') + ((item.sub_list && item.sub_list.length > 0) ? ' open' : '')"
         @click="loadFileDir(item.id, item.type)">
-        <svg v-if="item.type === 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-            <path
-                d="M447.1 96h-172.1L226.7 50.75C214.7 38.74 198.5 32 181.5 32H63.1c-35.35 0-64 28.66-64 64v320c0 35.34 28.65 64 64 64h384c35.35 0 64-28.66 64-64V160C511.1 124.7 483.3 96 447.1 96zM463.1 416c0 8.824-7.178 16-16 16h-384c-8.822 0-16-7.176-16-16V96c0-8.824 7.178-16 16-16h117.5c4.273 0 8.293 1.664 11.31 4.688L255.1 144h192c8.822 0 16 7.176 16 16V416z" />
-        </svg>
-        <svg v-if="item.type === 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-            <path
-                d="M384 32H64.01C28.66 32 .0085 60.65 .0065 96L0 415.1C-.002 451.3 28.65 480 64 480h232.1c25.46 0 49.88-10.12 67.89-28.12l55.88-55.89C437.9 377.1 448 353.6 448 328.1V96C448 60.8 419.2 32 384 32zM52.69 427.3C50.94 425.6 48 421.8 48 416l.0195-319.1C48.02 87.18 55.2 80 64.02 80H384c8.674 0 16 7.328 16 16v192h-88C281.1 288 256 313.1 256 344v88H64C58.23 432 54.44 429.1 52.69 427.3zM330.1 417.9C322.9 425.1 313.8 429.6 304 431.2V344c0-4.406 3.594-8 8-8h87.23c-1.617 9.812-6.115 18.88-13.29 26.05L330.1 417.9z" />
-        </svg>
+        <font-awesome-icon v-if="item.type === 2" icon="fa-solid fa-folder"/>
+        <font-awesome-icon v-if="item.type === 1" icon="fa-solid fa-file"/>
         <div class="main">
             <span>{{ toHtml(item.name) }}</span>
             <div>
@@ -32,7 +26,7 @@
             </div>
         </div>
         <div v-if="item.type === 1 && item.downloadingPercentage === undefined" class="download" @click="getFile(item)">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"/></svg>
+            <font-awesome-icon :icon="['fas', 'angle-down']"/>
         </div>
         <svg v-if="item.downloadingPercentage !== undefined" class="download-bar" xmlns="http://www.w3.org/2000/svg">
             <circle cx="50%" cy="50%" r="40%" stroke-width="15%" fill="none" stroke-linecap="round" />

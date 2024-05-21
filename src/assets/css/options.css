@@ -93,7 +93,7 @@
 }
 .logo-card a[class=ss-button]>svg {
     height: calc(100% - 20px);
-    fill: var(--color-font-r);
+    color: var(--color-font-r);
 }
 
 .jump-card {
@@ -116,8 +116,11 @@
     color: var(--color-font-2);
 }
 .jump-card > svg {
-    fill: var(--color-main);
-    height: 22px;
+    color: var(--color-main);
+    height: 20px;
+    width: 20px;
+    margin-top: 3px;
+    margin-right: -10px;
 }
 
 .buttons {
@@ -161,26 +164,19 @@
 }
 
 .opt-tab {
-    color: var(--color-font);
+    height: calc(100% - 115px);
+    flex-direction: column;
     display: flex;
+}
+.opt-tab > div:first-child {
+    min-height: 5px;
+}
+.opt-tab .tab-bar {
+    --bc-tab-margin: 5px;
+}
+.opt-tab .tab-body {
+    overflow-x: hidden;
     padding: 5px;
-    border: 0;
-}
-.option-title {
-    flex: 1;
-    text-align: left !important;
-    font-weight: bold;
-    margin-top: 1px;
-    font-size: 1rem !important;
-}
-
-.opt-tab>li {
-    transition: all .3s;
-}
-
-.opt-tab>li::after {
-    transition: all .3s;
-    transform: scaleX(0);
 }
 
 .opt-about {
@@ -264,6 +260,14 @@
     margin-top: 3px;
 }
 
+.ss-switch {
+    --switch-dot-margin: 6px;
+    --switch-height: 25px;
+    min-width: 45px;
+}
+.ss-switch > div > div {
+    margin-top: 2px;
+}
 .ss-switch>div>div {
     margin-left: calc(var(--switch-dot-margin) - 5px);
 }
@@ -335,7 +339,7 @@
 }
 
 .opt-item>svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     margin-right: 20px;
     margin-top: 1px;
     height: 1.1rem;
@@ -372,10 +376,11 @@
 }
 
 .l10n-info>svg {
-    fill: var(--color-font);
+    color: var(--color-font);
     margin: 0 20px 0 10px;
     min-width: 2.7rem;
     width: 2.7rem;
+    height: 2.7rem;
 }
 
 .l10n-info span {
@@ -480,7 +485,7 @@
 
 .account-info>svg {
     background: var(--color-card-2);
-    fill: var(--color-main);
+    color: var(--color-main);
     border-radius: 100%;
     cursor: pointer;
     padding: 10px;
@@ -489,8 +494,7 @@
 }
 
 .end-card {
-    margin-bottom: 40px;
-    margin-top: 20px;
+    margin: 20px 5px 20px 5px;
     display: flex;
     align-items: center;
 }
@@ -561,12 +565,6 @@
     .option-title {
         display: none !important;
     }
-    .opt-tab {
-        justify-content: center;
-    }
-    .opt-tab > li {
-        padding: 0 5px;
-    }
     .opt-main {
         height: 100%;
     }
@@ -579,11 +577,10 @@
         height: auto;
         padding: 10px 15px 10px 20px;
     }
-
     .opt-about {
         display: block !important;
     }
-    
+
     .opt-item select,
     .opt-item div.ss-range,
     .opt-item input[type="text"],
@@ -594,5 +591,9 @@
     }
     .opt-item div.ss-range {
         min-width: calc(100% - 40px);
+    }
+
+    .opt-tab .tab-bar > span {
+        display: none;
     }
 }
