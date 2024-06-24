@@ -312,6 +312,10 @@
   "reply_placeholder": "快速回复……",
   "btn_iframe_tip": "请不要在内嵌页面中输入敏感信息，内嵌页面并不安全。",
   "option_dev_get_version_info": "正在收集调试消息……",
+  "option_account_notlogin": "还没有连接到 OneBot 耶",
+  "option_account_gologin": "去连接",
+  "option_view_dont_touch": "不要点这个",
+  "option_view_dont_touch_tip": "啊吧啊吧（智慧）",
 
   "menu_about": "关于",
   "menu_update": "检查更新…",

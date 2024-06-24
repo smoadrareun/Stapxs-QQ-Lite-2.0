@@ -469,10 +469,28 @@ export function loadAppendStyle() {
     } catch (e) {
         logger.info('未找到对应平台的附加样式')
     }
-    if (platform != 'linux' && runtimeData.tags.isElectron) {
+    let subVersion = runtimeData.tags.release?.split('.') as any
+    subVersion = subVersion ? Number(subVersion[2]) : 0
+    if (runtimeData.tags.isElectron && (platform == 'darwin' || (platform == 'win32' && subVersion > 22621))) {
         import('@/assets/css/append/append_vibrancy.css').then(() => {
             logger.info('透明 UI 附加样式加载完成')
         })
+    }
+    if(runtimeData.tags.isElectron && platform == 'linux') {
+        const gnomeExtInfo = runtimeData.reader?.invoke('sys:getGnomeExt')
+        if(gnomeExtInfo) {
+            gnomeExtInfo.then((info: any) => {
+                console.log(info)
+                if(info['enable-all'] == 'true' || info['whitelist'].indexOf('stapxs-qq-lite') != -1) {
+                    import('@/assets/css/append/append_vibrancy.css').then(() => {
+                        logger.info('透明 UI 附加样式加载完成')
+                    })
+                    import('@/assets/css/append/append_gnome.css').then(() => {
+                        logger.info('Blur my sell 附加样式加载完成')
+                    })
+                }
+            })
+        }
     }
 }
 
@@ -517,6 +535,13 @@ function showGitChangeLog(version: string, mainTree: string, from: string) {
                 // 过滤掉一些不作为更新记录的提交
                 info = info.filter((item: any) => !item.commit.message.startsWith('[nl]'))
                 const json = info[0]
+                // 如果标题是 [ 开头的但不是 [platform]，则不显示
+                let platform = runtimeData.tags.platform
+                if(from == 'web') platform = 'web'
+                if (json.commit.message.startsWith('[') && !json.commit.message.startsWith('[' + platform + ']')) {
+                    return
+                }
+                // 如果是 electron 构建的版本，只显示 [build-electron] 的提交
                 if (from == 'web' || json.commit.message.indexOf('[build-electron]') > 0) {
                     const popInfo = {
                         template: UpdatePan,

@@ -88,15 +88,14 @@
                     </Transition>
                     <!-- 精华消息 -->
                     <Transition name="pan">
-                        <div v-show="details[2].open && runtimeData.chatInfo.info.jin_info && runtimeData.chatInfo.info.jin_info.data.msg_list" class="ss-card jin-pan">
+                        <div v-show="details[2].open && runtimeData.chatInfo.info.jin_info.list.length > 0" class="ss-card jin-pan">
                             <div>
                                 <font-awesome-icon :icon="['fas', 'message']" />
                                 <span>{{ $t('chat_fun_menu_jin') }}</span>
                                 <font-awesome-icon @click="details[2].open = !details[2].open" :icon="['fas', 'xmark']" />
                             </div>
                             <div class="jin-pan-body" @scroll="jinScroll">
-                                <div v-for="(item, index) in runtimeData.chatInfo.info.jin_info ? 
-                                        runtimeData.chatInfo.info.jin_info.data.msg_list : []"
+                                <div v-for="(item, index) in runtimeData.chatInfo.info.jin_info.list"
                                     :key="'jin-' + index">
                                     <div>
                                         <img :src="`https://q1.qlogo.cn/g?b=qq&s=0&nk=${item.sender_uin}`">
@@ -106,6 +105,10 @@
                                                 { hour: "numeric", minute: "numeric" })
                                                 .format(new Date(item.sender_time * 1000)) }} {{ $t('chat_send') }}</span>
                                         </div>
+                                        <span>{{ $t('chat_fun_menu_jin_sender',
+                                         { time: Intl.DateTimeFormat(trueLang,
+                                                    { hour: "numeric", minute: "numeric" })
+                                                    .format(new Date(item.add_digest_time * 1000)),name: item.add_digest_nick }) }}</span>
                                     </div>
                                     <div class="context">
                                         <template v-for="(context, indexc) in item.msg_content"
@@ -115,10 +118,6 @@
                                             <img v-if="context.msg_type === 3" :src="context.image_url">
                                         </template>
                                     </div>
-                                    <span>{{ $t('chat_fun_menu_jin_sender',
-                                     { time: Intl.DateTimeFormat(trueLang,
-                                                { hour: "numeric", minute: "numeric" })
-                                                .format(new Date(item.add_digest_time * 1000)),name: item.add_digest_nick }) }}</span>
                                 </div>
                                 <div class="jin-pan-load" v-show="tags.isJinLoading">
                                     <font-awesome-icon :icon="['fas', 'spinner']" />
@@ -1605,13 +1604,13 @@ export default defineComponent({
          */
         showJin () {
             this.details[2].open = !this.details[2].open
-            if (runtimeData.chatInfo.info.jin_info.data.msg_list.length == 0) {
-                const url = `https://qun.qq.com/cgi-bin/group_digest/digest_list?bkn=${runtimeData.loginInfo.bkn}&group_code=${this.chat.show.id}&page_start=0&page_limit=40`
-                Connector.send(
-                    'http_proxy',
-                    { 'url': url },
-                    'getJin'
-                )
+            if (runtimeData.chatInfo.info.jin_info.list.length == 0) {
+                // `https://qun.qq.com/cgi-bin/group_digest/digest_list?bkn=${runtimeData.loginInfo.bkn}&group_code=${this.chat.show.id}&page_start=0&page_limit=40`
+                const name = runtimeData.jsonMap.group_essence.name ?? 'get_essence_msg_list'
+                Connector.send(name, {
+                    group_id: this.chat.show.id,
+                    pages: 0
+                }, 'getJin' )
             }
             this.tags.showMoreDetail = !this.tags.showMoreDetail
         },
@@ -1623,14 +1622,13 @@ export default defineComponent({
             const body = event.target as HTMLDivElement
             // 滚动到底部，加载更多
             if (body.scrollTop + body.clientHeight === body.scrollHeight && !this.tags.isJinLoading) {
-                if (this.chat.info.jin_info.retcode == 0 && this.chat.info.jin_info.data.is_end == false) {
+                if (this.chat.info.jin_info.is_end == false) {
                     this.tags.isJinLoading = true
-                    const url = `https://qun.qq.com/cgi-bin/group_digest/digest_list?bkn=${runtimeData.loginInfo.bkn}&group_code=${this.chat.show.id}&page_start=${(this.chat.info.jin_info.data.msg_list.length) / 40 + 1}&page_limit=40`
-                    Connector.send(
-                        'http_proxy',
-                        { 'url': url },
-                        'getJin'
-                    )
+                    const name = runtimeData.jsonMap.group_essence.name ?? 'get_essence_msg_list'
+                    Connector.send(name, {
+                        group_id: this.chat.show.id,
+                        pages: this.chat.info.jin_info.pages + 1
+                    }, 'getJin' )
                 }
             }
         },
@@ -1672,7 +1670,7 @@ export default defineComponent({
         // PS：由于监听 list 本身返回的新旧值是一样，于是监听 length（反正也只要知道长度）
         this.$watch(() => this.list.length, this.updateList)
         //精华消息列表刷新
-        this.$watch(() => this.chat.info.jin_info.data.msg_list.length, () => {
+        this.$watch(() => this.chat.info.jin_info.list.length, () => {
             this.tags.isJinLoading = false
         })
     }

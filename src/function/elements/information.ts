@@ -29,6 +29,7 @@ export interface RunTimeDataElem {
         loginWaveTimer?: any,
         isElectron: boolean,
         platform: string | undefined,
+        release: string | undefined,
         connectSsl: boolean,
         classes: any[],
         sw?: boolean
@@ -64,14 +65,11 @@ export interface ChatInfoElem {
         group_sub_files: { [key: string]: any },
         group_notices?: { [key: string]: any },
         now_member_info?: { [key: string]: any },
-        image_list?: { index: number, message_id: string, img_url: string }[]
+        image_list?: { index: number, message_id: string, img_url: string }[],
         jin_info: {
-            data: {
-                msg_list: { [key: string]: any }[],
-                [key: string]: any
-            },
-            retcode?: number,
-            retmsg?: string
+            list: { [key: string]: any }[],
+            is_end?: boolean,
+            pages: number
         }
     }
 }

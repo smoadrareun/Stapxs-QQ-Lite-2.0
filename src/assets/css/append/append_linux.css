@@ -40,10 +40,6 @@
     box-shadow: unset;
     height: 35px;
 }
-.top-bar>span,
-.top-bar>img, .top-bar>svg {
-    display: none !important;
-}
 .top-bar>div.controller>div {
     padding: 7px;
 }

@@ -49,14 +49,14 @@ async function createWindow() {
         webPreferences: {
             nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
             contextIsolation: false
-        }
+        },
+        maximizable: false,
+        fullscreen: false
     } as Electron.BrowserWindowConstructorOptions
     if(process.platform === 'darwin') {
         // macOS
         windowConfig = {
             ...windowConfig,
-            maximizable: false,
-            fullscreen: false,
             titleBarStyle: 'hidden',
             trafficLightPosition: { x: 11, y: 10 },
             vibrancy: 'fullscreen-ui',

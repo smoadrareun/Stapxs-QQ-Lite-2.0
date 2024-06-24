@@ -4,7 +4,7 @@ import os from 'os'
 
 import { ipcMain, shell, systemPreferences, app, Menu, MenuItemConstructorOptions } from "electron"
 import { GtkTheme, GtkData } from '@jakejarrett/gtk-theme'
-import { queryKeys } from './util'
+import { queryKeys, runCommand } from './util'
 import { win } from '@/background'
 import { Notification as ELNotification } from 'electron'
 
@@ -16,6 +16,9 @@ export function regIpcListener() {
     // 获取系统平台
     ipcMain.handle('sys:getPlatform', () => {
         return process.platform
+    })
+    ipcMain.handle('sys:getRelease', () => {
+        return os.release()
     })
     // 关闭窗口
     ipcMain.on('win:close', () => {
@@ -175,6 +178,16 @@ export function regIpcListener() {
             })
         }
     })
+    // 运行命令
+    ipcMain.handle('sys:runCommand', async (event, cmd) => {
+        try {
+            const info = await runCommand(cmd)
+            const str = info.stdout as string
+            return { success: true, message: str }
+        } catch(ex) {
+            return { success: false, message: (ex as Error).message }
+        }
+    })
 
     // Windows：闪烁状态栏图标
     ipcMain.on('win:flashWindow', () => {
@@ -215,6 +228,26 @@ export function regIpcListener() {
             }
         }})
         return gtkTheme.getTheme().gtk.css
+    })
+    // Linux：获取 gnome extension 设置
+    // dconf dump /org/gnome/shell/extensions/ | awk -v RS='' '/\[blur-my-shell\/applications\]/'
+    ipcMain.handle('sys:getGnomeExt', async () => {
+        try {
+            const info = await runCommand('dconf dump /org/gnome/shell/extensions/ | awk -v RS=\'\' \'/\\[blur-my-shell\\/applications\\]/\'')
+            const str = info.stdout as string
+            const data = {} as {[key: string]: string}
+            if(str && str.startsWith('[blur-my-shell/applications]')) {
+                const lines = str.split('\n').slice(1)
+                lines.forEach((line) => {
+                    const [key, value] = line.split('=')
+                    if(key != '')
+                        data[key] = value
+                })
+            }
+            return data
+        } catch(ex) {
+            return (ex as Error).message
+        }
     })
 
     // MacOS：初始化菜单

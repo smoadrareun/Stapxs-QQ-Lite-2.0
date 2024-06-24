@@ -14,18 +14,6 @@ body {
     box-shadow: unset;
     height: 35px;
 }
-.top-bar>img, .top-bar>svg {
-    height: 16px;
-}
-.top-bar>span {
-    font-size: .8rem;
-    line-height: 35px;
-    font-weight: normal;
-}
-.top-bar>span,
-.top-bar>img, .top-bar>svg {
-    display: none;
-}
 .top-bar>div.controller>div {
     padding: 7px;
 }

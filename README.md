@@ -47,6 +47,8 @@ Stapxs QQ Lite 需要一个 QQ Bot 后端提供服务，你可以参考 [📖 �
 ### > 安装应用
 除了直接使用本仓库的构建页面，你也可以下载使用 electron 打包的功能**稍稍**更丰富的客户端版本，访问 [📦️ 这儿](https://github.com/Stapxs/Stapxs-QQ-Lite-2.0/releases) 查看构建列表。
 
+当然你也可以使用包管理来安装它，使用包管理安装将会更便于更新 Stapxs QQ Lite 而不用每次都从 Github 上手动更新，访问 [💬 这儿](https://github.com/Stapxs/Stapxs-QQ-Lite-2.0/issues/99) 来查看目前支持的包管理。
+
 ## 💬 提醒和问题
 
 ### > 关于不安全连接

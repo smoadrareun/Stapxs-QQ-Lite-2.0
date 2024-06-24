@@ -118,7 +118,7 @@
                     </div>
                 </div>
                 <div :name="$t('chat_chat_info_config')">
-                    <div class="layui-tab-item" style="padding: 0 20px;">
+                    <div style="padding: 0 20px;">
                         <OptInfo :type="'group'" :chat="chat"></OptInfo>
                     </div>
                 </div>

@@ -127,7 +127,7 @@ module.exports = {
                         }
                     ],
                     appId: 'com.stapxs.qqweb',
-                    icon: 'public/img/icons/icon.png',
+                    icon: 'public/img/icons/icon-client-others.png',
                     legalTrademarks: 'Copyright © 2022-2024 Stapx Steve [林槐]',
                     publisherName: 'stapxs',
                 },
@@ -140,12 +140,12 @@ module.exports = {
                         }
                     ],
                     category: 'public.app-category.social-networking',
-                    icon: 'public/img/icons/icon.icns',
+                    icon: 'public/img/icons/icon-client-mac.icns',
                     darkModeSupport: true
                 },
                 dmg: {
                     background: 'public/img/dmg-bg.png',
-                    icon: 'public/img/icons/icon.icns',
+                    icon: 'public/img/icons/icon-client-mac.icns',
                     iconSize: 80,
                     sign: false,
                     contents: [

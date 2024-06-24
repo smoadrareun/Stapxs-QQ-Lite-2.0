@@ -12,7 +12,7 @@
 import qed from '@/assets/qed.txt'
 
 import app from '@/main'
-import Option, { run } from './option'
+import Option from './option'
 import xss from 'xss'
 import pinyin from 'pinyin'
 
@@ -62,7 +62,7 @@ export function parse(str: string) {
                 case 'getGroupNotices'          : saveGroupNotices(msg); break
                 case 'getGroupFiles'            : saveFileList(msg.data.data); break
                 case 'getMoreGroupFiles'        : saveMoreFileList(msg.data.data); break
-                case 'getJin'                   : saveJin(msg.data.data); break
+                case 'getJin'                   : saveJin(msg.data); break
                 case 'getSystemMsg'             : runtimeData.systemNoticesList = msg.data; break
                 case 'getSendMsg'               : saveSendedMsg(echoList, msg); break
                 case 'getGroupMemberInfo'       : saveMemberInfo(msg); break
@@ -996,16 +996,19 @@ function sendNotice(info: any) {
  * @param data 返回数据
  */
 function saveJin(data: any) {
-    if (runtimeData.chatInfo.info.jin_info.data.msg_list.length == 0) {
-        // 首次获取
-        runtimeData.chatInfo.info.jin_info = data
-    } else {
-        // 追加保存
-        if (data.retcode == 0) {
-            runtimeData.chatInfo.info.jin_info.data.msg_list =
-                runtimeData.chatInfo.info.jin_info.data.msg_list.concat(data.data.msg_list)
-            runtimeData.chatInfo.info.jin_info.data.is_end = data.data.is_end
+    const jinList = getMsgData('group_essence', data, msgPath.group_essence)
+    const is_end = getMsgData('is_end', data, msgPath.group_essence.is_end)
+    if (jinList && is_end) {
+        if (runtimeData.chatInfo.info.jin_info.list.length == 0) {
+            runtimeData.chatInfo.info.jin_info.list = jinList
+        } else {
+            const now_page = runtimeData.chatInfo.info.jin_info.pages ?? 0
+
+            runtimeData.chatInfo.info.jin_info.list = 
+                runtimeData.chatInfo.info.jin_info.list.concat(jinList)
+            runtimeData.chatInfo.info.jin_info.pages = now_page + 1
         }
+        runtimeData.chatInfo.info.jin_info.is_end = is_end[0]
     }
 }
 
@@ -1094,6 +1097,7 @@ const baseRuntime = {
         msgType: BotMsgType.JSON,
         isElectron: false,
         platform: undefined,
+        release: undefined,
         connectSsl: false,
         classes: []
     },
@@ -1106,7 +1110,10 @@ const baseRuntime = {
             group_members: [],
             group_files: {},
             group_sub_files: {},
-            jin_info: { data: { msg_list: [] } }
+            jin_info: {
+                list: [] as { [key: string]: any }[],
+                pages: 0
+            }
         }
     },
     pageView: {

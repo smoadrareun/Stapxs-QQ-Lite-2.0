@@ -988,18 +988,12 @@ input {
     width: 300px;
     padding: 0;
 }
-.face-pan > div.layui-tab {
-    margin: 0;
-}
 .fase-pan-tab > li > svg {
     color: var(--color-font);
     margin-top: 10px;
     margin-left: 5px;
     height: 1.1rem;
     width: 1.1rem;
-}
-.fase-pan-tab > li.layui-this > svg {
-    color: var(--color-main) !important;
 }
 
 .face-pan .tab-bar {
@@ -1134,7 +1128,7 @@ input {
     outline: 2px solid var(--color-main);
     border-radius: 100%;
     margin-right: 10px;
-    width: 22px;
+    width: 25px;
 }
 .jin-pan-body > div > div:first-child > div {
     flex-direction: column;
@@ -1142,11 +1136,17 @@ input {
 }
 .jin-pan-body > div > div:first-child a {
     color: var(--color-font);
+    font-size: 0.9rem;
 }
 .jin-pan-body > div > div:first-child span {
     color: var(--color-font-2);
     border-radius: 2rem;
-    font-size: 0.5rem;
+    font-size: 0.8rem;
+}
+.jin-pan-body > div > div:first-child > span {
+    font-size: 0.8rem;
+    flex: 1;
+    text-align: right;
 }
 .jin-pan-body > div > div.context {
     padding: 15px 15px 5px 15px;

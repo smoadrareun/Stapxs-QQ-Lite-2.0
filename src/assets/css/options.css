@@ -57,6 +57,9 @@
 .logo-card>svg {
     width: 25%;
 }
+.logo-card>svg>path:first-child {
+    fill: var(--color-main);
+}
 
 .logo-card>a {
     color: var(--color-font-1);
@@ -181,16 +184,6 @@
 
 .opt-about {
     display: none !important;
-}
-
-.layui-this {
-    color: var(--color-main) !important;
-}
-
-.layui-this:after {
-    border-bottom: 3px solid var(--color-main) !important;
-    transform: scaleX(0.5) !important;
-    border-radius: 1px !important;
 }
 
 .bcd-about {
@@ -482,7 +475,6 @@
     margin-left: 10px;
     opacity: 0.7;
 }
-
 .account-info>svg {
     background: var(--color-card-2);
     color: var(--color-main);
@@ -491,6 +483,29 @@
     padding: 10px;
     height: 20px;
     width: 20px;
+}
+
+.account-not-login {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 50%;
+    margin: 40px auto 0 auto;
+}
+.account-not-login > svg {
+    font-size: 2rem;
+    color: var(--color-main);
+    margin-top: 40px;
+}
+.account-not-login > span {
+    color: var(--color-font-2);
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+.account-not-login > button {
+    width: 90%;
+    margin-top: 30px;
+    margin-bottom: 20px;
 }
 
 .end-card {
@@ -595,5 +610,12 @@
 
     .opt-tab .tab-bar > span {
         display: none;
+    }
+}
+
+@media (max-width: 500px) {
+    .account-not-login {
+        margin: 0 auto;
+        width: calc(100% - 40px);
     }
 }

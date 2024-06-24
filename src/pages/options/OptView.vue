@@ -133,7 +133,7 @@
         </div>
         <div class="ss-card">
             <header>{{ $t('option_view_view') }}</header>
-            <div class="opt-item">
+            <div class="opt-item" v-if="isMobile()">
                 <font-awesome-icon :icon="['fas', 'up-down-left-right']" />
                 <div>
                     <span>{{ $t('option_view_initial_scale') }}</span>
@@ -154,6 +154,19 @@
                     <input :style="`width:150px;background-size: ${fsAdaptationShow / 50 * 100}% 100%;`" type="range" min="0" max="50" step="10" v-model="runtimeData.sysConfig.fs_adaptation" name="fs_adaptation" @change="save" @input="setFsAdaptationShow">
                     <span :style="`color: var(--color-font${fsAdaptationShow / 50 > 0.5 ? '-r' : ''})`">{{ fsAdaptationShow }} px</span>
                 </div>
+            </div>
+            <div class="opt-item">
+                <font-awesome-icon :icon="['fas', 'arrows-rotate']" />
+                <div>
+                    <span>{{ $t('option_view_dont_touch') }}</span>
+                    <span>{{ $t('option_view_dont_touch_tip') }}</span>
+                </div>
+                <label class="ss-switch">
+                    <input type="checkbox" @change="modifyTouch">
+                    <div>
+                        <div></div>
+                    </div>
+                </label>
             </div>
         </div>
     </div>
@@ -209,6 +222,19 @@ export default defineComponent({
         
         isMobile() {
             return getDeviceType() === 'Android' || getDeviceType() === 'iOS'
+        },
+
+        modifyTouch(event: Event) {
+            const sender = event.target as HTMLInputElement
+            const baseApp = document.getElementById('base-app')
+            if(baseApp && sender.checked == true) {
+                if(baseApp.classList.contains('no-touch')) {
+                    baseApp.classList.remove('no-touch')
+                    sender.checked = false
+                } else {
+                    baseApp.classList.add('no-touch')
+                }
+            }
         }
     },
     mounted() {

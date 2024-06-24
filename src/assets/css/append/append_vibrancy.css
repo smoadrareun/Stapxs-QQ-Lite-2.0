@@ -6,7 +6,7 @@
     max-width: 240px !important;
 }
 .login-pan-card:hover {
-    box-shadow: none;
+    box-shadow: none !important;
 }
 .wave-pan {
     display: none;

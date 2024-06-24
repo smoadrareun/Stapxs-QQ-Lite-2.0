@@ -9,15 +9,6 @@
     font-size: 0.95rem;
     font-weight: bold;
 }
-.layui-tab-title li {
-    font-size: 0.8rem;
-    line-height: 30px;
-    min-width: 10%;
-}
-.layui-tab-title .layui-this:after {
-    transform: translateX(-50%);
-    height: 30px;
-}
 
 .main-body > ul {
     min-width: 45px;
@@ -28,8 +19,7 @@
     min-width: 50px;
     padding: 0;
 }
-.main-body > ul > li > svg,
-.main-body > ul > li.layui-this > svg {
+.main-body > ul > li > svg {
     width: 15px;
     height: 15px;
     padding: 10px;
@@ -55,6 +45,13 @@
 .login-pan-card button {
     height: 30px;
     width: 95%;
+}
+.login-pan-card button.afd {
+    transform: translateX(calc(-50% + 25px));
+    position: fixed;
+    width: 240px;
+    left: 50vw;
+    top: 75vh;
 }
 
 .friend-list {
@@ -177,6 +174,37 @@
 }
 .face-pan div.tab-main > div {
     margin-bottom: 0 !important;
+}
+
+.jin-ppan {
+    max-width: 350px;
+}
+.jin-pan > div:first-child {
+    padding: 10px;
+}
+.jin-pan > div:first-child > svg {
+    height: 1rem;
+}
+.jin-pan > div:first-child > span {
+    font-size: 0.9rem;
+}
+.jin-pan-body {
+    padding: 0 10px 0 10px;
+    margin-bottom: 10px;
+}
+.jin-pan-body > div > div:first-child a {
+    font-size: 0.8rem;
+}
+.jin-pan-body > div > div:first-child span {
+    font-size: 0.65rem;
+}
+.jin-pan-body > div > div:first-child > span {
+    font-size: 0.75rem;
+    flex: 1;
+    text-align: right;
+}
+.jin-pan-body > div > div.context {
+    padding: 10px 10px 5px 10px;
 }
 
 .ss-card:hover {
@@ -591,6 +619,23 @@
     font-size: 0.65rem;
 }
 
+.account-not-login {
+    margin: 20px auto 0 auto;
+}
+.account-not-login > svg {
+    font-size: 1.5rem;
+    margin-top: 20px;
+}
+.account-not-login > span {
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+.account-not-login > button {
+    margin-top: 15px;
+    margin-bottom: 10px;
+    font-size: 0.7rem;
+}
+
 @media (max-width: 700px) {
     .main-body > ul {
         background: var(--color-card-2) !important;
@@ -642,5 +687,9 @@
         width: calc(100% - 30px);
         height: calc(100% - 125px);
         padding-top: 40px;
+    }
+    .account-not-login {
+        margin: 0 auto;
+        width: calc(100% - 20px);
     }
 }

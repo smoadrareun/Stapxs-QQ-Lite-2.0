@@ -255,6 +255,38 @@ export default defineComponent({
                     info += `    ${get[name][0]} -> ${get[name][1]}\n`
                 })
             }
+            // 获取安装信息，这儿主要判断几种已提交的包管理安装方式
+            if(runtimeData.tags.isElectron && runtimeData.reader && runtimeData.tags.release) {
+                switch(process.platform) {
+                    case 'darwin': {
+                        // homebrew
+                        const brewInfo = await runtimeData.reader.invoke('sys:runCommand', 'brew list --cask stapxs-qq-lite')
+                        if(brewInfo.success) {
+                            info += `    Install Type     -> homebrew\n`
+                        }
+                        break;
+                    }
+                    case 'linux': {
+                        // archlinux
+                        if((runtimeData.tags.release.toLowerCase()).indexOf('arch') > 0) {
+                            let pacmanInfo = await runtimeData.reader.invoke('sys:runCommand', 'pacman -Q stapxs-qq-lite-bin')
+                            if(pacmanInfo.success) {
+                                info += `    Install Type     -> aur\n`
+                            } else {
+                                // 也有可能是 stapxs-qq-lite，这是我自己打的原生包
+                                pacmanInfo = await runtimeData.reader.invoke('sys:runCommand', 'pacman -Q stapxs-qq-lite')
+                                if(pacmanInfo.success) {
+                                    info += `    Install Type     -> pacman\n`
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    default: {
+                        info += `    Install Type     -> raw\n`
+                    }
+                }
+            }
 
             info += `Application Info:\n`
             info += `    Uptime           -> ${new Date().getTime() - uptime} ms\n` 
@@ -265,7 +297,7 @@ export default defineComponent({
             info += `Backend Info:\n`
             info += `    Bot Info Name    -> ${runtimeData.botInfo.app_name}\n`
             info += `    Bot Info Version -> ${runtimeData.botInfo.app_version !== undefined ? runtimeData.botInfo.app_version : runtimeData.botInfo.version}\n`
-            info += `    Loaded Config    -> ${runtimeData.jsonMap.name}\n`
+            info += `    Loaded Config    -> ${runtimeData.jsonMap?.name}\n`
 
             info += `View Info:\n`
             info += `    Doc Width        -> ${document.getElementById('app')?.offsetWidth} px\n`

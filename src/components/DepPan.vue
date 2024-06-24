@@ -22,11 +22,11 @@
             </div>
             <div class="dept">
                 <div class="ss-card jump-card" @click="openLink('https://lbs.amap.com/api/javascript-api/summary')">
-                    <header><div></div>aMap<span>高德地图</span></header>
+                    <header><div></div><div>aMap<span>高德地图</span></div></header>
                     <font-awesome-icon :icon="['fas', 'angle-right']"/>
                 </div>
                 <div class="ss-card jump-card" @click="openLink('https://github.com/Stapxs/Border-Card-UI/tree/js-bcui')">
-                    <header><div></div>Border Card UI<span>bcui.js</span></header>
+                    <header><div></div><div>Border Card UI<span>bcui.js</span></div></header>
                     <div>Apache 2.0</div>
                     <font-awesome-icon :icon="['fas', 'angle-right']"/>
                 </div>
@@ -40,7 +40,7 @@
                     <font-awesome-icon :icon="['fas', 'angle-right']"/>
                 </div>
                 <div class="ss-card jump-card" @click="openLink('https://github.com/SAWARATSUKI/KawaiiLogos')">
-                    <header><div></div>ServiceLogos<span>vue.js logo</span></header>
+                    <header><div></div><div>ServiceLogos<span>vue.js logo</span></div></header>
                     <font-awesome-icon :icon="['fas', 'angle-right']"/>
                 </div>
             </div>
@@ -148,11 +148,13 @@ export default defineComponent({
 .dept > div > svg {
     height: 15px;
 }
-.dept > div > header > span {
+.dept > div > header > div:not(:first-child) {
+    display: flex;
+    flex-direction: column;
+}
+.dept > div > header > div > span {
     font-size: 0.7rem;
     color: var(--color-font-2);
-    margin-left: 10px;
-
 }
 .dept > div > div {
     background: var(--color-main);
@@ -175,11 +177,14 @@ export default defineComponent({
         margin-right: 0;
         margin-bottom: 20px;
     }
+    .main > div:first-child {
+        display: none;
+    }
     .power-by > img {
         width: 60%;
     }
     .dept {
-        height: 20vh;
+        height: 40vh;
     }
 }
 </style>

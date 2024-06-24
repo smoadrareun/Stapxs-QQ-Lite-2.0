@@ -9,38 +9,47 @@
 
 <template>
     <div class="opt-page">
-        <div v-if="Object.keys(runtimeData.loginInfo).length > 0" class="ss-card account-info">
-            <img :src="'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + runtimeData.loginInfo.uin">
-            <div>
+        <template v-if="Object.keys(runtimeData.loginInfo).length > 0">
+            <div  class="ss-card account-info">
+                <img :src="'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + runtimeData.loginInfo.uin">
                 <div>
-                    <span>{{ runtimeData.loginInfo.nickname }}</span>
-                    <span>{{ runtimeData.loginInfo.uin }}</span>
+                    <div>
+                        <span>{{ runtimeData.loginInfo.nickname }}</span>
+                        <span>{{ runtimeData.loginInfo.uin }}</span>
+                    </div>
+                    <span>{{ runtimeData.loginInfo.info && Object.keys(runtimeData.loginInfo.info).length > 0 ?
+                            runtimeData.loginInfo.info.lnick : ''
+                    }}</span>
                 </div>
-                <span>{{ runtimeData.loginInfo.info && Object.keys(runtimeData.loginInfo.info).length > 0 ?
-                        runtimeData.loginInfo.info.lnick : ''
-                }}</span>
+                <font-awesome-icon @click="exitConnect" :icon="['fas', 'right-from-bracket']" />
             </div>
-            <font-awesome-icon @click="exitConnect" :icon="['fas', 'right-from-bracket']" />
-        </div>
-        <div v-if="Object.keys(runtimeData.loginInfo).length > 0" class="ss-card">
-            <header>{{ $t('option_account_config') }}</header>
-            <div class="opt-item">
-                <font-awesome-icon :icon="['fas', 'address-card']" />
-                <div>
-                    <span>{{ $t('option_account_nick') }}</span>
-                    <span>{{ $t('option_account_nick_tip') }}</span>
+            <div class="ss-card">
+                <header>{{ $t('option_account_config') }}</header>
+                <div class="opt-item">
+                    <font-awesome-icon :icon="['fas', 'address-card']" />
+                    <div>
+                        <span>{{ $t('option_account_nick') }}</span>
+                        <span>{{ $t('option_account_nick_tip') }}</span>
+                    </div>
+                    <input class="ss-input" style="width:150px" type="text" @keyup="setNick" v-model="runtimeData.loginInfo.nickname">
                 </div>
-                <input class="ss-input" style="width:150px" type="text" @keyup="setNick" v-model="runtimeData.loginInfo.nickname">
-            </div>
-            <div v-if="runtimeData.loginInfo.info && Object.keys(runtimeData.loginInfo.info).length > 0" class="opt-item">
-                <font-awesome-icon :icon="['fas', 'pen']" />
-                <div>
-                    <span>{{ $t('option_account_lnick') }}</span>
-                    <span>{{ $t('option_account_lnick_tip') }}</span>
+                <div v-if="runtimeData.loginInfo.info && Object.keys(runtimeData.loginInfo.info).length > 0" class="opt-item">
+                    <font-awesome-icon :icon="['fas', 'pen']" />
+                    <div>
+                        <span>{{ $t('option_account_lnick') }}</span>
+                        <span>{{ $t('option_account_lnick_tip') }}</span>
+                    </div>
+                    <input class="ss-input" style="width:150px" type="text" @keyup="setLNick" v-model="runtimeData.loginInfo.info.lnick">
                 </div>
-                <input class="ss-input" style="width:150px" type="text" @keyup="setLNick" v-model="runtimeData.loginInfo.info.lnick">
             </div>
-        </div>
+        </template>
+        <template v-else>
+            <div class="ss-card account-not-login">
+                <font-awesome-icon :icon="['fas', 'fish']" />
+                <span>{{ $t('option_account_notlogin') }}</span>
+                <button @click="goLogin" class="ss-button">{{ $t('option_account_gologin') }}</button>
+            </div>
+        </template>
         <div class="ss-card" v-if="Object.keys(runtimeData.botInfo).length > 0">
             <header>{{ $t('option_account_bot') }}</header>
             <div class="l10n-info">
@@ -114,6 +123,10 @@ export default {
         exitConnect() {
             remove('auto_connect')
             Connector.close()
+        },
+
+        goLogin() {
+            document.getElementById('bar-home')?.click()
         },
 
         /**

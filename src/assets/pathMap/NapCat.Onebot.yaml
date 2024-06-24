@@ -1,10 +1,18 @@
+# NapCat.Onbot/LLOneBot 消息结构声明
+# https://napneko.github.io/zh-CN/develop/api
+# PS：解析中可以使用 jsonpath，左斜杠开头则表示为当前位置
+
+# Bot 名称
 name: NapCat.Onebot
 
+# Bot 版本信息
 version_info: $.data
+# 登录信息
 login_info:
     uin: $.data.user_id
     bkn: ""
     nickname: $.data.nickname
+# 群、好友列表
 user_list:
     source: $.data[*]
     list:
@@ -17,6 +25,7 @@ user_list:
         user_id: /user_id
         nickname: /nickname
         remark: /remark
+# 消息列表
 message_list:
     name: get_group_msg_history
     private_name: get_friend_msg_history
@@ -35,6 +44,7 @@ message_list:
         sender: /sender
         message: /message
         raw_message: /raw_message
+# 转发消息体
 forward_msg:
     name: get_forward_msg
     source: $.data.messages[*]
@@ -48,21 +58,26 @@ forward_msg:
         sender: /sender
         message: /content
         raw_message: null
+# 消息基础信息
 message_info:
     message_id: $.message_id
     private_id: $.user_id
     group_id: $.group_id
     target_id: $.target_id
     sender: $.sender.user_id
+# 获取消息体
 get_message: $.message
 message_value:
     file:
         name: $.file
+# 设置消息已读
 set_message_read:
     name: mark_group_msg_as_read
     private_name: mark_private_msg_as_read
+# 设置消息回应
 send_respond:
     name: set_msg_emoji_like
+# 获取分组信息
 class_list:
     name: get_friends_with_category
     source: $.data[*]
@@ -71,6 +86,7 @@ class_list:
         class_name: /categroyName
         user_count: /categroyMbCount
         list: /buddyList
+# 获取群公告
 group_notices:
     name: _get_group_notice
     source: $.data[*]
@@ -80,3 +96,16 @@ group_notices:
         time: /publish_time
         is_read: null
         read_num: null
+# 获取群精华消息
+group_essence:
+    name: get_essence_msg_list
+    source: $.data.msg_list[*]
+    list:
+        sender_uin: /sender_uin
+        sender_nick: /sender_nick
+        sender_time: /sender_time
+        msg_content: /msg_content
+        add_digest_uin: /add_digest_uin
+        add_digest_nick: /add_digest_nick
+        add_digest_time: /add_digest_time
+    is_end: $.data.is_end

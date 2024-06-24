@@ -17,7 +17,7 @@ jobs:
     steps:
     # 拉取代码
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
         persist-credentials: false
@@ -45,7 +45,7 @@ jobs:
         echo VERSION=$(node -p "require('./package.json').version") >> $GITHUB_OUTPUT
     # 设置 Node.js 版本
     - name: Load Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: 18.x
     # 更新依赖
@@ -64,13 +64,13 @@ jobs:
     steps:
     # 拉取代码
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
         persist-credentials: false
     # 设置 Node.js 版本
     - name: Load Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: 18.x
     # 更新依赖
@@ -107,13 +107,13 @@ jobs:
 
     # 拉取代码
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
         persist-credentials: false
     # 设置 Node.js 版本
     - name: Load Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: 18.x
     # 更新依赖
@@ -137,9 +137,9 @@ jobs:
 
     # 上传构建结果
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
-        name: ${{ needs.init.outputs.version }}
+        name: ${{ needs.init.outputs.version }}-${{ matrix.os }}
         path: dist_electron/out
 
   # ========================= 发布构建结果 ========================= 
@@ -147,17 +147,20 @@ jobs:
     name: 发布构建结果
     runs-on: ubuntu-latest
     needs: build-electron
-
     steps:
     # 下载构建结果
     - name: Download Artifacts
       id: download-artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
+      with:
+        path: ${{ needs.build-electron.outputs.version }}
+        pattern: ${{ needs.build-electron.outputs.version }}-*
+        merge-multiple: true
     - name: Artifacts List
       run: ls -R
     # 发布构建结果
     - name: Publish Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         files: ./${{ needs.build-electron.outputs.version }}/*
         tag_name: v${{ needs.build-electron.outputs.version }}

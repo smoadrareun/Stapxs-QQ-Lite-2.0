@@ -1,15 +1,9 @@
 <template>
     <div class="top-bar" name="appbar" v-if="runtimeData.sysConfig.opt_no_window">
-        <img src="img/icons/icon.svg">
-        <span>
-            Stapxs QQ Lite
-            {{ dev ? '(Dev)' : '' }}
-        </span>
+        <div class="bar-button" @click="barMainClick()"></div>
         <div class="space"></div>
         <div class="controller">
-            <div @click="flushPage" v-if="dev" class="reflush"><font-awesome-icon :icon="['fas', 'rotate-right']" /></div>
             <div @click="controllWin('minimize')" class="min"><font-awesome-icon :icon="['fas', 'minus']" /></div>
-            <div @click="controllWin('maximize')" class="max"><font-awesome-icon :icon="['far', 'square']" /></div>
             <div @click="controllWin('close')" class="close"><font-awesome-icon :icon="['fas', 'xmark']" /></div>
         </div>
     </div>
@@ -61,7 +55,7 @@
                                         <a>{{ $t('home_card_auto_con') }}</a>
                                     </label>
                                 </div>
-                                <button id="connect_btn" class="ss-button" type="submit">{{ $t('home_card_connect')
+                                <button @mousemove="afd" id="connect_btn" class="ss-button" type="submit">{{ $t('home_card_connect')
                                 }}</button>
                             </form>
                             <a href="https://github.com/Stapxs/Stapxs-QQ-Lite-2.0#%E5%BF%AB%E9%80%9F%E4%BD%BF%E7%94%A8"
@@ -242,13 +236,6 @@ export default defineComponent({
                 runtimeData.reader.send('win:' + name)
             }
         },
-
-        /**
-         * 刷新页面
-         */
-        flushPage() {
-            window.location.reload()
-        },
         
         /**
          * 发起连接
@@ -268,6 +255,14 @@ export default defineComponent({
             Umami.trackPageView('/' + view)
             this.tags.showChat = !show
             this.tags.page = view
+        },
+        barMainClick() {
+            console.log(1111)
+            if(loginInfo.status) {
+                this.changeTab('信息', 'Messages', false)
+            } else {
+                this.changeTab('主页', 'Home', true)
+            }
         },
 
         /**
@@ -311,7 +306,10 @@ export default defineComponent({
                     group_members: [],
                     group_files: {},
                     group_sub_files: {},
-                    jin_info: { data: { msg_list: [] } }
+                    jin_info: {
+                        list: [] as { [key: string]: any }[],
+                        pages: 0
+                    }
                 }
             }
             runtimeData.mergeMessageList = undefined    // 清空合并转发缓存
@@ -404,6 +402,30 @@ export default defineComponent({
             if(allow != false) {
                 runtimeData.popBoxList.shift()
             }
+        },
+
+        afd(event: MouseEvent) {
+            // 只在愚人节时生效
+            if(new Date().getMonth() == 3 && new Date().getDate() == 1) {
+                const sender = event.target as HTMLButtonElement
+                // 获取文档整体宽高
+                const docWidth = document.documentElement.clientWidth
+                const docHeight = document.documentElement.clientHeight
+                // 获取按钮宽高
+                const senderWidth = sender.offsetWidth
+                const senderHeight = sender.offsetHeight
+                // 获取鼠标位置
+                const mouseX = event.clientX
+                const mouseY = event.clientY
+                // 在宽高里随机抽一个位置，不能超出文档，不能让按钮在鼠标下
+                do {
+                    var x = Math.floor(Math.random() * docWidth)
+                    var y = Math.floor(Math.random() * docHeight)
+                } while (x + senderWidth > docWidth || y + senderHeight > docHeight || (x < mouseX && x + senderWidth > mouseX && y < mouseY && y + senderHeight > mouseY))
+                // 设置按钮位置
+                sender.style.left = x + 'px'
+                sender.style.top = y + 'px'
+            }
         }
     },
     mounted () {
@@ -418,6 +440,7 @@ export default defineComponent({
             runtimeData.reader = reader
             if (reader) {
                 runtimeData.tags.platform = await reader.invoke('sys:getPlatform')
+                runtimeData.tags.release = await reader.invoke('sys:getRelease')
             }
             app.config.globalProperties.$viewer = this.viewerBody
             // 初始化波浪动画
@@ -477,6 +500,10 @@ export default defineComponent({
             App.checkUpdate()                // 检查更新
             App.checkOpenTimes()             // 检查打开次数
             App.checkNotice()                // 检查公告
+            // 加载愚人节附加
+            if(new Date().getMonth() == 3 && new Date().getDate() == 1) {
+                document.getElementById('connect_btn')?.classList.add('afd')
+            }
         }
     }
 })

@@ -15,3 +15,19 @@ export function queryKeys(keyPath: string, value: string) {
         }
     }) as Promise<{stdout: any, stderr: any}>
 }
+
+export function runCommand(command: string) {
+    return new Promise(function (resolve, reject) {
+        try {
+            child_process.exec(command, (error, stdout, stderr) => {
+                if (error) {
+                    reject(error)
+                    return
+                }
+                resolve({stdout, stderr})
+            });
+        } catch (error) {
+            reject(error)
+        }
+    }) as Promise<{stdout: any, stderr: any}>
+}

@@ -47,7 +47,7 @@
     color: var(--color-font-r);
 }
 .message.merge > div.message-body {
-    max-width: 100%;
+    max-width: calc(100% - 50px);
 }
 .message.revoke {
     display: none;
