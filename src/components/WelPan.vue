@@ -23,7 +23,7 @@
         <span>{{ $t('wel_select_language') }}</span>
         <a>Select a language</a>
         <div class="l10n-info" style="width: calc(100% - 40px)">
-            <font-awesome-icon style="margin-right: 30px;" icon="fa-solid fa-language"/>
+            <font-awesome-icon style="margin-right: 30px;" :icon="['fas', 'language']"/>
             <div style="overflow: hidden;">
                 <select @change="save($event);gaLanguage($event)" name="language" title="language" v-model="runtimeData.sysConfig.language">
                   <option v-for="item in languages" :value="item.value" :key="item.value">{{ item.name }}</option>

@@ -8,8 +8,8 @@
 <template>
     <div :class="(item.type === 2 ? ' folder' : '') + ((item.sub_list && item.sub_list.length > 0) ? ' open' : '')"
         @click="loadFileDir(item.id, item.type)">
-        <font-awesome-icon v-if="item.type === 2" icon="fa-solid fa-folder"/>
-        <font-awesome-icon v-if="item.type === 1" icon="fa-solid fa-file"/>
+        <font-awesome-icon v-if="item.type === 2" :icon="['fas', 'folder']"/>
+        <font-awesome-icon v-if="item.type === 1" :icon="['fas', 'file']"/>
         <div class="main">
             <span>{{ toHtml(item.name) }}</span>
             <div>

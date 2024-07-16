@@ -94,7 +94,7 @@
                     </label>
                 </div>
             </template>
-            <template v-if="runtimeData.tags.isElectron && browser.os == 'Windows 10'">
+            <template v-if="runtimeData.tags.isElectron && browser.os != 'Linux'">
                 <div class="opt-item">
                     <font-awesome-icon :icon="['fas', 'wand-magic-sparkles']" />
                     <div>

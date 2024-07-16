@@ -5,6 +5,7 @@ import { Logger } from '@/function/base'
 import { runtimeData } from '@/function/msg'
 import { v4 as uuid } from 'uuid'
 import { Connector } from '@/function/connect'
+import { BotMsgType } from '../elements/information'
 
 const logger = new Logger()
 
@@ -118,16 +119,24 @@ export function buildMsgList(msgList: { [key: string]: any }): { [key: string]: 
 }
 
 export function parseMsgList(list: any, map: string, valueMap: { [key: string]: any }): any[] {
+    // 判断消息类型
+    if(runtimeData.tags.msgType == BotMsgType.Auto) {
+        if(typeof list[0].message == 'string') {
+            runtimeData.tags.msgType = BotMsgType.CQCode
+        } else {
+            runtimeData.tags.msgType = BotMsgType.Array
+        }
+    }
     // 消息类型的特殊处理
-    switch (map.split('|')[0]) {
-        case 'cq-code': {
+    switch (runtimeData.tags.msgType) {
+        case BotMsgType.CQCode: {
             // 这儿会默认处理成 oicq2 的格式，所以 CQCode 消息请使用 oicq2 配置文件修改
             for (let i = 0; i < list.length; i++) {
                 list[i] = parseCQ(list[i])
             }
             break
         }
-        case 'json_with_data': {
+        case BotMsgType.Array: {
             // 非扁平化消息体，这儿会取 _type 后半段的 JSON Path 将结果并入 message
             for (let i = 0; i < list.length; i++) {
                 let msgList = list[i].message
@@ -135,7 +144,7 @@ export function parseMsgList(list: any, map: string, valueMap: { [key: string]: 
                     msgList = list[i].content
                 }
                 for (let j = 0; j < msgList.length; j++) {
-                    const data = getMsgData('message_list_message', msgList[j], map.split('|')[1])
+                    const data = getMsgData('message_list_message', msgList[j], map)
                     if (data != undefined && data.length == 1) {
                         msgList[j] = Object.assign(msgList[j], data[0])
                     }
@@ -338,38 +347,34 @@ export function sendMsgRaw(id: string, type: string, msg: string | { type: strin
         runtimeData.messageList = runtimeData.messageList.concat([showMsg])
     }
     // 检查消息体是否需要处理
-    const messageType = runtimeData.jsonMap.message_list.type.split('|')[0]
-    switch (messageType) {
-        case 'json_with_data': {
-            const map = runtimeData.jsonMap.message_list.type.split('|')[1]
-            const path = jp.parse(map)
-            const keys = [] as string[]
-            path.forEach((item) => {
-                if (item.expression.value != '*' && item.expression.value != '$') {
-                    keys.push(item.expression.value)
-                }
-            })
-            if(msg && typeof msg != 'string') {
-                const newMsg = [] as any
-                msg.forEach((item) => {
-                    const result = {} as any
-                    keys.reduce((acc, key, index) => {
-                        if (index === keys.length - 1) {
-                            acc[key] = item
-                        } else {
-                            acc[key] = {}
-                        }
-                        return acc[key]
-                    }, result)
-                    const newResult = {} as {[key: string]: any}
-                    newResult.type = item.type
-                    newResult.data = item
-                    delete newResult.data.type
-                    newMsg.push(newResult)
-                })
-                msg = newMsg
+    if (runtimeData.tags.msgType == BotMsgType.Array) {
+        const map = runtimeData.jsonMap.message_list.type
+        const path = jp.parse(map)
+        const keys = [] as string[]
+        path.forEach((item) => {
+            if (item.expression.value != '*' && item.expression.value != '$') {
+                keys.push(item.expression.value)
             }
-            break
+        })
+        if (msg && typeof msg != 'string') {
+            const newMsg = [] as any
+            msg.forEach((item) => {
+                const result = {} as any
+                keys.reduce((acc, key, index) => {
+                    if (index === keys.length - 1) {
+                        acc[key] = item
+                    } else {
+                        acc[key] = {}
+                    }
+                    return acc[key]
+                }, result)
+                const newResult = {} as { [key: string]: any }
+                newResult.type = item.type
+                newResult.data = item
+                delete newResult.data.type
+                newMsg.push(newResult)
+            })
+            msg = newMsg
         }
     }
     if (msg !== undefined && msg.length > 0) {

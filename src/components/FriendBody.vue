@@ -11,7 +11,7 @@
         :data-name="data.user_id ? data.nickname : data.group_name" :data-nickname="data.user_id ? data.nickname : ''"
         :data-type="data.user_id ? 'friend' : 'group'">
         <div :class="(data.new_msg === true ? 'new' : '')"></div>
-        <font-awesome-icon v-if="data.user_id == -10000" icon="fa-solid fa-bell"/>
+        <font-awesome-icon v-if="data.user_id == -10000" :icon="['fas', 'bell']"/>
         <img v-else loading="lazy" :title="getShowName()" :src="data.user_id ?
                     'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + data.user_id :
                     'https://p.qlogo.cn/gh/' + data.group_id + '/' + data.group_id + '/0'">
@@ -26,7 +26,7 @@
             <div>
                 <a>{{ data.raw_msg }}</a>
                 <div style="margin-left:10px;display:flex;">
-                    <font-awesome-icon v-if="data.always_top === true" icon="fa-solid fa-thumbtack"/>
+                    <font-awesome-icon v-if="data.always_top === true" :icon="['fas', 'thumbtack']"/>
                 </div>
             </div>
         </div>

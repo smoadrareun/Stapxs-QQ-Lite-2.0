@@ -117,7 +117,7 @@
         </component>
         <TransitionGroup class="app-msg" name="appmsg" tag="div">
           <div v-for="msg in appMsgs" :key="'appmsg-' + msg.id">
-            <div><font-awesome-icon :icon="'fa-solid fa-' + msg.svg"/></div>
+            <div><font-awesome-icon :icon="['fas', msg.svg]"/></div>
             <a>{{ msg.text }}</a>
             <div v-if="!msg.autoClose" @click="popInfo.remove(msg.id)">
                 <font-awesome-icon :icon="['fas', 'xmark']"/>
@@ -134,7 +134,7 @@
                             <font-awesome-icon :icon="['fas', runtimeData.popBoxList[0].svg]" />
                         </div>
                         <a>{{ runtimeData.popBoxList[0].title }}</a>
-                        <font-awesome-icon @click="removePopBox" icon="fa-solid fa-xmark"/>
+                        <font-awesome-icon @click="removePopBox" :icon="['fas','xmark']"/>
                     </header>
                     <div v-if="runtimeData.popBoxList[0].html" v-html="runtimeData.popBoxList[0].html"></div>
                     <component v-else
@@ -223,7 +223,7 @@ export default defineComponent({
                 isSavePwdClick: false,
                 savePassword: false
             },
-            viewerOpt: { inline: false, button: false, title: false, toolbar: { prev: true, rotateLeft: true, reset: true, rotateRight: true, next: true } },
+            viewerOpt: { inline: false, button: false, title: false, navbar: false, toolbar: { prev: true, rotateLeft: true, reset: true, rotateRight: true, next: true } },
             viewerBody: undefined as HTMLDivElement | undefined
         }
     },

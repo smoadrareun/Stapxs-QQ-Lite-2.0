@@ -34,7 +34,7 @@ message_list:
     name: get_group_msg_history
     private_name: get_friend_msg_history
     source: $.data.messages[*]
-    type: json_with_data|$.data
+    type: $.data
     message_type:
         user: private
         group: group

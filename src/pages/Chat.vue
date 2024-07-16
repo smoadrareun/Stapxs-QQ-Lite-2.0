@@ -11,12 +11,12 @@
 
 <template>
     <div
-        :style="`background-image: url(${runtimeData.sysConfig.chat_background})`"
         :class="'chat-pan' + (runtimeData.tags.openSideBar ? ' open': '') + (runtimeData.sysConfig.opt_no_window ? ' withBar': '')"
+        :style="`background-image: url(${runtimeData.sysConfig.chat_background});` + (Option.get('fs_adaptation') > 0 ? ('--append-fs-adaptation:' + Option.get('fs_adaptation') + 'px') : '--append-fs-adaptation:0px')"
         id="chat-pan">        
         <!-- 聊天基本信息 -->
         <div class="info">
-            <font-awesome-icon @click="openLeftBar" icon="fa-solid fa-bars-staggered"/><img :src="chat.show.avatar">
+            <font-awesome-icon @click="openLeftBar" :icon="['fas', 'bars-staggered']"/><img :src="chat.show.avatar">
             <div class="info">
                 <p>{{ chat.show.name }}</p>
                 <span v-if="chat.show.temp">
@@ -33,7 +33,7 @@
             </div>
             <div class="space"></div>
             <div class="more">
-                <font-awesome-icon @click="openChatInfoPan" icon="fa-solid fa-ellipsis-vertical"/>
+                <font-awesome-icon @click="openChatInfoPan" :icon="['fas', 'ellipsis-vertical']"/>
             </div>
         </div>
         <!-- 加载中指示器 -->
@@ -256,11 +256,17 @@
         <div :class="'msg-menu' + (runtimeData.sysConfig.opt_no_window ? ' withBar': '')">
             <div v-show="tags.showMsgMenu" class="msg-menu-bg" @click="closeMsgMenu"></div>
             <div :class="tags.showMsgMenu ? 'ss-card msg-menu-body show' : 'ss-card msg-menu-body'" id="msgMenu">
-                <div v-if="runtimeData.chatInfo.show.type == 'group'" :class="'ss-card respond' + (tags.menuDisplay.respond ? ' open': '')">
+                <div v-if="runtimeData.chatInfo.show.type == 'group'"
+                    v-show="tags.menuDisplay.showRespond"
+                    :class="'ss-card respond' + (tags.menuDisplay.respond ? ' open': '')">
                     <template v-for="(num, index) in respondIds" :key="'respond-' + num">
                         <img v-if="getFace(num) != false" @click="sendRespond(num)" loading="lazy" :src="(getFace(num) as any)">
                         <font-awesome-icon  v-if="index == 4" @click="tags.menuDisplay.respond = true" :icon="['fas', 'angle-up']" />
                     </template>
+                </div>
+                <div @click="forwardSelf()" v-show="tags.menuDisplay.add">
+                    <div><font-awesome-icon :icon="['fas', 'plus']" /></div>
+                    <a>{{ $t('chat_msg_menu_plus') }}</a>
                 </div>
                 <div @click="replyMsg(true)" v-show="tags.menuDisplay.relpy">
                     <div><font-awesome-icon :icon="['fas', 'message']" /></div>
@@ -366,7 +372,7 @@
 <script lang="ts">
 import app from '@/main'
 import SendUtil from '@/function/sender'
-import Option from '@/function/option'
+import Option, { get } from '@/function/option'
 import Info from '@/pages/Info.vue'
 import MsgBody from '@/components/MsgBody.vue'
 import NoticeBody from '@/components/NoticeBody.vue'
@@ -411,6 +417,7 @@ export default defineComponent({
                 isJinLoading: false,
                 onAtFind: false,
                 menuDisplay: {
+                    add: true,
                     relpy: true,
                     forward: true,
                     select: false,
@@ -421,7 +428,8 @@ export default defineComponent({
                     revoke: false,
                     at: true,
                     remove: false,
-                    respond: false
+                    respond: false,
+                    showRespond: true
                 },
                 msgTouch: {
                     x: -1,
@@ -698,11 +706,16 @@ export default defineComponent({
                 msg = this.tags.openedMenuMsg.msg
             }
             if(menu !== null && msg !== null) {
+                // 关闭回应功能
+                if(get('close_respond') == true) {
+                    this.tags.menuDisplay.showRespond = false
+                }
                 if(select.nodeName == 'IMG' && (select as HTMLImageElement).name == 'avatar') {
                     // 右击头像需要显示的内容
                     Object.keys(this.tags.menuDisplay).forEach((name: string) => {
                         (this.tags.menuDisplay as any)[name] = false
                     })
+                    this.tags.menuDisplay.showRespond = false
                     this.tags.menuDisplay.at = true
                     this.tags.menuDisplay.remove = true
                     if(runtimeData.chatInfo.show.type != 'group' ||
@@ -762,6 +775,7 @@ export default defineComponent({
                         if(nList.indexOf(item.type as string) > 0) {
                             // 如果包含以上消息类型，不能转发
                             this.tags.menuDisplay.forward = false
+                            this.tags.menuDisplay.add = false
                         }
                     })
                     if(data.message[0].type == 'mface') {
@@ -814,6 +828,7 @@ export default defineComponent({
          */
         initMenuDisplay () {
             this.tags.menuDisplay = {
+                add: true,
                 relpy: true,
                 forward: true,
                 select: false,
@@ -824,7 +839,8 @@ export default defineComponent({
                 revoke: false,
                 at: false,
                 remove: false,
-                respond: false
+                respond: false,
+                showRespond: true
             }
         },
 
@@ -894,6 +910,14 @@ export default defineComponent({
                 }
             })
             runtimeData.onMsgList.reverse()
+        },
+
+        forwardSelf() {
+            if (this.selectedMsg) {
+                const msg = this.selectedMsg
+                sendMsgRaw(this.chat.show.id, this.chat.show.type, msg.message)
+            }
+            this.closeMsgMenu()
         },
 
         /**
@@ -974,7 +998,7 @@ export default defineComponent({
                 const msgId = msg.message_id
                 Connector.send(runtimeData.jsonMap.send_respond.name, {
                     'message_id': msgId,
-                    'emoji_id': num
+                    'emoji_id': String(num)
                 }, 'SendRespondBack')
             }
             this.closeMsgMenu()
@@ -1382,8 +1406,8 @@ export default defineComponent({
             // =================== 首次加载消息 ===================
 
             if(oldLength == 0 && newLength > 0) {
-                const name = runtimeData.jsonMap.set_message_read.private_name
-                let private_name = runtimeData.jsonMap.set_message_read.private_name
+                const name = runtimeData.jsonMap.set_message_read?.name ?? undefined
+                let private_name = runtimeData.jsonMap.set_message_read?.private_name ?? name
                 if(!private_name) private_name = name
                 // 设置最后一条消息以上都为已读
                 if(runtimeData.chatInfo.show.type == 'group') {

@@ -39,9 +39,9 @@ export function parseMsg(msg: string, cache: MsgItemElem[], img: string[]) {
     }
     // 处理消息
     let back = undefined
-    if (runtimeData.tags.msgType === undefined || runtimeData.tags.msgType === BotMsgType.JSON) {
+    if (runtimeData.tags.msgType == BotMsgType.Array) {
         back = parseMsgToJSON(msg, cache)
-    } else if (runtimeData.tags.msgType === BotMsgType.CQCode || runtimeData.tags.msgType === BotMsgType.JSON_OICQ_1) {
+    } else if (runtimeData.tags.msgType == BotMsgType.CQCode) {
         back = parseMsgToCQ(msg, cache)
     }
     return back

@@ -31,7 +31,7 @@
             <div icon="fa-solid fa-store">
                 <div class="store-face-list">
                     <div v-for="face in storeFace" :key="face.emoji_id">
-                        <font-awesome-icon @click="removeMface(face)" icon="fa-solid fa-xmark"/>
+                        <font-awesome-icon @click="removeMface(face)" :icon="['fas', 'xmark']"/>
                         <img loading="lazy"
                             :src="face.url"
                             :title="face.summary"

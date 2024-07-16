@@ -140,6 +140,10 @@ export function reloadUsers() {
     }
 }
 
+export function reloadCookies() {
+    Connector.send('get_cookies', { 'domain': 'qun.qq.com' }, 'getCookies_qun.qq.com')
+}
+
 /**
  * 通过用户和消息 ID 跳转到对应的消息
  * @param id 
@@ -337,23 +341,26 @@ export async function loadWinColor() {
     }
 }
 
-export function updateWinColor(info: any) {
-    if(!info.err) {
+export function updateWinColor(color: string) {
+    if(process.platform == 'win32') {
+        const red = parseInt(color.substr(0, 2), 16)
+        const green = parseInt(color.substr(2, 2), 16)
+        const blue = parseInt(color.substr(4, 2), 16)
         // 平衡颜色亮度
-        const hsl = rgbToHsl(info.color[0], info.color[1], info.color[2])
+        const hsl = rgbToHsl(red, green, blue)
         const media = window.matchMedia('(prefers-color-scheme: dark)')
         const autodark = option.get('opt_auto_dark')
         const dark = option.get('opt_dark')
-        if((autodark == true && media.matches) || (autodark != true && dark == true)) {
+        if ((autodark == true && media.matches) || (autodark != true && dark == true)) {
             hsl[2] = 0.8
         } else {
             hsl[2] = 0.3
         }
-        info.color = hslToRgb(hsl[0], hsl[1], hsl[2])
-        document.documentElement.style.setProperty('--color-main', 'rgb(' + info.color[0] + ',' + info.color[1] + ',' + info.color[2] + ')')
+        const finalColor = hslToRgb(hsl[0], hsl[1], hsl[2])
+        document.documentElement.style.setProperty('--color-main', 'rgb(' + finalColor[0] + ',' + finalColor[1] + ',' + finalColor[2] + ')')
     } else {
-        runtimeData.sysConfig['opt_auto_win_color'] = false
-        new PopInfo().add(PopType.ERR, app.config.globalProperties.$t('option_view_auto_win_color_tip_1') + info.err)
+        document.documentElement.style.setProperty('--color-main', '#' + color.substring(0, 6) + 'CF')
+    
     }
 }
 
@@ -700,4 +707,16 @@ export function checkNotice() {
                 }
             })
         })
+}
+
+export function BackendRequest(type: 'GET' | 'POST', url: string, cookies: string[], data: any = undefined) {
+    if (runtimeData.reader) {
+        console.log(type, url, cookies, data)
+        runtimeData.reader.send('sys:requestHttp', {
+            type: type,
+            url: url,
+            cookies: JSON.stringify(cookies),
+            data: data
+        })
+    }
 }

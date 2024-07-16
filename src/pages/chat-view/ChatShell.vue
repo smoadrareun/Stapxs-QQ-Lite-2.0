@@ -23,9 +23,9 @@
                     <div v-if="msg.post_type == 'message'" style="cursor: pointer;" :class="'shell-msg' + (msg.revoke ? ' revoke' : '')">
                         <span @click="copy(msg.sender.user_id)" :class="'sname s' + msg.sender.role + (runtimeData.loginInfo.uin == msg.sender.user_id ? ' smine' : '')">{{ msg.sender.card ? msg.sender.card : msg.sender.nickname }}{{ msg.sub_type == 'friend' ? (runtimeData.loginInfo.uin == msg.sender.user_id ? runtimeData.loginInfo.nickname : runtimeData.chatInfo.show.name) : '' }}{{ msg.sender.user_id == 0 ? '' : ': ' }}</span>
                         <span class="smsg" @click="copy(msg.message_id)">{{ msg.raw_message }}</span>
-                        <template v-for="(item, index) in msg.message" :key="msg.message_id + '-' + index.toString()">
+                        <!-- <template v-for="(item, index) in msg.message" :key="msg.message_id + '-' + index.toString()">
                             <pre v-if="item.type == 'image'" v-show="tags.showImg" :id="'img-' + msg.message_id + '-' + index.toString()" :data-get="makeAscii('img-' + msg.message_id + '-' + index.toString(), item.url)"></pre>
-                        </template>
+                        </template> -->
                         <br>
                     </div>
                     <div v-else-if="msg.post_type == 'notice'">
@@ -88,6 +88,7 @@ import { runtimeData, appendMsg } from '@/function/msg'
 import { getTrueLang } from '@/function/utils/systemUtil'
 import { MsgItemElem, SQCodeElem, UserFriendElem, UserGroupElem } from '@/function/elements/information'
 import { Logger, LogType, PopInfo, popList, PopType } from '@/function/base'
+import { sendMsgRaw } from '@/function/utils/msgUtil'
 
 export default defineComponent({
     name: 'ChatShell',
@@ -420,12 +421,11 @@ export default defineComponent({
                         // 发送消息
                         case 'send': {
                             const rawMsg = raw.substring(raw.indexOf('send') + 5)
-                            let msg = SendUtil .parseMsg(rawMsg, this.sendCache, this.imgCache)
-                            if (msg !== undefined && msg.length > 0) {
-                                switch (this.chat.show.type) {
-                                    case 'group': Connector.send('send_group_msg', { 'group_id': this.chat.show.id, 'message': msg }, 'sendMsgBack'); break
-                                    case 'user': Connector.send('send_private_msg', { 'user_id': this.chat.show.id, 'message': msg }, 'sendMsgBack'); break
-                                }
+                            let msg = SendUtil.parseMsg(rawMsg, this.sendCache, this.imgCache)
+                            if(this.chat.show.temp) {
+                                sendMsgRaw(this.chat.show.id + '/' + this.chat.show.temp, this.chat.show.type, msg)
+                            } else {
+                                sendMsgRaw(this.chat.show.id, this.chat.show.type, msg)
                             }
                             // 发送后处理
                             this.sendCache = []
@@ -521,7 +521,20 @@ export default defineComponent({
             neofetch: {
                 info: 'print system info.',
                 fun: () => {
-                    this.addCommandOut('', '', `<div class="shell-neofetch"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;***&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*******************&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;***************************&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*******************************&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;&nbsp;&nbsp;**************&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**************&nbsp;&nbsp;<br>&nbsp;&nbsp;*************&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*************&nbsp;<br>&nbsp;**************&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*************<br>&nbsp;*************,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*************<br>*************,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;************<br>&nbsp;************&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;***********<br>&nbsp;***********,**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*.***********<br>&nbsp;&nbsp;*************&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*************&nbsp;<br>&nbsp;&nbsp;&nbsp;***********************************&nbsp;&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*******************************&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;***************************&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*******************<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;***</span><div><span>${runtimeData.loginInfo.nickname}<span>@</span>sql-vue</span><a>-----------------</a><span>Application<span>: Stapxs QQ Lite 2.0</span></span><span>Kernel<span>: ${packageInfo.version}-web</span></span><span>Shell<span>: stsh base</span></span><span>Theme<span>: ChatSHell</span></span><div><div style="background:black"></div><div style="background:red"></div><div style="background:green"></div><div style="background:yellow"></div><div style="background:blue"></div><div style="background:violet"></div></div></div></div>`)
+                    const infoList = {
+                        Application: 'Stapxs QQ Lite 2.0',
+                        Kernel: packageInfo.version + '-web',
+                        Shell: 'stsh base',
+                        Theme: 'ChatSHell'
+                    } as { [key: string]: string }
+                    if(runtimeData.tags.isElectron) {
+                        infoList.Kernel = packageInfo.version + '-electron'
+                    }
+                    let info = ''
+                    Object.keys(infoList).forEach((key) => {
+                        info += `<span>${key}<span>: ${infoList[key]}</span></span>`
+                    })
+                    this.addCommandOut('', '', `<div class="shell-neofetch"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;***&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*******************&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;***************************&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*******************************&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;&nbsp;&nbsp;**************&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**************&nbsp;&nbsp;<br>&nbsp;&nbsp;*************&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*************&nbsp;<br>&nbsp;**************&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*************<br>&nbsp;*************,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*************<br>*************,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;************<br>&nbsp;************&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;***********<br>&nbsp;***********,**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*.***********<br>&nbsp;&nbsp;*************&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*************&nbsp;<br>&nbsp;&nbsp;&nbsp;***********************************&nbsp;&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*******************************&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;***************************&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*******************<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;***</span><div><span>${runtimeData.loginInfo.nickname}<span>@</span>sql-vue</span><a>-----------------</a>${info}<div><div style="background:black"></div><div style="background:red"></div><div style="background:green"></div><div style="background:yellow"></div><div style="background:blue"></div><div style="background:violet"></div></div></div></div>`)
                 }
             },
             clear: {
@@ -602,17 +615,13 @@ export default defineComponent({
 </script>
 
 <style>
-a {
+.shell-pan a, .shell-pan span {
     font-family: "FiraCode Nerd Font";
     color: var(--color-font);
     white-space:pre-wrap;
 }
-a:hover {
+.shell-pan a:hover {
     color: var(--color-font);
-}
-span {
-    font-family: "FiraCode Nerd Font";
-    white-space: pre-wrap;
 }
 
 .line-head {
@@ -649,8 +658,8 @@ span {
     color: greenyellow;
 }
 
-
 .shell-pan {
+    margin-top: 20px;
     padding: 20px;
     pointer-events: all;
     overflow-y: scroll;

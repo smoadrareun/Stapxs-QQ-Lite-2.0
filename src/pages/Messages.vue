@@ -323,6 +323,24 @@ export default defineComponent({
     },
     mounted() {
         library.add(faCheckToSlot, faThumbTack, faTrashCan, faGripLines)
+        if(runtimeData.tags.isElectron && runtimeData.reader) {
+            this.$watch(() => runtimeData.onMsgList.length, () => {
+                console.log('flush touch bar: ', runtimeData.onMsgList.length)
+                const list = [] as {
+                    id: number,
+                    name: string,
+                    image?: string
+                }[]
+                runtimeData.onMsgList.forEach((item) => {
+                    list.push({
+                        id: item.user_id ? item.user_id : item.group_id,
+                        name: item.group_name ? item.group_name : item.remark === item.nickname ? item.nickname : item.remark + '（' + item.nickname + '）',
+                        image: item.user_id ? 'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + item.user_id : 'https://p.qlogo.cn/gh/' + item.group_id + '/' + item.group_id + '/0'
+                    })
+                })
+                runtimeData.reader?.send('sys:flushTouchBar', list)
+            })
+        }
     }
 })
 </script>

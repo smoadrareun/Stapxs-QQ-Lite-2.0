@@ -7,7 +7,10 @@ html, body {
 }
 input::placeholder {
     color: var(--color-font-2);
-
+}
+select:focus,
+textarea:focus {
+    outline: none;
 }
 
 .mac-controller {
@@ -345,6 +348,7 @@ input::placeholder {
 }
 .friend-list > div:first-child label > input {
     background: transparent;
+    font-size: 0.8rem;
     padding: 0 15px;
     height: 100%;
     width: 100%;
@@ -884,11 +888,11 @@ input::placeholder {
 .viewer-footer > div {
     margin: 20px;
 }
-.viewer-footer > div:last-child {
+/* .viewer-footer > div:last-child {
     align-items: flex-end;
     display: flex;
     flex: 1;
-}
+} */
 .viewer-footer ul {
     pointer-events: all;
     height: 55px;

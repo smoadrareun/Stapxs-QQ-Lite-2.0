@@ -39,7 +39,7 @@
                         <template v-else-if="item.type == 'face'">
                             <img v-if="getFace(item.id)" :alt="item.text" class="msg-face" :src="getFace(item.id)" :title="item.text">
                             <span v-else-if="item.id == 394" class="msg-face-long"><span v-for="i in 15" :key="data.message_id + '-l-' + i">🐲</span></span>
-                            <font-awesome-icon v-else :class="'msg-face-svg' + (isMe ? ' me': '')" icon="fa-solid fa-face-grin-wide"/>
+                            <font-awesome-icon v-else :class="'msg-face-svg' + (isMe ? ' me': '')" :icon="['fas', 'face-grin-wide']"/>
                         </template>
                         <img v-else-if="item.type == 'mface' && item.url" @load="scrollButtom" @error="imgLoadFail" :class="imgStyle(data.message.length, index, item.asface) + ' msg-mface'" :src="item.url">
                         <span v-else-if="item.type == 'mface' && item.text" class="msg-unknown">{{ item.text }}</span>
@@ -53,7 +53,7 @@
                                 <div><p>{{ loadFileBase(item, item.name, data.message_id) }}</p><a>（{{ getSizeFromBytes(item.size) }}）</a></div><i>{{ item.md5 }}</i>
                             </div>
                             <div>
-                                <font-awesome-icon @click="downloadFile(item, data.message_id)" v-if="item.downloadingPercentage === undefined" icon="fa-solid fa-angle-down"/>
+                                <font-awesome-icon @click="downloadFile(item, data.message_id)" v-if="item.downloadingPercentage === undefined" :icon="['fas', 'angle-down']"/>
                                 <svg v-if="item.downloadingPercentage !== undefined" class="download-bar" xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="50%" cy="50%" r="40%" stroke-width="15%" fill="none" stroke-linecap="round" />
                                     <circle cx="50%" cy="50%" r="40%" stroke-width="15%" fill="none" :stroke-dasharray="item.downloadingPercentage === undefined ?
