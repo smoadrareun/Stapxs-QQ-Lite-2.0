@@ -110,7 +110,7 @@
   "option_dev_log_level_info": "Info",
   "option_dev_log_level_tip": "ReferenceError: slackOff is not defined",
   "option_dev_msg_menu": "Disable customized context menu",
-  "option_dev_msg_menu_tip": "You may want to disable11 context menu, but not ours",
+  "option_dev_msg_menu_tip": "You may want to disable Windows 11 context menu, but not ours",
   "option_dev_notice_all": "Notifications for all messages",
   "option_dev_notice_all_tip": "https://youtu.be/BU79Rfuk72Y",
   "option_dev_notice_close": "Disable all notifications",

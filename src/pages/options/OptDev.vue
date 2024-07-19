@@ -26,17 +26,6 @@
                 </label>
             </div>
             <div class="opt-item">
-                <font-awesome-icon :icon="['fas', 'table-columns']" />
-                <div>
-                    <span>{{ $t('option_dev_chatview_name') }}</span>
-                    <span>{{ $t('option_dev_chatview_name_tip') }}</span>
-                </div>
-                <select @change="save" name="chatview_name" title="chatview_name" v-model="chatview_name">
-                    <option value="">{{ $t('option_dev_chatview_name_none') }}</option>
-                    <option v-for="item in getAppendChatView()" :value="item" :key="item">{{ item }}</option>
-                </select>
-            </div>
-            <div class="opt-item">
                 <font-awesome-icon :icon="['fas', 'clipboard-list']" />
                 <div>
                     <span>{{ $t('option_dev_msg_type') }}</span>
@@ -180,7 +169,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { runASWEvent as save, runAS as saveBase, saveAll } from '@/function/option'
+import { runASWEvent as save, saveAll } from '@/function/option'
 import { websocket as ws } from '@/function/connect'
 import { PopInfo, PopType } from '@/function/base'
 import { runtimeData } from '@/function/msg'
@@ -199,16 +188,10 @@ export default defineComponent({
             runtimeData: runtimeData,
             save: save,
             ws_text: '',
-            appmsg_text: '',
-            chatview_name: ''
+            appmsg_text: ''
         }
     },
     methods: {
-        saveWName (event: KeyboardEvent, name: string) {
-            if (event.keyCode === 13) {
-                saveBase(name, this.chatview_name)
-            }
-        },
         sendTestWs (event: KeyboardEvent) {
             // 发送测试 WS 消息
             if (event.keyCode === 13 && this.ws_text !== '') {
@@ -432,24 +415,7 @@ export default defineComponent({
             if (runtimeData.reader) {
                 runtimeData.reader.send('win:relaunch')
             }
-        },
-        getAppendChatView() {
-            // 获取附加的聊天视图，它放置在项目 src/pages/chat-view 下
-            const chatView = require.context('@/pages/chat-view', true, /\.vue$/)
-            const chatViewList: string[] = []
-            chatView.keys().forEach((key: string) => {
-                const name = key.split('/').pop()?.split('.')[0]
-                if (name && name.startsWith('Chat')) {
-                    chatViewList.push(name)
-                }
-            })
-            return chatViewList
         }
-    },
-    mounted() {
-        this.$watch(() => runtimeData.sysConfig.chatview_name, () => {
-            this.chatview_name = runtimeData.sysConfig.chatview_name
-        })
     }
 })
 </script>

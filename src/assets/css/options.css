@@ -344,8 +344,9 @@
 }
 .opt-item div.ss-range {
     --range-height: 30px !important;
+    margin-left: -25px;
     max-width: 170px;
-    margin: 0;
+    margin: 0 0 0 -25px;
 }
 .opt-item div.ss-range span {
     font-size: 0.85rem;

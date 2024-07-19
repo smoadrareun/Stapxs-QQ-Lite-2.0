@@ -18,33 +18,42 @@
         <div id="shell-pan" class="shell-pan">
             <div>
                 <template
-                    v-for="msg in runtimeData.messageList"
+                    v-for="(msg, index) in runtimeData.messageList"
                     :key="msg.message_id">
-                    <div v-if="msg.post_type == 'message'" style="cursor: pointer;" :class="'shell-msg' + (msg.revoke ? ' revoke' : '')">
-                        <span @click="copy(msg.sender.user_id)" :class="'sname s' + msg.sender.role + (runtimeData.loginInfo.uin == msg.sender.user_id ? ' smine' : '')">{{ msg.sender.card ? msg.sender.card : msg.sender.nickname }}{{ msg.sub_type == 'friend' ? (runtimeData.loginInfo.uin == msg.sender.user_id ? runtimeData.loginInfo.nickname : runtimeData.chatInfo.show.name) : '' }}{{ msg.sender.user_id == 0 ? '' : ': ' }}</span>
-                        <span class="smsg" @click="copy(msg.message_id)">{{ msg.raw_message }}</span>
-                        <!-- <template v-for="(item, index) in msg.message" :key="msg.message_id + '-' + index.toString()">
-                            <pre v-if="item.type == 'image'" v-show="tags.showImg" :id="'img-' + msg.message_id + '-' + index.toString()" :data-get="makeAscii('img-' + msg.message_id + '-' + index.toString(), item.url)"></pre>
-                        </template> -->
+                    <div
+                        v-if="msg.post_type == 'message' || msg.post_type == 'message_sent'"
+                        :class="'shell-msg' + (msg.revoke ? ' revoke' : '') + (tags.replyId == msg.message_id ? ' reply' : '')"
+                        style="cursor: pointer;">
+                        <span @click="copy(msg.sender.user_id)" :class="'sname s' + msg.sender.role + (runtimeData.loginInfo.uin == msg.sender.user_id ? ' smine' : '')">
+                            {{ msg.sender.card ? msg.sender.card : msg.sender.nickname }}{{ hasReply(msg) ?? '' }}{{ msg.sub_type == 'friend' ? (runtimeData.loginInfo.uin == msg.sender.user_id ? runtimeData.loginInfo.nickname : runtimeData.chatInfo.show.name) : '' }}{{ msg.sender.user_id == 0 ? '' : ': ' }}
+                        </span>
+                        <span class="smsg" @click="copy(msg.message_id)">{{ getMsgRawTxt(msg.message) }}</span>
                         <br>
                     </div>
                     <div v-else-if="msg.post_type == 'notice'">
                         <span v-if="msg.sub_type == 'recall'" style="color:yellow">:: <span style="color:yellow;opacity: 0.7;">{{ getRecallName(msg.operator_id) }}</span> recalled a message.</span>
                     </div>
                     <div v-else-if="msg.commandLine">
-                        <div class="line-head">
-                            <span class="time">{{ msg.time.time }}</span>
-                            <span class="c1"></span>
-                            <span class="name">{{ runtimeData.loginInfo.nickname }}@sql-vue</span>
-                            <span class="c2"></span>
-                            <span class="dir">{{ msg.dir }}</span>
-                            <span :class="'c3' + (Object.keys(msg.data).length > 0 ? ' c3bg' : '')"></span>
-                            <template v-if="Object.keys(msg.data).length > 0">
-                                <span v-if="msg.data.reply" class="dir" style="background:var(--color-main);color: var(--color-font-r);">{{ msg.data.reply ? 'reply' : '' }}</span>
-                                <span class="c3" style="color:var(--color-main)"></span>
-                            </template>
+                        <div v-if="index == 2" class="line-head">
+                            <div>
+                                <span>
+                                    <font-awesome-icon :icon="['fas', 'folder-open']" />{{ runtimeData.chatInfo.show.name }}
+                                </span>
+                                <span style="color: var(--color-main-0)">
+                                    <font-awesome-icon :icon="['fas', 'plug']" />{{ runtimeData.sysConfig.address }}
+                                </span>
+                            </div>
+                            <div style="flex: 1;"></div>
+                            <div>
+                                <span style="color: var(--color-main-1)">
+                                    {{ packageInfo.version }}<font-awesome-icon :icon="['fas', 'code-branch']" />
+                                </span>
+                                <span>
+                                    {{ msg.time.time }}<font-awesome-icon :icon="['fas', 'clock']" />
+                                </span>
+                            </div>
                         </div>
-                        <a class=command-start>$ </a>
+                        <a class=command-start>• </a>
                         <span>{{ msg.str }}</span>
                     </div>
                     <div v-else-if="msg.commandOut">
@@ -55,19 +64,29 @@
             </div>
             <div class="shell-input">
                 <div class="line-head">
-                    <span class="time">{{ timeShow }}</span>
-                    <span class="c1"></span>
-                    <span class="name">{{ runtimeData.loginInfo.nickname }}@sql-vue</span>
-                    <span class="c2"></span>
-                    <span class="dir">{{ runtimeData.chatInfo.show.name }}</span>
-                    <span :class="'c3' + (Object.keys(tags.cmdTags).length > 0 ? ' c3bg' : '')"></span>
-                    <template v-if="Object.keys(tags.cmdTags).length > 0">
-                        <span v-if="tags.cmdTags.reply" class="dir" style="background:var(--color-main);color: var(--color-font-r);">{{ tags.cmdTags.reply ? 'reply' : '' }}</span>
-                        <span class="c3" style="color:var(--color-main)"></span>
-                    </template>
+                    <div>
+                        <span>
+                            <font-awesome-icon :icon="['fas', 'folder-open']" />{{ runtimeData.chatInfo.show.name }}{{ tags.replyName ? ' -> ' + tags.replyName : '' }}
+                        </span>
+                        <span style="color: var(--color-main-0)">
+                            <font-awesome-icon :icon="['fas', 'plug']" />{{ runtimeData.sysConfig.address }}
+                        </span>
+                    </div>
+                    <div style="flex: 1;"></div>
+                    <div>
+                        <span v-if="tags.newMsg > 0" style="color: var(--color-main-2);">
+                            {{ tags.newMsg }}<font-awesome-icon :icon="['fas', 'envelope']" />
+                        </span>
+                        <span style="color: var(--color-main-1)">
+                            {{ packageInfo.version }}<font-awesome-icon :icon="['fas', 'code-branch']" />
+                        </span>
+                        <span>
+                            {{ timeShow }}<font-awesome-icon :icon="['fas', 'clock']" />
+                        </span>
+                    </div>
                 </div>
-                <a class=command-start>$ </a>
-                <input @keyup="sendMsg" v-model="msg" @paste="addImg">
+                <a class=command-start>• </a>
+                <input @keyup="sendMsg" v-model="msg" @paste="addImg" id="msgInput">
             </div>
         </div>
     </div>
@@ -79,16 +98,15 @@ import SendUtil from '@/function/sender'
 import packageInfo from '../../../package.json'
 import Option from '@/function/option'
 
-import { imageToText, getImageData } from "char-dust"
-
 import { nextTick } from 'vue'
 import { Connector } from '@/function/connect'
 import { defineComponent, markRaw } from 'vue'
-import { runtimeData, appendMsg } from '@/function/msg'
+import { runtimeData } from '@/function/msg'
 import { getTrueLang } from '@/function/utils/systemUtil'
 import { MsgItemElem, SQCodeElem, UserFriendElem, UserGroupElem } from '@/function/elements/information'
 import { Logger, LogType, PopInfo, popList, PopType } from '@/function/base'
-import { sendMsgRaw } from '@/function/utils/msgUtil'
+import { sendMsgRaw, getMsgRawTxt } from '@/function/utils/msgUtil'
+import { uptime } from '@/main'
 
 export default defineComponent({
     name: 'ChatShell',
@@ -99,8 +117,11 @@ export default defineComponent({
                 fullscreen: false,
                 fistget: true,
                 cmdTags: {} as { [key: string]: any },
-                showImg: false
+                newMsg: 0,
+                replyName: null as string | null,
+                replyId: null as string | null
             },
+            getMsgRawTxt: getMsgRawTxt,
             popInfo: new PopInfo(),
             packageInfo: packageInfo,
             runMode: process.env.NODE_ENV,
@@ -113,11 +134,27 @@ export default defineComponent({
             supportCmd: {} as { [key: string]: any },
             imgCache: [] as string[],
             sendCache: [] as MsgItemElem[],
-            searchListCache: [] as (UserFriendElem & UserGroupElem)[],
-            asciiCache: {} as { [ key: string ]: string }
+            searchListCache: [] as (UserFriendElem & UserGroupElem)[]
         }
     },
     methods: {
+        hasReply(msg: any) {
+            if(msg.message) {
+                const repItem = msg.message.filter((item: any) => {
+                    return item.type == 'reply'
+                })
+                if(repItem[0]) {
+                    const repMsg = runtimeData.messageList.filter((item) => {
+                        return item.message_id == repItem[0].id
+                    })
+                    if(repMsg[0]) {
+                        return '->' + (repMsg[0].sender.card ? repMsg[0].sender.card : repMsg[0].sender.nickname)
+                    }
+                }
+            }
+            return null
+        },
+
         /**
          * 消息区滚动到指定位置
          * @param where 位置（px）
@@ -147,7 +184,7 @@ export default defineComponent({
                 this.tags.fistget = false
                 this.addCommandOutF(':: joining chat ..', 'yellow')
                 this.addCommandLineF('cd ' + runtimeData.chatInfo.show.id, runtimeData.chatInfo.show.type)
-                this.addCommandOutF('* Stapxs QQ Lite 2.0 Shell Theme requires "FiraCode Nerd Font" to display complete command line symbols, please ensure the device has installed this font.\n\n* Use the command "fullscreen" or return to the parent directory to exit the full screen mode.\n\n\n', 'var(--color-font)')
+                this.addCommandOutF('* Stapxs QQ Lite 2.0 Shell requires "FiraCode Nerd Font" to display complete command line symbols, please ensure the device has installed this font.\n\n* Use the command "fullscreen" or return to the parent directory to exit the full screen mode.\n\n* 使用 "help" 命令查看所有可用命令。\n\n\n', 'var(--color-font)')
                 this.addCommandOutF(`Welcome to Stapxs QQ Lite ${packageInfo.version} (Vue ${packageInfo.dependencies.vue}-${this.runMode})\n\n`, 'var(--color-font)')
             }
             this.scrollBottom(true)
@@ -202,9 +239,14 @@ export default defineComponent({
 
         sendMsg (event: KeyboardEvent) {
             // 执行指令
-            if (event.keyCode === 13 && this.msg != '') {
+            if (event.keyCode === 13) {
                 this.addCommandLine(this.msg, runtimeData.chatInfo.show.name, this.tags.cmdTags)
+                if(this.msg == '') return
+
                 // 检查是否是支持的指令
+                if(this.msg[0] == '/') {
+                    this.msg = 'sql send ' + this.msg.substring(1, this.msg.length)
+                }
                 const msgList = this.msg.split(' ')
                 new Logger().add(LogType.DEBUG, 'CMD: ' + msgList.toString())
                 if(msgList.length > 0 && this.supportCmd[msgList[0]]) {
@@ -214,19 +256,27 @@ export default defineComponent({
                     this.addCommandOut('stsh: command not found, use the help command to view all available commands.', 'red')
                 }
                 // 发送后处理
-                this.scrollBottom()
                 this.tags.cmdTags = {}
                 if(this.sendCache.filter((item) => { return item.type === 'reply'}).length > 0) {
                     this.tags.cmdTags.reply = true
                 }
             }
+            setTimeout(() => {
+                this.scrollBottom()
+            }, 500)
         },
 
         copy(str: string) {
-            app.config.globalProperties.$copyText(str).then(() => {
-                this.popInfo.add(PopType.INFO, 'copy messageId successfully', true)
+            const input = document.getElementById('msgInput')
+            console.log(input)
+            if(input) {
+                this.msg = 'sql reply ' + str + ' '
+                input.focus()
+            }
+            app.config.globalProperties.$copyText(String(str)).then(() => {
+                this.addCommandOut(':: Copy messageId successfully.', 'gray')
             }, () => {
-                this.popInfo.add(PopType.ERR, 'copy messageId failed', true)
+                this.addCommandOut(':: Copy messageId failed.', 'gray')
             })
         },
 
@@ -249,56 +299,6 @@ export default defineComponent({
             }
             return -1
         },
-        
-        makeAscii(id: string, url: string) {
-            // 检查缓存是否存在
-            if(!this.asciiCache[id]) {
-                // PS：由于 QQ 的图片也有跨域限制
-                // 导致生成 ascii 纯文本无法正常下载图片 ……
-                // 于是也只能拜托后端帮忙下载一下用 base64 图片丢回来（当然这样效率低到了一个新的高度）
-                // 总之为了彩蛋就不管了
-
-                // 添加自定义的 msg 处理方法
-                const setAscii = (msg: any) => {
-                    msg = msg.data
-                    // 图片 base64
-                    const base64 = 'data:' + msg.headers['content-type'] + ';base64,' + msg.data
-                    const img = document.createElement('img')
-                    img.src = base64
-                    const imageData = getImageData(img)
-                    const text = imageToText(imageData)
-                    this.asciiCache[id] = 'test'
-                    const pre = document.getElementById(id)
-                    if(pre) {
-                        let out = ''
-                        text.forEach((line: string) => {
-                            out += line + '\n'
-                        })
-                        // 修正宽度
-                        const chat = document.getElementById('chat-pan')
-                        if(chat) {
-                            let fontWidth = chat.offsetWidth / text[0].length
-                            if(fontWidth < 1) {
-                                fontWidth = 1
-                            }
-                            if(fontWidth > 7) {
-                                fontWidth = 7
-                            }
-                            pre.style.fontSize = Math.ceil(fontWidth) + 'px'
-                            pre.style.lineHeight = (Math.ceil(fontWidth) + 1) + 'px'
-                        }
-                        pre.innerHTML = out
-                    }
-                }
-                appendMsg.getImgAscii = setAscii
-
-                // 请求图片
-                Connector.send('http_proxy', {url: url, responseEncoding: 'base64'}, 'getImgAscii')
-                return 'get'
-            }
-            return 'has'
-        },
-
         getRecallName(id: number) {
             let backName = id.toString()
             // 补全撤回者信息
@@ -390,7 +390,7 @@ export default defineComponent({
                 info: 'List all contacts in the current message queue.',
                 fun: () => {
                     this.searchListCache = markRaw(runtimeData.onMsgList)
-                    let str = ''
+                    let str = '  total ' + this.searchListCache.length + '\n'
                     let hasMsg = false
                     runtimeData.onMsgList.forEach((item, index) => {
                         if(item.new_msg == true) {
@@ -403,15 +403,6 @@ export default defineComponent({
                     })
                     if(hasMsg) this.addCommandOut(':: You have message.', 'yellow')
                     this.addCommandOut(str)
-                }
-            },
-            '': {
-                info: 'Alias for the command "sql send".',
-                fun: (raw: string, item: string[]) => {
-                    if(item[0] == '' && item[1] == '') {
-                        const msg = raw.substring(2, raw.length)
-                        this.supportCmd.sql.fun('sql send ' + msg, ['sql', 'send', msg])
-                    }
                 }
             },
             sql: {
@@ -430,6 +421,9 @@ export default defineComponent({
                             // 发送后处理
                             this.sendCache = []
                             this.imgCache = []
+
+                            this.tags.replyName = null
+                            this.tags.replyId = null
                             break
                         }
                         // 寻找联系人
@@ -440,7 +434,7 @@ export default defineComponent({
                                 const id = item.user_id ? item.user_id : item.group_id
                                 return name.indexOf(value.toLowerCase()) !== -1 || id.toString() === value
                             }) as (UserFriendElem & UserGroupElem)[]
-                            let str = ''
+                            let str = '  total ' + this.searchListCache.length + '\n'
                             this.searchListCache.forEach((item, index) => {
                                 str += index.toString() + '     '
                                 str += (item.group_id ? item.group_id : item.user_id) + '     '
@@ -456,8 +450,27 @@ export default defineComponent({
                             this.sendCache = this.sendCache.filter((item) => {
                                 return item.type !== 'reply'
                             })
-                            if(item[2]) {
+                            if (item[2] && item[2] != 'clear') {
+                                // 根据 item[2] 寻找这条消息 的 msg.sender.card ? msg.sender.card : msg.sender.nickname
+                                const msg = runtimeData.messageList.filter((msg) => {
+                                    return msg.message_id == item[2]
+                                })
+                                this.tags.replyId = item[2]
+                                if(msg[0]) {
+                                    this.tags.replyName = 
+                                        msg[0].sender.card ? msg[0].sender.card : msg[0].sender.nickname
+                                }
                                 this.addSpecialMsg({ msgObj: { type: 'reply', id: item[2] }, addText: false, addTop: true })
+                            } else if (item[2] && item[2] == 'clear') {
+                                this.sendCache = this.sendCache.filter((item) => {
+                                    return item.type !== 'reply'
+                                })
+                                this.tags.replyName = null
+                                this.tags.replyId = null
+                            }
+                            if(item[3]) {
+                                this.supportCmd['sql'].fun('sql send ' + item[3], ['sql', 'send', item[3]])
+                                this.msg = ''
                             }
                             break
                         }
@@ -472,33 +485,32 @@ export default defineComponent({
                             }
                             // 加载历史消息
                             // 获取列表第一条消息 ID
-                            const firstMsgId = runtimeData.messageList[0].message_id
-                            if (firstMsgId) {
-                                // 发起获取历史消息请求
-                                let name = 'get_chat_history'
-                                if(runtimeData.botInfo['go-cqhttp'] === true)
-                                    name = 'get_msg_history'
-                                Connector.send(
-                                    name,
-                                    {
-                                        message_id: firstMsgId,
-                                        target_id: runtimeData.chatInfo.show.id,
-                                        group: runtimeData.chatInfo.show.type == 'group',
-                                        count: 20
-                                    },
-                                    'getChatHistory'
-                                )
+                            const firstMsgId = runtimeData.messageList[0].message_id ?? 0
+                            // 发起获取历史消息请求
+                            const type = runtimeData.chatInfo.show.type
+                            const id = runtimeData.chatInfo.show.id
+                            let name
+                            if(runtimeData.jsonMap.message_list && type != "group") {
+                                name = runtimeData.jsonMap.message_list.private_name
                             } else {
-                                this.addCommandOut(':: No messages in the message list. Failed to get message id ...', 'red')
+                                name = runtimeData.jsonMap.message_list.name
                             }
-                            break
-                        }
-                        case 'showImg': {
-                            this.tags.showImg = !this.tags.showImg
+                            Connector.send(
+                                name ?? 'get_chat_history',
+                                {
+                                    message_type: runtimeData.jsonMap.message_list.message_type[type],
+                                    group_id: type == "group" ? id : undefined,
+                                    user_id: type != "group" ? id : undefined,
+                                    message_seq: firstMsgId,
+                                    message_id: firstMsgId,
+                                    count: 20
+                                },
+                                'getChatHistory'
+                            )
                             break
                         }
                         default: {
-                            this.addCommandOut('usage: sql send [msg], \n           list [search], \n           reply [msgId], \n           history, \n           showImg')
+                            this.addCommandOut('usage: sql send [msg]: Send a message, you can directly use "/<Message>" to replace it, \n           list [search]: Fuzzy search in the list of friends/groups, \n           reply [msgId] <message>: Use the message id to reply to the message, Click the message to copy the id, \n           history: Load more history.')
                         }
                     }
                 }
@@ -524,8 +536,10 @@ export default defineComponent({
                     const infoList = {
                         Application: 'Stapxs QQ Lite 2.0',
                         Kernel: packageInfo.version + '-web',
-                        Shell: 'stsh base',
-                        Theme: 'ChatSHell'
+                        Shell: 'stsh Basic Shell 1.0',
+                        Theme: 'ChatSHell',
+                        Uptime: Math.floor((new Date().getTime() - uptime) / 1000 * 100) / 100 + ' s',
+                        Resolution: window.screen.width + 'x' + window.screen.height
                     } as { [key: string]: string }
                     if(runtimeData.tags.isElectron) {
                         infoList.Kernel = packageInfo.version + '-electron'
@@ -577,10 +591,12 @@ export default defineComponent({
                         const item = runtimeData.userList[i]
                         const gid = item.user_id !== undefined ? item.user_id : item.group_id
                         if (String(gid) === id) {
+                            console.log('cd ' + id + ' success')
+                            console.log(item)
                             // 检查显示列表里有没有它
                             if (!document.getElementById('user-' + id)) {
-                                // 把它插入到显示列表的第一个
-                                runtimeData.showList?.unshift(item)
+                                // 把它插入到显示列表
+                                runtimeData.onMsgList?.push(item)
                             }
                             nextTick(() => {
                                 const bodyNext = document.getElementById('user-' + id)
@@ -595,6 +611,9 @@ export default defineComponent({
                         }
                     }
                     this.addCommandOut(':: No valid contacts found', 'red')
+
+                    this.tags.replyName = null
+                    this.tags.replyId = null
                 }
             }
         }
@@ -604,7 +623,11 @@ export default defineComponent({
         this.$watch(() => popList.length, this.showPop)
         this.timeSetter = setInterval(()=>{
             this.timeShow = Intl.DateTimeFormat(this.trueLang, { hour: 'numeric', minute: 'numeric', second: 'numeric' }).format(new Date())
-        }, 1000);
+            // 刷新新消息数
+            this.tags.newMsg = runtimeData.onMsgList.filter((item) => {
+                return item.new_msg == true
+            }).length
+        }, 1000)
         const pan = document.getElementById('chat-pan')
         if (pan) {
             this.tags.fullscreen = true
@@ -625,42 +648,41 @@ export default defineComponent({
 }
 
 .line-head {
-    margin-bottom: 5px;
+    margin: 5px 0;
+    color: var(--color-font);
+    font-size: 0.8rem;
+    display: flex;
+    justify-content: flex-end;
 }
-.line-head > span.time {
+.line-head > div:first-child svg {
+    margin-right: 10px;
+}
+.line-head > div:last-child svg {
+    margin-left: 10px;
+}
+.line-head > div > span {
+    background: var(--color-card-1);
+    margin-left: 5px;
+    padding: 3px 10px;
+}
+.line-head > div > span:first-child {
+    border-radius: 10px 0 0 10px;
+    margin-left: 0;
+}
+.line-head > div:first-child > span:first-child {
     background: var(--color-main);
     color: var(--color-font-r);
-    border-radius: 7px 0 0 7px;
-    padding: 0 5px 0 10px;
 }
-.line-head > span.c1 {
-    color: var(--color-main);
-}
-.line-head > span.name {
-    background: var(--color-card);
-    padding: 0 10px;
-}
-.line-head > span.c2 {
-    background: rgb(0, 122, 204);
-    color: var(--color-card);
-}
-.line-head > span.dir {
-    background: rgb(0, 122, 204);
-    padding: 0 10px;
-}
-.line-head > span.c3 {
-    color: rgb(0, 122, 204);
-}
-.line-head > span.c3.c3bg {
-    background: var(--color-main);
+.line-head > div > span:last-child {
+    border-radius: 0 10px 10px 0;
 }
 .command-start {
     color: greenyellow;
 }
 
 .shell-pan {
-    margin-top: 20px;
-    padding: 20px;
+    margin-top: 40px;
+    padding: 0 20px;
     pointer-events: all;
     overflow-y: scroll;
     overflow-x: hidden;
@@ -669,17 +691,23 @@ export default defineComponent({
     flex: 1;
 }
 
+.shell-msg {
+    border-radius: 7px;
+}
 .shell-msg.revoke {
     display: none;
 }
+.shell-msg.reply {
+        background: var(--color-card-1);
+}
 .shell-msg > span.sname.sadmin {
-    color: green;
+    color: var(--color-main-1);
 }
 .shell-msg > span.sname.sowner {
-    color: gold;
+    color: var(--color-main-4);
 }
 .shell-msg > span.sname.smine {
-    color: rgb(0, 122, 204) !important;
+    color: var(--color-main-0) !important;
 }
 .shell-msg > span.smsg {
     color: var(--color-font-2);
@@ -710,11 +738,14 @@ export default defineComponent({
     display: flex;
     flex-wrap: wrap;
 }
+.shell-neofetch span {
+    line-height: 1.2rem;
+}
 .shell-neofetch > span {
-    color: var(--color-main);
+    color: var(--color-main-0);
     margin-bottom: 20px;
     margin-right: 20px;
-    line-height: 1.3rem;
+    letter-spacing: -1px;
 }
 .shell-neofetch > div {
     flex-direction: column;
