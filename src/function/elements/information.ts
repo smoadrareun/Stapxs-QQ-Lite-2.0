@@ -37,6 +37,9 @@ export interface RunTimeDataElem {
         classes: any[],
         sw?: boolean
     },
+    watch: {                // PS: 一些给监听器捕捉用的数据
+        newMsg: any
+    },
     messageList: any[]
     mergeMessageList?: any[] | undefined,
     stickerCache?: any[],

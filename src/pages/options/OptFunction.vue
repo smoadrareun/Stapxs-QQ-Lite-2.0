@@ -80,7 +80,7 @@
                 </label>
             </div>
             <div class="opt-item">
-                <font-awesome-icon :icon="['fas', 'face-laugh-squint']"/>
+                <font-awesome-icon :icon="['fas', 'face-laugh-squint']" />
                 <div>
                     <span>{{ $t('option_dev_chat_respond') }}</span>
                     <span>{{ $t('option_dev_chat_respond_tip') }}</span>

@@ -38,7 +38,7 @@ export function getTrueLang(): string {
  * @param str 待处理的字符串
  * @returns 处理完成的字符串
  */
-export function htmlDecodeByRegExp(str: string): string {
+export function escape2Html(str: string): string {
     let s = ''
     if (str.length === 0) return ''
     s = str.replace(/&amp;/g, '&')
@@ -56,7 +56,7 @@ export function htmlDecodeByRegExp(str: string): string {
  * @returns emoji 符号
  */
 export function gitmojiToEmoji (name: string) {
-    return {":zap:":"⚡️",":art:":"🎨",":fire:":"🔥",":bug:":"🐛",":ambulance:":"🚑️",":sparkles:":"✨",":memo:":"📝",":rocket:":"🚀",":lipstick:":"💄",":tada:":"🎉",":white-check-mark:":"✅",":lock:":"🔒️",":closed-lock-with-key:":"🔐",":bookmark:":"🔖",":rotating-light:":"🚨",":construction:":"🚧",":green-heart:":"💚",":arrow-down:":"⬇️",":arrow-up:":"⬆️",":pushpin:":"📌",":construction-worker:":"👷",":chart-with-upwards-trend:":"📈",":recycle:":"♻️",":heavy-plus-sign:":"➕",":heavy-minus-sign:":"➖",":wrench:":"🔧",":hammer:":"🔨",":globe-with-meridians:":"🌐",":pencil2:":"✏️",":poop:":"💩",":rewind:":"⏪️",":twisted-rightwards-arrows:":"🔀",":package:":"📦️",":alien:":"👽️",":truck:":"🚚",":page-facing-up:":"📄",":boom:":"💥",":bento:":"🍱",":wheelchair:":"♿️",":bulb:":"💡",":beers:":"🍻",":speech-balloon:":"💬",":card-file-box:":"🗃️",":loud-sound:":"🔊",":mute:":"🔇",":busts-in-silhouette:":"👥",":children-crossing:":"🚸",":building-construction:":"🏗️",":iphone:":"📱",":clown-face:":"🤡",":egg:":"🥚",":see-no-evil:":"🙈",":camera-flash:":"📸",":alembic:":"⚗️",":mag:":"🔍️",":label:":"🏷️",":seedling:":"🌱",":triangular-flag-on-post:":"🚩",":goal-net:":"🥅",":animation:":"💫",":wastebasket:":"🗑️",":passport-control:":"🛂",":adhesive-bandage:":"🩹",":monocle-face:":"🧐",":coffin:":"⚰️",":test-tube:":"🧪",":necktie:":"👔",":stethoscope:":"🩺",":bricks:":"🧱",":technologist:":"🧑‍💻"}[name]
+    return {':art:':'🎨',':zap:':'⚡️',':fire:':'🔥',':bug:':'🐛',':ambulance:':'🚑️',':sparkles:':'✨',':memo:':'📝',':rocket:':'🚀',':lipstick:':'💄',':tada:':'🎉',':white_check_mark:':'✅',':lock:':'🔒️',':closed_lock_with_key:':'🔐',':bookmark:':'🔖',':rotating_light:':'🚨',':construction:':'🚧',':green_heart:':'💚',':arrow_down:':'⬇️',':arrow_up:':'⬆️',':pushpin:':'📌',':construction_worker:':'👷',':chart_with_upwards_trend:':'📈',':recycle:':'♻️',':heavy_plus_sign:':'➕',':heavy_minus_sign:':'➖',':wrench:':'🔧',':hammer:':'🔨',':globe_with_meridians:':'🌐',':pencil2:':'✏️',':poop:':'💩',':rewind:':'⏪️',':twisted_rightwards_arrows:':'🔀',':package:':'📦️',':alien:':'👽️',':truck:':'🚚',':page_facing_up:':'📄',':boom:':'💥',':bento:':'🍱',':wheelchair:':'♿️',':bulb:':'💡',':beers:':'🍻',':speech_balloon:':'💬',':card_file_box:':'🗃️',':loud_sound:':'🔊',':mute:':'🔇',':busts_in_silhouette:':'👥',':children_crossing:':'🚸',':building_construction:':'🏗️',':iphone:':'📱',':clown_face:':'🤡',':egg:':'🥚',':see_no_evil:':'🙈',':camera_flash:':'📸',':alembic:':'⚗️',':mag:':'🔍️',':label:':'🏷️',':seedling:':'🌱',':triangular_flag_on_post:':'🚩',':goal_net:':'🥅',':dizzy:':'💫',':wastebasket:':'🗑️',':passport_control:':'🛂',':adhesive_bandage:':'🩹',':monocle_face:':'🧐',':coffin:':'⚰️',':test_tube:':'🧪',':necktie:':'👔',':stethoscope:':'🩺',':bricks:':'🧱',':technologist:':'🧑‍💻',':money_with_wings:':'💸',':thread:':'🧵',':safety_vest:':'🦺'}[name]
 }
 
 /**
@@ -181,9 +181,6 @@ export function getRandom(num: boolean, maxA: boolean, minlA: boolean, fqy: numb
         for (let m = 97; m <= 122; m++) {
             arr2.push(m)
         }
-    }
-    if (!fqy) {
-        console.log('生成位数必传')
     }
     const mergeArr = arr.concat(arr1)
     const mergeArr1 = mergeArr.concat(arr2)

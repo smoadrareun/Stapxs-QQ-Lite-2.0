@@ -8,6 +8,23 @@
 <template>
     <div class="opt-page">
         <div class="ss-card">
+            <header>{{ $t('option_dev_append') }}</header>
+            <div class="opt-item">
+                <font-awesome-icon :icon="['fas', 'code']" />
+                <div>
+                    <span>{{ $t('title_scripts') }}</span>
+                    <span>{{ $t('option_dev_scripts_tip') }}</span>
+                </div>
+                <label class="ss-switch">
+                    <input type="checkbox" @change="save" name="append_scripts" v-model="runtimeData.sysConfig.append_scripts">
+                    <div>
+                        <div></div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <div class="ss-card">
             <header>{{ $t('option_dev_connect') }}</header>
             <div class="tip">
                 {{ $t('option_dev_connect_tip') }}
@@ -212,9 +229,11 @@ export default defineComponent({
             new PopInfo().add(PopType.INFO, app.config.globalProperties.$t('pop_option_dev_debug_msg_tip_1'))
         },
         printRuntime () {
+            /* eslint-disable no-console */
             console.log('=========================')
             console.log(runtimeData)
             console.log('=========================')
+            /* eslint-enable no-console */
             if (runtimeData.reader) {
                 runtimeData.reader.send('win:openDevTools')
             }
@@ -231,7 +250,7 @@ export default defineComponent({
             const browser = detect() as BrowserInfo
             let info = '```\n'
             info += 'Debug Info - ' + new Date().toLocaleString() + '\n================================\n'
-            info += `System Info:\n`
+            info += 'System Info:\n'
             info += `    OS Name          -> ${browser.os}\n`
             info += `    Browser Name     -> ${browser.name}\n`
             info += `    Browser Version  -> ${browser.version}\n`
@@ -261,12 +280,12 @@ export default defineComponent({
                         if((runtimeData.tags.release.toLowerCase()).indexOf('arch') > 0) {
                             let pacmanInfo = await runtimeData.reader.invoke('sys:runCommand', 'pacman -Q stapxs-qq-lite-bin')
                             if(pacmanInfo.success) {
-                                info += `    Install Type     -> aur\n`
+                                info += '    Install Type     -> aur\n'
                             } else {
                                 // 也有可能是 stapxs-qq-lite，这是我自己打的原生包
                                 pacmanInfo = await runtimeData.reader.invoke('sys:runCommand', 'pacman -Q stapxs-qq-lite')
                                 if(pacmanInfo.success) {
-                                    info += `    Install Type     -> pacman\n`
+                                    info += '    Install Type     -> pacman\n'
                                 }
                             }
                         }
@@ -275,21 +294,21 @@ export default defineComponent({
                 }
             }
 
-            info += `Application Info:\n`
+            info += 'Application Info:\n'
             info += `    Uptime           -> ${Math.floor((new Date().getTime() - uptime) / 1000 * 100) / 100} s\n` 
             info += `    Package Version  -> ${packageInfo.version}\n`
             info += `    Runtime env      -> ${process.env.NODE_ENV}\n`
             info += `    Service Work     -> ${runtimeData.tags.sw}\n`
 
-            info += `Backend Info:\n`
+            info += 'Backend Info:\n'
             info += `    Bot Info Name    -> ${runtimeData.botInfo.app_name}\n`
             info += `    Bot Info Version -> ${runtimeData.botInfo.app_version !== undefined ? runtimeData.botInfo.app_version : runtimeData.botInfo.version}\n`
             info += `    Loaded Config    -> ${runtimeData.jsonMap?.name}\n`
 
-            info += `View Info:\n`
+            info += 'View Info:\n'
             info += `    Doc Width        -> ${document.getElementById('app')?.offsetWidth} px\n`
 
-            info += `Network Info:\n`
+            info += 'Network Info:\n'
             const testList = [
                      ['Github          ', 'https://api.github.com'],
                      ['Link API        ', 'https://api.stapxs.cn']
@@ -391,7 +410,7 @@ export default defineComponent({
                         text: app.config.globalProperties.$t('btn_yes'),
                         fun: () => {
                             localStorage.clear()
-                            document.cookie.split(';').forEach(function (c) {
+                            document.cookie.split(';').forEach((c) => {
                                 document.cookie = c
                                     .replace(/^ +/, '')
                                     .replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');

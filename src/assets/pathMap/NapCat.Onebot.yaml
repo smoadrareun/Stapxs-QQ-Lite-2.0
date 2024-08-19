@@ -13,18 +13,24 @@ login_info:
     bkn: ""
     nickname: $.data.nickname
 # 群、好友列表
-user_list:
+friend_list:
+    name: get_friends_with_category
+    source: $.data[*]
+    list:
+        class_id: /categoryId
+        class_name: /categroyName
+        user_id: /user_id
+        nickname: /nickname
+        remark: /remark
+        longNick: /longNick
+group_list:
+    name: get_group_list
     source: $.data[*]
     list:
         group_id: /group_id
         group_name: /group_name
         member_count: /member_count
         admin_flag: $.admins[?(@ == '<uin>')]
-
-        class_id: null
-        user_id: /user_id
-        nickname: /nickname
-        remark: /remark
 # 消息列表
 message_list:
     name: get_group_msg_history
@@ -77,15 +83,6 @@ set_message_read:
 # 设置消息回应
 send_respond:
     name: set_msg_emoji_like
-# 获取分组信息
-class_list:
-    name: get_friends_with_category
-    source: $.data[*]
-    list:
-        class_id: /categoryId
-        class_name: /categroyName
-        user_count: /categroyMbCount
-        list: /buddyList
 # 获取群公告
 group_notices:
     name: _get_group_notice
@@ -109,3 +106,16 @@ group_essence:
         add_digest_nick: /add_digest_nick
         add_digest_time: /add_digest_time
     is_end: $.data.is_end
+# 获取收藏表情
+roaming_stamp:
+    name: fetch_custom_face
+    pageed: true
+# 获取历史会话
+recent_contact:
+    name: get_recent_contact
+    source: $.data[*]
+    list:
+        user_id: /peerUin
+        time: /msgTime
+        chat_type: /chatType
+        name: /peerName

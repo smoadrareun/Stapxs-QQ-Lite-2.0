@@ -2,6 +2,7 @@ import VueViewer from 'v-viewer'
 import VueClipboard from 'vue-clipboard2'
 import InfiniteScroll from 'vue3-infinite-scroll-better'
 import packageInfo from '../package.json'
+import { PrismEditor } from 'vue-prism-editor'
 
 import App from './App.vue'
 
@@ -16,6 +17,7 @@ import { faSquare } from '@fortawesome/free-regular-svg-icons'
 import './registerServiceWorker'
 
 import 'viewerjs/dist/viewer.css'
+import 'vue-prism-editor/dist/prismeditor.min.css'
 
 import './assets/css/view.css'
 import './assets/css/chat.css'
@@ -24,6 +26,8 @@ import './assets/css/options.css'
 import './assets/css/sys_notice.css'
 
 import zh from './assets/l10n/zh-CN.json'
+
+/* eslint-disable no-console */
 
 // 载入 l10n
 const messages = { 'zh-CN': zh }
@@ -46,6 +50,7 @@ app.use(InfiniteScroll)
 library.add(fas)
 library.add(faSquare)
 app.component('font-awesome-icon', FontAwesomeIcon)
+app.component('PrismEditor', PrismEditor)
 
 app.mount('#app')
 export default app

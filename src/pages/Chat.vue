@@ -16,7 +16,7 @@
         id="chat-pan">        
         <!-- 聊天基本信息 -->
         <div class="info">
-            <font-awesome-icon @click="openLeftBar" :icon="['fas', 'bars-staggered']"/><img :src="chat.show.avatar">
+            <font-awesome-icon @click="openLeftBar" :icon="['fas', 'bars-staggered']" /><img :src="chat.show.avatar">
             <div class="info">
                 <p>{{ chat.show.name }}</p>
                 <span v-if="chat.show.temp">
@@ -33,12 +33,12 @@
             </div>
             <div class="space"></div>
             <div class="more">
-                <font-awesome-icon @click="openChatInfoPan" :icon="['fas', 'ellipsis-vertical']"/>
+                <font-awesome-icon @click="openChatInfoPan" :icon="['fas', 'ellipsis-vertical']" />
             </div>
         </div>
         <!-- 加载中指示器 -->
         <div :class="'loading' + (tags.nowGetHistroy && runtimeData.tags.canLoadHistory ? ' show': '')">
-            <font-awesome-icon :icon="['fas', 'spinner']"/>
+            <font-awesome-icon :icon="['fas', 'spinner']" />
             <span>{{ $t('loading') }}</span>
         </div>
         <!-- 消息显示区 -->
@@ -160,6 +160,8 @@
                         @click="details[1].open = !details[1].open, tags.showMoreDetail = false">
                         <font-awesome-icon :icon="['fas', 'face-laugh']" />
                     </div>
+                    <div :title="$t('chat_fun_menu_poke')" v-if="chat.show.type === 'user'" @click="sendPoke">
+                        <font-awesome-icon :icon="['fas', 'bomb']" /></div>
                     <div :title="$t('chat_fun_menu_jin')" v-if="chat.show.type === 'group'" @click="showJin">
                         <font-awesome-icon :icon="['fas', 'star']" /></div>
                 </div>
@@ -520,7 +522,7 @@ export default defineComponent({
                 const type = runtimeData.chatInfo.show.type
                 const id = runtimeData.chatInfo.show.id
                 let name
-                if(runtimeData.jsonMap.message_list && type != "group") {
+                if(runtimeData.jsonMap.message_list && type != 'group') {
                     name = runtimeData.jsonMap.message_list.private_name
                 } else {
                     name = runtimeData.jsonMap.message_list.name
@@ -529,8 +531,8 @@ export default defineComponent({
                     name ?? 'get_chat_history',
                     {
                         message_type: runtimeData.jsonMap.message_list.message_type[type],
-                        group_id: type == "group" ? id : undefined,
-                        user_id: type != "group" ? id : undefined,
+                        group_id: type == 'group' ? id : undefined,
+                        user_id: type != 'group' ? id : undefined,
                         message_seq: firstMsgId,
                         message_id: firstMsgId,
                         count: 20
@@ -564,9 +566,8 @@ export default defineComponent({
             }
         },
         scrollToMsg (message_id: string) {
-            // oicq1：seq 字段名消息格式兼容
             if (!scrollToMsg(message_id, true)) {
-                new PopInfo().add(PopType.INFO, this.$t('pop_chat_msg_not_load') + ' ( ' + message_id.split('-')[1] + ' ) ')
+                new PopInfo().add(PopType.INFO, this.$t('pop_chat_msg_not_load'))
             }
         },
         imgLoadedScroll () {
@@ -604,13 +605,12 @@ export default defineComponent({
                     this.tags.onAtFind = true
                 }
                 if(this.tags.onAtFind) {
-                    if(this.msg.lastIndexOf("@") < 0) {
+                    if(this.msg.lastIndexOf('@') < 0) {
                         logger.add(LogType.UI, '匹配群成员列表被打断 ……')
                         this.tags.onAtFind = false
                         this.atFindList = null
                     } else {
-                        const atInfo = this.msg.substring(this.msg.lastIndexOf("@") + 1).toLowerCase()
-                        console.log(atInfo)
+                        const atInfo = this.msg.substring(this.msg.lastIndexOf('@') + 1).toLowerCase()
                         if(atInfo != '') {
                             this.atFindList = runtimeData.chatInfo.info.group_members.filter((item) => {
                                 return (item.card != '' && item.card != null && item.card.toLowerCase().indexOf(atInfo) >= 0) || 
@@ -687,7 +687,7 @@ export default defineComponent({
             this.selectedMsg = data
 
             if (Option.get('log_level') === 'debug') {
-                console.log(data)
+                new Logger().debug('右击消息：' + data)
             }
             const menu = document.getElementById('msgMenu')
             let msg = event.currentTarget as HTMLDivElement
@@ -915,7 +915,7 @@ export default defineComponent({
         forwardSelf() {
             if (this.selectedMsg) {
                 const msg = this.selectedMsg
-                sendMsgRaw(this.chat.show.id, this.chat.show.type, msg.message)
+                sendMsgRaw(this.chat.show.id, this.chat.show.type, msg.message, true)
             }
             this.closeMsgMenu()
         },
@@ -953,7 +953,7 @@ export default defineComponent({
                             text: this.$t('btn_yes'),
                             master: true,
                             fun: () => {
-                                sendMsgRaw(this.chat.show.id, this.chat.show.type, msg.message)
+                                sendMsgRaw(this.chat.show.id, this.chat.show.type, msg.message, true)
                                 runtimeData.popBoxList.shift()
                             }
                         }
@@ -1017,8 +1017,7 @@ export default defineComponent({
                 const popInfo = new PopInfo()
                 app.config.globalProperties.$copyText(msg.raw_message).then(() => {
                     popInfo.add(PopType.INFO, this.$t('pop_chat_msg_menu_copy_success'), true)
-                }, (e: any) => {
-                    console.log(e)
+                }, () => {
                     popInfo.add(PopType.ERR, this.$t('pop_chat_msg_menu_copy_err'), true)
                 })
             }
@@ -1033,8 +1032,7 @@ export default defineComponent({
                 const popInfo = new PopInfo()
                 app.config.globalProperties.$copyText(this.selectCache).then(() => {
                     popInfo.add(PopType.INFO, this.$t('pop_chat_msg_menu_copy_success'), true)
-                }, (e: any) => {
-                    console.log(e)
+                }, () => {
                     popInfo.add(PopType.ERR, this.$t('pop_chat_msg_menu_copy_err'), true)
                 })
             }
@@ -1297,8 +1295,8 @@ export default defineComponent({
                     var url = ssl + loginInfo.address + '/upload_file'
                     var xhr = new XMLHttpRequest()
                     xhr.upload.onprogress = onProgress
-                    xhr.open("POST", url, true)
-                    xhr.setRequestHeader("authorization", loginInfo.token)
+                    xhr.open('POST', url, true)
+                    xhr.setRequestHeader('authorization', loginInfo.token)
                     xhr.send(formData)
                     xhr.onreadystatechange = function () {
                         const data = JSON.parse(xhr.responseText)
@@ -1310,7 +1308,6 @@ export default defineComponent({
                         }
                     }
                 } catch(e) {
-                    console.log(e)
                     new PopInfo().add(PopType.ERR, app.config.globalProperties.$t('pop_send_file_err'))
                 }
             }
@@ -1389,9 +1386,9 @@ export default defineComponent({
             // 在发送操作触发之后，将会解析此条字符串排列出最终需要发送的消息结构用于发送。
             let msg = SendUtil.parseMsg(this.msg, this.sendCache, this.imgCache)
             if(this.chat.show.temp) {
-                sendMsgRaw(this.chat.show.id + '/' + this.chat.show.temp, this.chat.show.type, msg)
+                sendMsgRaw(this.chat.show.id + '/' + this.chat.show.temp, this.chat.show.type, msg, true)
             } else {
-                sendMsgRaw(this.chat.show.id, this.chat.show.type, msg)
+                sendMsgRaw(this.chat.show.id, this.chat.show.type, msg, true)
             }
             // 发送后事务
             this.msg = ''
@@ -1541,7 +1538,7 @@ export default defineComponent({
 
             // 消息长按事件，计时判定长按
             setTimeout(() => {
-                logger.add(LogType.UI, "消息触屏长按判定：" + this.tags.msgTouch.msgOnTouchDown)
+                logger.add(LogType.UI, '消息触屏长按判定：' + this.tags.msgTouch.msgOnTouchDown)
                 if (this.tags.msgTouch.msgOnTouchDown === true) {
                     sender.style.background = '#00000008'
                     this.showMsgMeun(event, msg)
@@ -1570,7 +1567,7 @@ export default defineComponent({
                 // 如果 dy 大于 10px 则判定为用户在滚动页面，打断长按消息判定
                 if (dy > 10 || dx > 5) {
                     if (this.tags.msgTouch.msgOnTouchDown) {
-                        logger.add(LogType.UI, "用户正在滑动，打断长按判定。")
+                        logger.add(LogType.UI, '用户正在滑动，打断长按判定。')
                         this.tags.msgTouch.msgOnTouchDown = false
                     }
                 }
@@ -1580,24 +1577,24 @@ export default defineComponent({
                         // 左滑
                         if (dx >= sender.offsetWidth / 3) {
                             this.tags.msgTouch.onMove = 'right'
-                            logger.add(LogType.UI, "触发右滑判定 ……（转发）")
+                            logger.add(LogType.UI, '触发右滑判定 ……（转发）')
                         } else {
-                            sender.style.transform = "translate(" + (Math.sqrt(dx) + 5) + "px)"
-                            sender.style.transition = "transform 0s"
+                            sender.style.transform = 'translate(' + (Math.sqrt(dx) + 5) + 'px)'
+                            sender.style.transition = 'transform 0s'
                         }
                     } else if (x > 10) {
                         // 右滑
                         if (dx >= sender.offsetWidth / 3) {
                             this.tags.msgTouch.onMove = 'left'
-                            logger.add(LogType.UI, "触发左滑判定 ……（回复）")
+                            logger.add(LogType.UI, '触发左滑判定 ……（回复）')
                         } else {
-                            sender.style.transform = "translate(-" + (Math.sqrt(dx) + 5) + "px)"
-                            sender.style.transition = "transform 0s"
+                            sender.style.transform = 'translate(-' + (Math.sqrt(dx) + 5) + 'px)'
+                            sender.style.transition = 'transform 0s'
                         }
                     }
                 } else {
                     this.tags.msgTouch.onMove = 'no'
-                    sender.style.transform = "translate(0px)"
+                    sender.style.transform = 'translate(0px)'
                 }
             }
         },
@@ -1636,6 +1633,15 @@ export default defineComponent({
                     pages: 0
                 }, 'getJin' )
             }
+            this.tags.showMoreDetail = !this.tags.showMoreDetail
+        },
+
+        /**
+         * 发送戳一戳
+         */
+        sendPoke() {
+            let msg = SendUtil.parseMsg('[SQ:0]', [{ type: 'poke', _type: 1, id: -1, name: '戳一戳' }], this.imgCache)
+            sendMsgRaw(this.chat.show.id, this.chat.show.type, msg)
             this.tags.showMoreDetail = !this.tags.showMoreDetail
         },
 

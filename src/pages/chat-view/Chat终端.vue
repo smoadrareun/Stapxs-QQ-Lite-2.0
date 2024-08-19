@@ -53,7 +53,7 @@
                                 </span>
                             </div>
                         </div>
-                        <a class=command-start>• </a>
+                        <a class="command-start">• </a>
                         <span>{{ msg.str }}</span>
                     </div>
                     <div v-else-if="msg.commandOut">
@@ -85,7 +85,7 @@
                         </span>
                     </div>
                 </div>
-                <a class=command-start>• </a>
+                <a class="command-start">• </a>
                 <input @keyup="sendMsg" v-model="msg" @paste="addImg" id="msgInput">
             </div>
         </div>
@@ -268,7 +268,6 @@ export default defineComponent({
 
         copy(str: string) {
             const input = document.getElementById('msgInput')
-            console.log(input)
             if(input) {
                 this.msg = 'sql reply ' + str + ' '
                 input.focus()
@@ -490,7 +489,7 @@ export default defineComponent({
                             const type = runtimeData.chatInfo.show.type
                             const id = runtimeData.chatInfo.show.id
                             let name
-                            if(runtimeData.jsonMap.message_list && type != "group") {
+                            if(runtimeData.jsonMap.message_list && type != 'group') {
                                 name = runtimeData.jsonMap.message_list.private_name
                             } else {
                                 name = runtimeData.jsonMap.message_list.name
@@ -499,8 +498,8 @@ export default defineComponent({
                                 name ?? 'get_chat_history',
                                 {
                                     message_type: runtimeData.jsonMap.message_list.message_type[type],
-                                    group_id: type == "group" ? id : undefined,
-                                    user_id: type != "group" ? id : undefined,
+                                    group_id: type == 'group' ? id : undefined,
+                                    user_id: type != 'group' ? id : undefined,
                                     message_seq: firstMsgId,
                                     message_id: firstMsgId,
                                     count: 20
@@ -591,8 +590,6 @@ export default defineComponent({
                         const item = runtimeData.userList[i]
                         const gid = item.user_id !== undefined ? item.user_id : item.group_id
                         if (String(gid) === id) {
-                            console.log('cd ' + id + ' success')
-                            console.log(item)
                             // 检查显示列表里有没有它
                             if (!document.getElementById('user-' + id)) {
                                 // 把它插入到显示列表

@@ -25,7 +25,7 @@ if (process.env.NODE_ENV === 'production') {
         },
         updated(registration) {
             console.log(app.config.globalProperties.$t('sw_updated'))
-            registration.waiting?.postMessage({ type: "SKIP_WAITING" })
+            registration.waiting?.postMessage({ type: 'SKIP_WAITING' })
             new PopInfo().add(PopType.INFO,
                 app.config.globalProperties.$t('sw_updated_1'), false)
         },

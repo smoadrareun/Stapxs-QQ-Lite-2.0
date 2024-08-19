@@ -8,7 +8,7 @@
   </a>
   <h2 align="center" style="font-weight: 600">Stapxs QQ Lite 2.0</h2>
  <p align="center">
-  <img src="https://github.com/Stapxs/Stapxs-QQ-Lite-2.0/assets/42486439/e6a04c61-48d6-471b-883a-f5821a13a002" width="400">
+  <img src="README/gitcode.png" width="400">
  </p>
   <p align="center">
     一个兼容 OneBot 的非官方网页 QQ 客户端

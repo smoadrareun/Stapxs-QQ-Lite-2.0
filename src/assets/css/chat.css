@@ -383,6 +383,7 @@ input {
 }
 .merge-pan > div:last-child > div:first-child svg {
     color: var(--color-font);
+    cursor: pointer;
     height: 1.5rem;
 }
 .merge-pan > div:last-child > div:last-child {
@@ -727,6 +728,19 @@ input {
 }
 .bulletins > div.base > div.body > span {
     white-space: pre-line;
+}
+.bulletins > div.base > div.body > span > a {
+    color: var(--color-main) !important;
+    font-weight: bold;
+    text-decoration: underline;
+    padding: 0 5px;
+    opacity: 0.8;
+}
+.bulletins > div.base > div.body > span > a:before {
+    text-align: center;
+    content: '🔗';
+    color: transparent;
+    text-shadow: 0 0 0 var(--color-font-1);
 }
 .bulletins > div.base > div.info {
     background: var(--color-card-1);

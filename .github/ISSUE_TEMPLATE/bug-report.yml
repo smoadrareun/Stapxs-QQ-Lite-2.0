@@ -4,13 +4,15 @@ body:
   - type: markdown
     attributes:
       value: |
-        在开始提交 BUG 前，请先前往 [Projects](https://github.com/users/Stapxs/projects/2/views/7) 检查 BUG 标签卡下的已有 BUG 列表是否已存在你想提交的 BUG，如果没有再回来提交以防重复。 
+        在开始提交 BUG 前，请先前往 [里程碑](https://github.com/Stapxs/Stapxs-QQ-Lite-2.0/milestones) 检查已经在计划中的事项，如果没有再回来提交以防重复。 
   - type: dropdown
     attributes:
       label: 错误来源
       options:
         - QQ Bot
-        - Stapxs QQ Lite
+        - Stapxs QQ Lite（All）
+        - Stapxs QQ Lite（Web）
+        - Stapxs QQ Lite（Electron）
         - 其他
   - type: textarea
     attributes:

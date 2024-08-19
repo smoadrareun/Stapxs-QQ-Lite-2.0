@@ -12,6 +12,7 @@
     margin: 5px 0;
     font-size: 1rem;
     flex-wrap: wrap;
+    transition: opacity 0.3s;
 }
 .message.forward {
     border: 2px solid var(--color-card-2);

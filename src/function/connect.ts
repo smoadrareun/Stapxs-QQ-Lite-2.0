@@ -6,15 +6,15 @@
  * @Description: 此模块主要处理 Websocket 交互相关功能
 */
 
-import Option from "./option"
-import app from "@/main"
+import Option from './option'
+import app from '@/main'
 
 import { reactive } from 'vue'
 import { LogType, Logger, PopType, PopInfo  } from './base'
 import { parse, runtimeData, resetRimtime } from './msg'
 
 import { BotActionElem, LoginCacheElem } from './elements/system'
-import { updateMenu } from "@/function/utils/appUtil"
+import { updateMenu } from '@/function/utils/appUtil'
 
 const logger = new Logger()
 const popInfo = new PopInfo()
@@ -120,6 +120,7 @@ export class Connector {
                 }
                 default: {
                     popInfo.add(PopType.ERR, $t('pop_log_con_fail') + ': ' + e.code, false)
+                    // eslint-disable-next-line no-console
                     console.log(e)
                 }
             }

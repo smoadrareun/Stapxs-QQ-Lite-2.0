@@ -58,7 +58,14 @@
     width: 25%;
 }
 .logo-card>svg>path:first-child {
-    fill: var(--color-main);
+    fill: var(--color-main) !important;
+}
+.logo-card>svg>path:not(:last-child):not(:nth-last-child(2)) {
+    fill: var(--color-card);
+}
+.logo-card>svg>path:last-child,
+.logo-card>svg>path:nth-last-child(2) {
+    fill: var(--color-card-2);
 }
 
 .logo-card>a {

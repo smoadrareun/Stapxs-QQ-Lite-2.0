@@ -14,6 +14,7 @@ login_info:
     nickname: $.data.nickname
 # 群、好友列表
 user_list:
+    name: get_friend_list|get_group_list
     source: $.data[*]
     list:
         group_id: /group_id
@@ -29,6 +30,7 @@ user_list:
 # 收藏表情
 roaming_stamp:
     name: fetch_custom_face
+    reverse: true
 # 消息列表
 message_list:
     name: get_group_msg_history

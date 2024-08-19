@@ -8,14 +8,14 @@
 <template>
     <div class="base" @click="showAll = !showAll">
         <header>
-            <font-awesome-icon :icon="['fas', 'bookmark']"/>
+            <font-awesome-icon :icon="['fas', 'bookmark']" />
             <span>{{ $t('chat_chat_info_notice') }}</span>
             <div style="flex: 1;"></div>
             <span>{{ Intl.DateTimeFormat(trueLang, { month: "short", day: "numeric", hour: "numeric", minute: "numeric" })
                     .format(data.time) }}</span>
         </header>
         <div :id="'bulletins-msg-' + index" :class="'body' + (!showAll ? '' : ' all')">
-            <span v-html="Xss(data.content).replaceAll('\r', '\n').replaceAll('\n\n', '\n')"></span>
+            <span @click="textClick" v-html="parseText(data.content)"></span>
         </div>
         <span v-show="needShow && !showAll">{{ $t('bulletin_show_tip') }}</span>
         <div class="info">
@@ -36,9 +36,10 @@
 </template>
 
 <script lang="ts">
-import Xss from 'xss'
+import xss from 'xss'
 import { defineComponent } from 'vue'
 import { runtimeData } from '@/function/msg'
+import { openLink } from '@/function/utils/appUtil'
 import { getTrueLang } from '@/function/utils/systemUtil'
 
 export default defineComponent({
@@ -47,10 +48,28 @@ export default defineComponent({
     data() {
         return {
             trueLang: getTrueLang(),
-            Xss: Xss,
             runtimeData: runtimeData,
             showAll: false,
             needShow: true
+        }
+    },
+    methods: {
+        parseText(text: string) {
+            text = text.replaceAll('\r', '\n').replaceAll('\n\n', '\n')
+                .replaceAll('&#10;', '\n')
+            text = xss(text, {whiteList: {a: ['href', 'target']}})
+            // 匹配链接
+            const reg = /(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-.,@?^=%&:/~+#]*[\w\-@?^=%&/~+#])?/gi
+            text = text.replaceAll(reg, '<a href="" data-link="$&" onclick="return false">$&</a>')
+            return text
+        },
+        textClick(event: Event) {
+            const target = event.target as HTMLElement
+            if(target.dataset.link) {
+                // 点击了链接
+                const link = target.dataset.link
+                openLink(link)
+            }
         }
     },
     mounted() {

@@ -63,6 +63,7 @@ export class Logger {
      * @param args 日志内容
      */
     private print(type: LogType, args: string) {
+        // eslint-disable-next-line no-console
         console.log(`%c${LogType[type]}%c ${args}`, `background:#${this.logTypeInfo[type][0]};color:#${this.logTypeInfo[type][1]};border-radius:7px 0 0 7px;display:inline-block;padding:2px 4px 2px 7px;`, '');
     }
 }

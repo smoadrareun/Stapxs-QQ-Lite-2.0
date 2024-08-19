@@ -1,12 +1,12 @@
 <template>
     <div class="update-info">
-        <span>{{ from == 'web' ? $t('update_history') : $t('new_update') }}</span>
+        <span>{{ updated ? $t('update_history') : $t('new_update') }}</span>
         <a>{{ version }}</a>
         <div class="title">
             <img :src="user.avatar">
             <a :href="user.url">{{ user.name }}</a>
             <span> {{ Intl.DateTimeFormat(getTrueLang(), { year: 'numeric', month: 'short', day: 'numeric' })
-                        .format(new Date(user.date)) }} </span>
+                        .format(new Date(date)) }} </span>
         </div>
         <div class="info"><span>{{ info.title }}</span>
             <div>
@@ -25,7 +25,7 @@ import { getTrueLang, gitmojiToEmoji } from '@/function/utils/systemUtil'
 
 export default defineComponent({
     name: 'UpdatePan',
-    props: ['version', 'user', 'message', 'from'],
+    props: ['version', 'date', 'user', 'message', 'updated'],
     data() {
         return {
             getTrueLang,

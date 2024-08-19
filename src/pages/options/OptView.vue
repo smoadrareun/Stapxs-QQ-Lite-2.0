@@ -68,7 +68,7 @@
                         </div>
                         <div class="theme-color-col">
                             <label v-for="(name, index) in colors" :title="name" :key="'color_id_' + index" class="ss-radio">
-                                <input type="radio" name="theme_color" @change="save" :data-id="index"
+                                <input type="radio" name="theme_color" @change="save($event); gaColor($event)" :data-id="index"
                                     :checked="runtimeData.sysConfig.theme_color === undefined ? index === 0 : Number(runtimeData.sysConfig.theme_color) === index">
                                 <div :style="'background: var(--color-main-' + index + ');'">
                                     <div></div>
@@ -116,7 +116,7 @@
                     <span>{{ $t('option_dev_chatview_name') }}</span>
                     <span>{{ $t('option_dev_chatview_name_tip') }}</span>
                 </div>
-                <select @change="save" name="chatview_name" title="chatview_name" v-model="chatview_name">
+                <select @change="save($event); gaChatView($event)" name="chatview_name" title="chatview_name" v-model="chatview_name">
                     <option value="">{{ $t('option_dev_chatview_name_none') }}</option>
                     <option v-for="item in getAppendChatView()" :value="item" :key="item">{{ item.replace('Chat', '') }}</option>
                 </select>
@@ -173,7 +173,8 @@
                     <span>{{ $t('option_view_dont_touch_tip') }}</span>
                 </div>
                 <label class="ss-switch">
-                    <input type="checkbox" @change="modifyTouch">
+                    <input type="checkbox" @change="save" name="opt_revolve"
+                        v-model="runtimeData.sysConfig.opt_revolve">
                     <div>
                         <div></div>
                     </div>
@@ -217,6 +218,18 @@ export default defineComponent({
             Umami.trackEvent('use_language', { name: sender.value })
         },
 
+        gaChatView(event: Event) {
+            const sender = event.target as HTMLInputElement
+            // UM：上传Chat View 选择
+            Umami.trackEvent('use_chatview', { name: sender.value })
+        },
+
+        gaColor(event: Event) {
+            const sender = event.target as HTMLInputElement
+            // UM：上传主题颜色选择
+            Umami.trackEvent('use_theme_color', { name: this.colors[Number(sender.dataset.id)] })
+        },
+
         setInitialScaleShow(event: Event) {
             const sender = event.target as HTMLInputElement
             this.initialScaleShow = Number(sender.value)
@@ -234,19 +247,6 @@ export default defineComponent({
         
         isMobile() {
             return getDeviceType() === 'Android' || getDeviceType() === 'iOS'
-        },
-
-        modifyTouch(event: Event) {
-            const sender = event.target as HTMLInputElement
-            const baseApp = document.getElementById('base-app')
-            if(baseApp && sender.checked == true) {
-                if(baseApp.classList.contains('no-touch')) {
-                    baseApp.classList.remove('no-touch')
-                    sender.checked = false
-                } else {
-                    baseApp.classList.add('no-touch')
-                }
-            }
         },
 
         getAppendChatView() {

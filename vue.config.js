@@ -39,34 +39,34 @@ module.exports = {
             maskIcon: 'img/icons/icon-maskable.png'
         },
         manifestOptions: {
-            description: "一个兼容 OneBot 的非官方网页版 QQ 客户端，使用 Vue 重制的全新版本。",
+            description: '一个兼容 OneBot 的非官方网页版 QQ 客户端，使用 Vue 重制的全新版本。',
             icons: [
                 {
-                    "src": "img/icons/icon.svg",
-                    "sizes": "1080x1080",
-                    "purpose": "any"
+                    'src': 'img/icons/icon.svg',
+                    'sizes': '1080x1080',
+                    'purpose': 'any'
                 },
                 {
-                    "src": "img/icons/icon.png",
-                    "type": "image/png",
-                    "sizes": "512x512"
+                    'src': 'img/icons/icon.png',
+                    'type': 'image/png',
+                    'sizes': '512x512'
                 },
                 {
-                    "src": "img/icons/icon-maskable.png",
-                    "sizes": "1024x1024",
-                    "type": "image/png",
-                    "purpose": "maskable"
+                    'src': 'img/icons/icon-maskable.png',
+                    'sizes': '1024x1024',
+                    'type': 'image/png',
+                    'purpose': 'maskable'
                 }
             ],
             related_applications: [
                 {
-                  "platform": "play",
-                  "url": "https://play.google.com/store/apps/details?id=com.tencent.mobileqq",
-                  "id": "com.tencent.mobileqq"
+                  'platform': 'play',
+                  'url': 'https://play.google.com/store/apps/details?id=com.tencent.mobileqq',
+                  'id': 'com.tencent.mobileqq'
                 },
                 {
-                    "platform": "itunes",
-                    "url": "https://apps.apple.com/app/qq/id444934666"
+                    'platform': 'itunes',
+                    'url': 'https://apps.apple.com/app/qq/id444934666'
                 }
             ]
         }     
@@ -178,7 +178,6 @@ module.exports = {
                             return item.endsWith('-unpacked') || item.startsWith('build') ||
                             item.startsWith('mac')
                         })
-                        console.log('删除的目录和文件：', delList)
                         for (const item of delList) {
                             // 判断是文件还是目录
                             if (fs.statSync(path.join(context.outDir, item)).isDirectory()) {

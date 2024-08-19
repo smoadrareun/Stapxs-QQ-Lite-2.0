@@ -39,7 +39,7 @@ export default defineComponent({
     },
     methods: {
         getTimeConfig(date: Date) {
-            let base = { hour: "numeric", minute: "numeric", second: "numeric" } as Intl.DateTimeFormatOptions
+            let base = { hour: 'numeric', minute: 'numeric', second: 'numeric' } as Intl.DateTimeFormatOptions
             const nowDate = new Date()
             const todayDate = new Date().setHours(0, 0, 0, 0)
             const paramsDate = date.setHours(0, 0, 0, 0)

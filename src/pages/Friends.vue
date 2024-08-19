@@ -46,7 +46,7 @@
                             <div :id="'class-' + info.class_id">
                                 <FriendBody 
                                     v-for="item in runtimeData.userList.filter((get) => { return get.class_id == info.class_id })"
-                                    :key="'fb-' + (item.user_id ? item.user_id : item.group_id)" :data="item"
+                                    :key="'fb-' + (item.user_id ? item.user_id : item.group_id)" :data="item" from="friend"
                                     @click="userClick(item, $event)">
                                 </FriendBody>
                             </div>
@@ -61,7 +61,7 @@
                         <div>
                             <FriendBody 
                                 v-for="item in runtimeData.userList.filter((get) => { return get.class_id == undefined })"
-                                :key="'fb-' + (item.user_id ? item.user_id : item.group_id)" :data="item"
+                                :key="'fb-' + (item.user_id ? item.user_id : item.group_id)" :data="item" from="friend"
                                 @click="userClick(item, $event)">
                             </FriendBody>
                         </div>
@@ -71,7 +71,7 @@
                 <div v-else class="list">
                     <div>
                         <FriendBody v-for="item in runtimeData.showList"
-                            :key="'fb-' + (item.user_id ? item.user_id : item.group_id)" :data="item"
+                            :key="'fb-' + (item.user_id ? item.user_id : item.group_id)" :data="item" from="friend"
                             @click="userClick(item, $event)">
                         </FriendBody>
                     </div>

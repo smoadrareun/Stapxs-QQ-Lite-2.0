@@ -1,7 +1,7 @@
 import child_process from 'child_process'
 
 export function queryKeys(keyPath: string, value: string) {
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
         try {
             child_process.exec(`reg query ${keyPath} /v ${value}`, (error, stdout, stderr) => {
                 if (error) {
@@ -17,7 +17,7 @@ export function queryKeys(keyPath: string, value: string) {
 }
 
 export function runCommand(command: string) {
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
         try {
             child_process.exec(command, (error, stdout, stderr) => {
                 if (error) {

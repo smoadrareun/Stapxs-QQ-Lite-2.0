@@ -18,8 +18,8 @@ import pinyin from 'pinyin'
 
 import Umami from '@stapxs/umami-logger-typescript'
 
-import { buildMsgList, getMsgData, parseMsgList, getMsgRawTxt } from '@/function/utils/msgUtil'
-import { getViewTime, htmlDecodeByRegExp, randomNum } from '@/function/utils/systemUtil'
+import { buildMsgList, getMsgData, parseMsgList, getMsgRawTxt, updateLastestHistory } from '@/function/utils/msgUtil'
+import { getViewTime, escape2Html, randomNum } from '@/function/utils/systemUtil'
 import { reloadUsers, reloadCookies, downloadFile, updateMenu, jumpToChat } from '@/function/utils/appUtil'
 import { reactive, markRaw, defineAsyncComponent } from 'vue'
 import { PopInfo, PopType, Logger, LogType } from './base'
@@ -32,6 +32,9 @@ const logger = new Logger()
 const popInfo = new PopInfo()
 // eslint-disable-next-line
 let msgPath = require('@/assets/pathMap/Lagrange.OneBot.yaml')
+
+// 其他 tag
+let listLoadTimes = 0
 
 export function parse(str: string) {
     const msg = JSON.parse(str)
@@ -51,12 +54,12 @@ export function parse(str: string) {
                 case 'getFriendList'            : saveUser(msg, 'friend'); break
                 case 'getUserInfoInGroup'       : runtimeData.chatInfo.info.me_info = msg; break
                 case 'getGroupMemberList'       : saveGroupMember(msg.data); break
-                case 'getChatHistoryFist'       : saveMsg(msg); break
-                case 'getChatHistoryTop'        : updateTopMag(msg, echoList); break
-                case 'getChatHistory'           : saveMsg(msg, "top"); break
+                case 'getChatHistoryFist'       : saveMsg(msg, 'top'); break
+                case 'getChatHistoryOnMsg'      : updateTopMsg(msg, echoList); break
+                case 'getChatHistory'           : saveMsg(msg, 'top'); break
                 case 'getForwardMsg'            : saveForwardMsg(msg); break
                 case 'sendMsgBack'              : showSendedMsg(msg, echoList); break
-                case 'getRoamingStamp'          : runtimeData.stickerCache = msg.data.reverse(); break
+                case 'getRoamingStamp'          : saveSticker(msg.data); break
                 case 'getMoreGroupInfo'         : runtimeData.chatInfo.info.group_info = msg.data.data; break
                 case 'getMoreUserInfo'          : runtimeData.chatInfo.info.user_info = msg.data.data.result.buddy.info_list[0]; break
                 case 'getGroupNotices'          : saveGroupNotices(msg); break
@@ -74,7 +77,7 @@ export function parse(str: string) {
                 case 'setFriendAdd':
                 case 'setGroupAdd'              : updateSysInfo(head); break
                 case 'loadFileBase'             : loadFileBase(echoList, msg); break
-                case 'getClassInfo'             : saveClassInfo(msg); break
+                case 'GetRecentContact'         : createRecentContact(msg); break
 
                 case 'getCookies'               : saveCookie(msg, echoList); break
             }
@@ -83,7 +86,7 @@ export function parse(str: string) {
         switch (msg.post_type) {
             // 心跳包
             case 'meta_event'           : break
-            // go-cqhttp：自动发送的消息回调和其他消息有区分
+            // go-cqhttp：主动发送的消息回调和其他消息有区分
             case 'message_sent':
             case 'message'              : newMsg(msg); break
             case 'request'              : addSystemNotice(msg); break
@@ -201,11 +204,66 @@ function saveGroupNotices(msg: any) {
     }
 }
 
+function createRecentContact(data: any) {
+    const list = getMsgData('recent_contact', data, msgPath.recent_contact)
+    if (list != undefined) {
+        // user_id: /peerUin
+        // time: /msgTime
+        // chat_type: /chatType
+        // 过滤掉 chatType 不是 1 和 2 的
+        let back = list.filter((item) => {
+            return item.chat_type == 1 || item.chat_type == 2
+        })
+        // 排除掉在置顶列表里的
+        const topList = runtimeData.sysConfig.top_info as { [key: string]: number[] } | null
+        if(topList != null) {
+            const top = topList[runtimeData.loginInfo.uin]
+            if(top != undefined) {
+                back = back.filter((item) => {
+                    return top.indexOf(Number(item.user_id)) == -1
+                })
+            }
+        }
+        // 去重
+        back = back.filter((item, index, arr) => {
+            return arr.findIndex((item2) => {
+                return item2.user_id == item.user_id
+            }) == index
+        })
+        back.forEach((item) => {
+            // 去消息列表里找一下它
+            const user = runtimeData.userList.find((user) => {
+                return user.user_id == item.user_id
+            })
+            const inMsgList = runtimeData.onMsgList.find((msg) => {
+                return msg.user_id == item.user_id
+            }) != undefined
+            if(user && !inMsgList) {
+                runtimeData.onMsgList.push(user)
+                updateLastestHistory(user)
+            }
+        })
+    }
+}
+
 function saveUser(msg: { [key: string]: any }, type: string) {
-    const list = getMsgData('user_list', msg, msgPath.user_list)
+    listLoadTimes ++
+    let list: any[] | undefined
+    if(msgPath.user_list)
+        list = getMsgData('user_list', msg, msgPath.user_list)
+    else {
+        switch(type) {
+            case 'friend':
+                list = getMsgData('friend_list', msg, msgPath.friend_list)
+                break
+            case 'group':
+                list = getMsgData('group_list', msg, msgPath.group_list)
+                break
+        }
+    }
     if (list != undefined) {
         const pyConfig = { style: 0 } as IPinyinOptions
-        const groupNames = {} as { [key: number]: string }
+        const groupNames = {} as {[key: number]: string}
         list.forEach((item, index) => {
             // 为所有项目追加拼音名称
             let py_name = ''
@@ -215,7 +273,7 @@ function saveUser(msg: { [key: string]: any }, type: string) {
                 py_name = pinyin(item.nickname, pyConfig).join('') + ',' +
                     pinyin(item.remark, pyConfig).join('')
             }
-            list[index].py_name = py_name
+            if(list && list[index]) list[index].py_name = py_name
             // 构建分类
             if (type == 'friend') {
                 if (item.class_id != undefined && item.class_name) {
@@ -227,8 +285,13 @@ function saveUser(msg: { [key: string]: any }, type: string) {
                 delete item.class_name
             }
         })
-        if (Object.keys(groupNames).length > 0) {
-            saveClassInfo(Array.from(Object.entries(groupNames), ([key, value]) => ({ [key]: value })))
+        if(Object.keys(groupNames).length > 0) {
+            // 把 groupNames 处理为 { class_id: number, class_name: string }[]
+            const groupNamesList = [] as { class_id: number, class_name: string }[]
+            for(const key in groupNames) {
+                groupNamesList.push({ class_id: Number(key), class_name: groupNames[key] })
+            }
+            saveClassInfo(groupNamesList)
         }
         runtimeData.userList = runtimeData.userList.concat(list)
         // 刷新置顶列表
@@ -250,27 +313,7 @@ function saveUser(msg: { [key: string]: any }, type: string) {
                             // 给置顶的用户刷新最新一条的消息用于显示
                             runtimeData.userList.forEach((item) => {
                                 if (item.always_top) {
-                                    // 发起获取历史消息请求
-                                    const type = item.user_id ? 'user' : 'group'
-                                    const id = item.user_id ? item.user_id : item.group_id
-                                    let name
-                                    if (runtimeData.jsonMap.message_list && type != "group") {
-                                        name = runtimeData.jsonMap.message_list.private_name
-                                    } else {
-                                        name = runtimeData.jsonMap.message_list.name
-                                    }
-                                    Connector.send(
-                                        name ?? 'get_chat_history',
-                                        {
-                                            message_type: runtimeData.jsonMap.message_list.message_type[type],
-                                            group_id: id,
-                                            user_id: id,
-                                            message_seq: 0,
-                                            message_id: 0,
-                                            count: 1
-                                        },
-                                        'getChatHistoryTop_' + id
-                                    )
+                                    updateLastestHistory(item)
                                 }
                             })
                         }
@@ -285,9 +328,15 @@ function saveUser(msg: { [key: string]: any }, type: string) {
             value: app.config.globalProperties.$t('menu_user_list', { count: runtimeData.userList.length })
         })
     }
+    // 如果获取次数大于 0 并且是双数，刷新一下历史会话
+    if(listLoadTimes > 0 && listLoadTimes % 2 == 0) {
+        // 获取最近的会话
+        if(runtimeData.jsonMap.recent_contact)
+            Connector.send(runtimeData.jsonMap.recent_contact.name, {}, 'GetRecentContact')
+    }
 }
 
-function updateTopMag(msg: any, echoList: string[]) {
+function updateTopMsg(msg: any, echoList: string[]) {
     const id = Number(echoList[1])
     if (id) {
         // 对消息进行一次格式化处理
@@ -297,52 +346,41 @@ function updateTopMag(msg: any, echoList: string[]) {
             const raw = getMsgRawTxt(list[0].message)
             const sender = list[0].sender
             const time = list[0].time
-            // 更新置顶列表
+            // 更新消息列表
             runtimeData.onMsgList.forEach((item) => {
                 if (item.user_id == id) {
                     item.raw_msg = raw
                 } else if(item.group_id == id) {
                     item.raw_msg = sender.nickname + ': ' + raw
-                    item.time = getViewTime(Number(time))
                 }
+                item.time = getViewTime(Number(time))
             })
         }
     }
 }
 
-function saveClassInfo(data: any) {
-    const list = getMsgData('class_list', data, msgPath.class_list)
-    if (list != undefined && (data.status == 'ok' || data.status == undefined)) {
-        // 对 classes 列表按拼音重新排序
-        const names = [] as string[]
-        list.forEach((item: any) => {
-            names.push(Object.values(item)[0] as string)
-            // 如果分组 ID 没有返回在用户列表中而是在这儿……
-            if (item.list != undefined) {
-                item.list.forEach((user: any) => {
-                    const user_id = Number(user.uin)
-                    runtimeData.userList.forEach((get) => {
-                        if (get.user_id == user_id) {
-                            // 保存分组信息，特别关心（9999）优先覆盖
-                            if(get.class_id == undefined || item.class_id == 9999)
-                                get.class_id = item.class_id
-                        }
-                    })
-                })
-            }
-        })
-        const sortedData = names.sort(pinyin.compare)
+function saveClassInfo(list: { class_id: number, class_name: string }[]) {
+    // 按拼音重新排序
+    // const names = [] as string[]
+    // list.forEach((item) => {
+    //     names.push(item.class_name)
+    // })
+    // const sortedData = names.sort(pinyin.compare)
+    // const back = [] as { class_id: number, class_name: string }[]
+    // sortedData.forEach((name) => {
+    //     list.forEach((item) => {
+    //         if (item.class_name == name) {
+    //             back.push(item)
+    //         }
+    //     })
+    // })
 
-        const back = [] as any[]
-        sortedData.forEach((name) => {
-            list.forEach((item: any) => {
-                if ((Object.values(item)[0] as string) == name)
-                    back.push(item)
-            })
-        })
+    // 按 class_id 排序
+    const back = list.sort((a, b) => {
+        return a.class_id - b.class_id
+    })
 
-        runtimeData.tags.classes = back
-    }
+    runtimeData.tags.classes = back
 }
 
 function saveGroupMember(data: GroupMemberInfoElem[]) {
@@ -376,7 +414,12 @@ function saveMsg(msg: any, append = undefined as undefined | string) {
                     return
                 }
                 if (append == 'top') {
-                    list.pop()      // TODO：丢掉一条重复消息，将来可以改成自动判断
+                    // 判断 list 的最后一条消息是否和 runtimeData.messageList 的第一条消息 id 相同
+                    if (runtimeData.messageList.length > 0 && list.length > 0) {
+                        if (runtimeData.messageList[0].message_id == list[list.length - 1].message_id) {
+                            list.pop() // 去掉重复的消息
+                        }
+                    }
                     runtimeData.messageList = list.concat(runtimeData.messageList)
                 } else if (append == 'bottom') {
                     runtimeData.messageList = runtimeData.messageList.concat(list)
@@ -412,7 +455,6 @@ function saveForwardMsg(msg: any) {
     } else {
         let list = getMsgData('forward_message_list', msg, msgPath.forward_msg)
         list = getMessageList(list)
-        console.log(list)
         if (list != undefined) {
             runtimeData.mergeMessageList = list
         }
@@ -644,7 +686,7 @@ function downloadGroupFile(msg: any) {
     let subFileIndex = -1
     runtimeData.chatInfo.info.group_files.file_list.forEach((item: any, index: number) => {
         if (item.id === id) {
-            fileName = htmlDecodeByRegExp(item.name)
+            fileName = escape2Html(item.name)
             fileIndex = index
         }
     })
@@ -652,7 +694,7 @@ function downloadGroupFile(msg: any) {
     if (info[2] !== undefined) {
         runtimeData.chatInfo.info.group_files.file_list[fileIndex].sub_list.forEach((item: any, index: number) => {
             if (item.id === info[2]) {
-                fileName = htmlDecodeByRegExp(item.name)
+                fileName = escape2Html(item.name)
                 subFileIndex = index
             }
         })
@@ -745,10 +787,11 @@ function newMsg(data: any) {
         const showId = runtimeData.chatInfo.show.id
         const sender = info.sender
         // 在好友列表里找一下他
-        const user = runtimeData.userList.find((item) => {
-            return item.user_id == id || item.group_id == id
+        const senderInfo = runtimeData.userList.find((item) => {
+            return item.user_id == sender
         })
-        const isImportant = user?.class_id == 9999
+        const isImportant = senderInfo?.class_id == 9999
+        runtimeData.watch.newMsg = data
 
         // 消息回调检查
         // PS：如果在新消息中获取到了自己的消息，则自动打开“停止消息回调”设置防止发送的消息重复
@@ -760,7 +803,7 @@ function newMsg(data: any) {
         let fakeIndex = -1
         for (let i = runtimeData.messageList.length - 1; i > 0; i--) {
             const msg = runtimeData.messageList[i]
-            if (msg.fake_msg && sender == loginId) {
+            if (msg.fake_msg != undefined && sender == loginId) {
                 fakeIndex = i
                 break
             }
@@ -812,8 +855,7 @@ function newMsg(data: any) {
             list = parseMsgList(list, msgPath.message_list.type, msgPath.message_value)
             data = list[0]
         }
-        // 刷新消息列表
-        // PS：在消息列表内的永远会刷新，不需要被提及
+        // 刷新好友列表
         const get = runtimeData.onMsgList.filter((item, index) => {
             if (Number(id) === item.user_id || Number(id) === item.group_id || Number(info.target_id) === item.user_id) {
                 runtimeData.onMsgList[index].message_id = data.message_id
@@ -842,8 +884,8 @@ function newMsg(data: any) {
         }
         // (发送者不是自己 && (在特别关心列表里 || 发送者不是群组 || 群组 AT || 群组 AT 全体 || 打开了通知全部消息)) 这些情况需要进行新消息处理
         if (sender != loginId && sender != 0 && (isImportant || data.message_type !== 'group' || data.atme || data.atall || Option.get('notice_all') === true)) {
-            // (发送者没有被打开 || 窗口被最小化) 这些情况需要进行消息通知
-            if (id !== showId || document.hidden) {
+            // (发送者没有被打开 || 窗口没有焦点 || 窗口被最小化 || 在特别关心列表里) 这些情况需要进行消息通知
+            if (id !== showId || !document.hasFocus() || document.hidden || isImportant) {
                 // 准备消息内容
                 let raw = getMsgRawTxt(data.message)
                 raw = raw === '' ? data.raw_message : raw
@@ -1083,6 +1125,7 @@ function friendNotice(msg: any) {
         }
         case 'decrease': {
             // 输出日志（显示为红色字体）
+            // eslint-disable-next-line no-console
             console.log('%c消失了一个好友：' + msg.nickname + '（' + msg.user_id + '）', 'color:red;')
             break
         }
@@ -1112,6 +1155,17 @@ function saveCookie(data: any, echoList: string[]) {
     runtimeData.loginInfo.webapi[domain].bkn = (hash & 0x7FFFFFFF).toString()
 }
 
+function saveSticker(data: any) {
+    if(msgPath.roaming_stamp.reverse) {
+        data.reverse()
+    }
+    if(runtimeData.stickerCache == undefined) {
+        runtimeData.stickerCache = data
+    } else {
+        runtimeData.stickerCache = runtimeData.stickerCache.concat(data)
+    }
+}
+
 // ==============================================================
 
 const baseRuntime = {
@@ -1126,6 +1180,9 @@ const baseRuntime = {
         release: undefined,
         connectSsl: false,
         classes: []
+    },
+    watch: {
+        newMsg: {}
     },
     chatInfo: {
         show: { type: '', id: 0, name: '', avatar: '' },

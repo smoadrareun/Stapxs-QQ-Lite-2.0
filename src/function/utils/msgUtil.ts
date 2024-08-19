@@ -5,7 +5,8 @@ import { Logger } from '@/function/base'
 import { runtimeData } from '@/function/msg'
 import { v4 as uuid } from 'uuid'
 import { Connector } from '@/function/connect'
-import { BotMsgType } from '../elements/information'
+import { BotMsgType, UserFriendElem, UserGroupElem } from '../elements/information'
+import Umami from '@stapxs/umami-logger-typescript'
 
 const logger = new Logger()
 
@@ -55,6 +56,7 @@ export function getMsgData(name: string, msg: { [key: string]: any }, map: strin
                 }
             } catch (ex) {
                 logger.error(`解析消息 JSON 错误：${name} -> ${map}`)
+                // eslint-disable-next-line
                 console.log(ex)
             }
         } else {
@@ -65,6 +67,7 @@ export function getMsgData(name: string, msg: { [key: string]: any }, map: strin
                         data[key] = jp.query(msg, replaceJPValue(map[key]))[0]
                     } catch (ex) {
                         logger.error(`解析 JSON 错误：${name} -> ${map}`)
+                        // eslint-disable-next-line
                         console.log(ex)
                     }
             })
@@ -226,6 +229,7 @@ export function getMsgRawTxt(message: [{ [key: string]: any }]): string {
             }
         } catch (error) {
             logger.error('解析消息短格式错误：' + JSON.stringify(message[i]))
+            // eslint-disable-next-line
             console.log(error)
         }
     }
@@ -331,7 +335,7 @@ export function sendMsgRaw(id: string, type: string, msg: string | { type: strin
             message_id: msgUUID,
             message_type: runtimeData.chatInfo.show.type,
             time: parseInt(String(new Date().getTime() / 1000)),
-            post_type: "message",
+            post_type: 'message',
             sender: {
                 user_id: runtimeData.loginInfo.uin,
                 nickname: runtimeData.loginInfo.nickname
@@ -372,6 +376,11 @@ export function sendMsgRaw(id: string, type: string, msg: string | { type: strin
                 newResult.type = item.type
                 newResult.data = item
                 delete newResult.data.type
+                // 特殊处理，如果 newResult.data 里有 _type 字段，给它改成 type
+                if (newResult.data._type != undefined) {
+                    newResult.data.type = newResult.data._type
+                    delete newResult.data._type
+                }
                 newMsg.push(newResult)
             })
             msg = newMsg
@@ -381,7 +390,7 @@ export function sendMsgRaw(id: string, type: string, msg: string | { type: strin
         switch (type) {
             case 'group': 
                 Connector.send(
-                    runtimeData.jsonMap.message_list.name_group_send ?? 'send_group_msg',
+                    runtimeData.jsonMap.message_list.name_group_send ?? 'send_msg',
                     { 'group_id': id, 'message': msg },'sendMsgBack_uuid_' + msgUUID); break
             case 'user': 
             {
@@ -391,11 +400,37 @@ export function sendMsgRaw(id: string, type: string, msg: string | { type: strin
                         { 'user_id': id.split('/')[0], 'group_id': id.split('/')[1], 'message': msg }, 'sendMsgBack_uuid_' + msgUUID);
                 } else {
                     Connector.send(
-                        runtimeData.jsonMap.message_list.name_user_send ?? 'send_private_msg',
+                        runtimeData.jsonMap.message_list.name_user_send ?? 'send_msg',
                          { 'user_id': id, 'message': msg }, 'sendMsgBack_uuid_' + msgUUID);
                 }
                 break
             }
         }
+        // UM：统计消息发送次数
+        Umami.trackEvent('sendMsg', { type: type })
     }
+}
+
+export function updateLastestHistory(item: UserFriendElem & UserGroupElem) {
+    // 发起获取历史消息请求
+    const type = item.user_id ? 'user' : 'group'
+    const id = item.user_id ? item.user_id : item.group_id
+    let name
+    if (runtimeData.jsonMap.message_list && type != 'group') {
+        name = runtimeData.jsonMap.message_list.private_name
+    } else {
+        name = runtimeData.jsonMap.message_list.name
+    }
+    Connector.send(
+        name ?? 'get_chat_history',
+        {
+            message_type: runtimeData.jsonMap.message_list.message_type[type],
+            group_id: id,
+            user_id: id,
+            message_seq: 0,
+            message_id: 0,
+            count: 1
+        },
+        'getChatHistoryOnMsg_' + id
+    )
 }

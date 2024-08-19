@@ -21,6 +21,7 @@ protocol.registerSchemesAsPrivileged([
 export let win = undefined as BrowserWindow | undefined
 export let touchBarInstance = undefined as touchBar | undefined
 
+/* eslint-disable no-console */
 async function createWindow() {
     console.log('')
     console.log(' _____ _____ _____ _____ __ __  \n' +
@@ -154,7 +155,7 @@ app.on('window-all-closed', () => {
     })
     if (process.platform === 'win32')
     {
-        app.removeAsDefaultProtocolClient("stapx-qq-lite")   // 取消默认协议
+        app.removeAsDefaultProtocolClient('stapx-qq-lite')   // 取消默认协议
     }
     app.quit()
 })
@@ -168,7 +169,7 @@ app.on('ready', async () => {
     if (process.platform === 'win32')
     {
         app.setAppUserModelId('Stapx QQ Lite')              // 设置应用 ID
-        app.setAsDefaultProtocolClient("stapx-qq-lite")     // 设置为默认协议
+        app.setAsDefaultProtocolClient('stapx-qq-lite')     // 设置为默认协议
     }
     // 开发者工具
     if (isDevelopment && !process.env.IS_TEST) {

@@ -89,6 +89,15 @@
     left: 270px;
 }
 
+.script-view {
+    background: rgba(var(--color-card-rgb), 0.6) !important;
+}
+.script-view .list > header > span,
+.script-view .list-body > div {
+    background: transparent;
+    backdrop-filter: blur(10px);
+}
+
 @media (max-width: 500px) {
     .chat-pan > div.info {
         margin-top: 35px;

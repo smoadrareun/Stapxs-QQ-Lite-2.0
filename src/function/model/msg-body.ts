@@ -242,10 +242,10 @@ export class MsgBodyFuns {
     static parseText(text: string) {
         // 把 r 转为 n
         text = text.replaceAll('\r\n', '\n').replaceAll('\r', '\n')
-        // 防止意外渲染转义字符串
-        text = text.replaceAll('&', '&amp;')
+        // 还原转义字符
+        text = text.replace(/&([^;]+);/g, '&amp;$1;');
         // XSS 过滤
-        text = xss(text, {whiteList: {a: ["href", "target"]}})
+        text = xss(text, {whiteList: {a: ['href', 'target']}})
         // 返回
         return text
     }

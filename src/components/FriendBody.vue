@@ -11,22 +11,22 @@
         :data-name="data.user_id ? data.nickname : data.group_name" :data-nickname="data.user_id ? data.nickname : ''"
         :data-type="data.user_id ? 'friend' : 'group'">
         <div :class="(data.new_msg === true ? 'new' : '')"></div>
-        <font-awesome-icon v-if="data.user_id == -10000" :icon="['fas', 'bell']"/>
+        <font-awesome-icon v-if="data.user_id == -10000" :icon="['fas', 'bell']" />
         <img v-else loading="lazy" :title="getShowName()" :src="data.user_id ?
                     'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + data.user_id :
                     'https://p.qlogo.cn/gh/' + data.group_id + '/' + data.group_id + '/0'">
         <div>
             <div>
-                <p>{{getShowName()}}</p>
+                <p>{{ getShowName() }}</p>
                 <div style="flex:1"></div>
-                <a class="time">{{ data.time !== undefined ? Intl.DateTimeFormat(trueLang,
+                <a class="time" v-if="from == 'message'">{{ data.time !== undefined ? Intl.DateTimeFormat(trueLang,
                         { hour: "numeric", minute: "numeric" }).format(new Date(data.time)) : ''
                 }}</a>
             </div>
             <div>
-                <a>{{ data.raw_msg }}</a>
-                <div style="margin-left:10px;display:flex;">
-                    <font-awesome-icon v-if="data.always_top === true" :icon="['fas', 'thumbtack']"/>
+                <a :class="from == 'friend' ? 'nick' : ''">{{ from == 'friend' ? data.longNick ?? '' : data.raw_msg }}</a>
+                <div style="margin-left:10px;display:flex;" v-if="from == 'message'">
+                    <font-awesome-icon v-if="data.always_top === true" :icon="['fas', 'thumbtack']" />
                 </div>
             </div>
         </div>
@@ -40,7 +40,7 @@ import { getMsgRawTxt } from '@/function/utils/msgUtil'
 
 export default defineComponent({
     name: 'FriendBody',
-    props: ['data', 'select', 'menu'],
+    props: ['data', 'select', 'menu', 'from'],
     data () {
         return {
             trueLang: getTrueLang(),

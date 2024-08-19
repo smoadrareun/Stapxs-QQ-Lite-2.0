@@ -10,7 +10,7 @@
         <BcTab>
             <div icon="fa-solid fa-face-laugh-squint">
                 <div class="base-face">
-                    <div v-for="num in baseFaceMax" :data-id='num'
+                    <div v-for="num in baseFaceMax" :data-id="num"
                         v-show="getFace(num) != false"
                         :key="'base-face-' + num"
                         @click="addBaseFace(num)">
@@ -22,8 +22,8 @@
                 <div class="face-stickers">
                     <img loading="lazy" v-for="(url, index) in runtimeData.stickerCache" @click="addImgFace(url)"
                         :key="'stickers-' + index" :src="url">
-                    <div v-show="runtimeData.stickerCache && runtimeData.stickerCache.length <= 0" class=ss-card>
-                        <font-awesome-icon :icon="['fas', 'face-dizzy']"/>
+                    <div v-show="runtimeData.stickerCache && runtimeData.stickerCache.length <= 0" class="ss-card">
+                        <font-awesome-icon :icon="['fas', 'face-dizzy']" />
                         <span>{{ $t('chat_face_pan_none').split('|')[0] }}</span>
                     </div>
                 </div>
@@ -31,7 +31,7 @@
             <div icon="fa-solid fa-store">
                 <div class="store-face-list">
                     <div v-for="face in storeFace" :key="face.emoji_id">
-                        <font-awesome-icon @click="removeMface(face)" :icon="['fas', 'xmark']"/>
+                        <font-awesome-icon @click="removeMface(face)" :icon="['fas', 'xmark']" />
                         <img loading="lazy"
                             :src="face.url"
                             :title="face.summary"
@@ -97,7 +97,11 @@ export default defineComponent({
     mounted() {
         // 加载漫游表情
         if (runtimeData.stickerCache === undefined && runtimeData.jsonMap.roaming_stamp) {
-            Connector.send(runtimeData.jsonMap.roaming_stamp.name, {}, 'getRoamingStamp')
+            if(runtimeData.jsonMap.roaming_stamp.paged) {
+                Connector.send(runtimeData.jsonMap.roaming_stamp.name, { count: 20 }, 'getRoamingStamp')
+            } else {
+                Connector.send(runtimeData.jsonMap.roaming_stamp.name, {}, 'getRoamingStamp')
+            }
         }
         this.getStoreFaceList()
     }

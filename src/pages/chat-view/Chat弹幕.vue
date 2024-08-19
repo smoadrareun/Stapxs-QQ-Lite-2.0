@@ -11,17 +11,17 @@
         :class="'chat-pan' + (runtimeData.tags.openSideBar ? ' open': '') + (runtimeData.sysConfig.opt_no_window ? ' withBar': '')">
         <div class="danmu-pan">
             <vue-danmaku style="height: calc(100vh - 40px);width: 100%;" ref="danmakuRef" :channels="0"
-                :danmus="danmus" :speeds="opt.speeds" :randomChannel="true" :top="2" :loop="opt.loop" useSlot>
+                :danmus="danmus" :speeds="opt.speeds" randomChannel :top="2" :loop="opt.loop" useSlot>
                 <div class="controller">
                     <div class="back" @click="openLeftBar">
-                        <font-awesome-icon :icon="['fas', 'angle-left']"/>
+                        <font-awesome-icon :icon="['fas', 'angle-left']" />
                     </div>
                     <div class="back" @click="opera">
-                        <font-awesome-icon v-if="parseIndex == -1" :icon="['fas', 'pause']"/>
-                        <font-awesome-icon v-else :icon="['fas', 'play']"/>
+                        <font-awesome-icon v-if="parseIndex == -1" :icon="['fas', 'pause']" />
+                        <font-awesome-icon v-else :icon="['fas', 'play']" />
                     </div>
                     <div class="loop">
-                        <font-awesome-icon :icon="['fas', 'arrows-rotate']"/>
+                        <font-awesome-icon :icon="['fas', 'arrows-rotate']" />
                         <label class="ss-switch">
                             <input type="checkbox" v-model="opt.loop" checked>
                             <div>
@@ -31,7 +31,7 @@
                     </div>
                     <div class="space"></div>
                     <div class="ss-range">
-                        <font-awesome-icon :class="opt.speeds < 120 ? 'w' : '' " :icon="['fas', 'gauge-high']"/>
+                        <font-awesome-icon :class="opt.speeds < 120 ? 'w' : '' " :icon="['fas', 'gauge-high']" />
                         <input :style="`background-size: ${opt.speeds / 8}% 100%;`" type="range" v-model="opt.speeds" min="20" max="800" step="20">
                         <span :style="`color: var(--color-font${opt.speeds / 8 > 50 ? '-r' : ''})`">{{ opt.speeds }} px/s</span>
                     </div>
@@ -311,7 +311,7 @@ export default defineComponent({
                     const id = runtimeData.chatInfo.show.id
                     const firstMsgId = this.list[0].message_id ?? 0
                     let name
-                    if(runtimeData.jsonMap.message_list && type != "group") {
+                    if(runtimeData.jsonMap.message_list && type != 'group') {
                         name = runtimeData.jsonMap.message_list.private_name
                     } else {
                         name = runtimeData.jsonMap.message_list.name
@@ -320,8 +320,8 @@ export default defineComponent({
                         name ?? 'get_chat_history',
                         {
                             message_type: runtimeData.jsonMap.message_list.message_type[type],
-                            group_id: type == "group" ? id : undefined,
-                            user_id: type != "group" ? id : undefined,
+                            group_id: type == 'group' ? id : undefined,
+                            user_id: type != 'group' ? id : undefined,
                             message_seq: firstMsgId,
                             message_id: firstMsgId,
                             count: 10
@@ -355,7 +355,6 @@ export default defineComponent({
         const ele = document.getElementById('chat-pan') as Element
         const resizeObserver = new ResizeObserver(() => {
             (this.$refs.danmakuRef as any)?.resize()
-            console.log('resize')
         })
         resizeObserver.observe(ele)
         // 监听消息列表，刷新到弹幕列表中

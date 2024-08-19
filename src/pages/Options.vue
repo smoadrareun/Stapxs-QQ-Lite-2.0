@@ -7,14 +7,14 @@
 
 <template>
     <div class="opt-main">
-        <AboutPan :showUI="true"></AboutPan>
+        <AboutPan showUI></AboutPan>
         <div>
             <BcTab :title="$t('option_title')" class="opt-tab">
                 <div :name="$t('option_bar_account')"><OptAccount :config="config"></OptAccount></div>
                 <div :name="$t('option_bar_view')"><OptView></OptView></div>
                 <div :name="$t('option_bar_function')"><OptFunction :config="config"></OptFunction></div>
                 <div :name="$t('option_bar_dev')"><OptDev></OptDev></div>
-                <div :name="$t('menu_about')"><AboutPan class="opt-about" :showUI="true"></AboutPan></div>
+                <div :name="$t('menu_about')"><AboutPan class="opt-about" showUI></AboutPan></div>
             </BcTab>
             <div class="ss-card end-card">
                 <div>

@@ -26,20 +26,20 @@
                 <!-- 回复指示框（独立版本） -->
                 <div v-if="data.source && data.source.seq" :class="isMe ? (type == 'merge' ? 'msg-replay' : 'msg-replay me') : 'msg-replay'"
                     @click="scrollToMsg(data.source.seq)">
-                    <font-awesome-icon :icon="['fas', 'reply']"/>
+                    <font-awesome-icon :icon="['fas', 'reply']" />
                     <a> {{ getRepInfo((data.source ? data.source.message : ''), data) }} </a>
                 </div>
                 <!-- 消息体 -->
                 <template v-if="!hasCard()">
                     <div v-for="(item, index) in data.message" :class="View.isMsgInline(item.type) ? 'msg-inline' : ''" :key="data.message_id + '-m-' + index">
-                        <div v-if="item.type === undefined" ></div>
+                        <div v-if="item.type === undefined"></div>
                         <span v-else-if="isDebugMsg" class="msg-text">{{ item }}</span>
                         <span v-else-if="item.type == 'text'" @click="textClick" v-show="item.text !== ''" class="msg-text" v-html="parseText(item.text)"></span>
                         <img v-else-if="item.type == 'image'" :title="$t('chat_view_pic')" :alt="$t('chat_group_pic')" @load="scrollButtom" @error="imgLoadFail" @click="imgClick(data.message_id)" :class="imgStyle(data.message.length, index, item.asface)" :src="item.url">
                         <template v-else-if="item.type == 'face'">
                             <img v-if="getFace(item.id)" :alt="item.text" class="msg-face" :src="getFace(item.id)" :title="item.text">
                             <span v-else-if="item.id == 394" class="msg-face-long"><span v-for="i in 15" :key="data.message_id + '-l-' + i">🐲</span></span>
-                            <font-awesome-icon v-else :class="'msg-face-svg' + (isMe ? ' me': '')" :icon="['fas', 'face-grin-wide']"/>
+                            <font-awesome-icon v-else :class="'msg-face-svg' + (isMe ? ' me': '')" :icon="['fas', 'face-grin-wide']" />
                         </template>
                         <img v-else-if="item.type == 'mface' && item.url" @load="scrollButtom" @error="imgLoadFail" :class="imgStyle(data.message.length, index, item.asface) + ' msg-mface'" :src="item.url">
                         <span v-else-if="item.type == 'mface' && item.text" class="msg-unknown">{{ item.text }}</span>
@@ -48,12 +48,12 @@
                             <a @mouseenter="showUserInfo" :data-id="item.qq" :data-group="data.group_id">{{ getAtName(item) }}</a>
                         </div>
                         <div v-else-if="item.type == 'file'" :class="'msg-file' + (isMe ? ' me' : '')">
-                            <font-awesome-icon :icon="['fas', 'file']"/>
+                            <font-awesome-icon :icon="['fas', 'file']" />
                             <div>
                                 <div><p>{{ loadFileBase(item, item.name, data.message_id) }}</p><a>（{{ getSizeFromBytes(item.size) }}）</a></div><i>{{ item.md5 }}</i>
                             </div>
                             <div>
-                                <font-awesome-icon @click="downloadFile(item, data.message_id)" v-if="item.downloadingPercentage === undefined" :icon="['fas', 'angle-down']"/>
+                                <font-awesome-icon @click="downloadFile(item, data.message_id)" v-if="item.downloadingPercentage === undefined" :icon="['fas', 'angle-down']" />
                                 <svg v-if="item.downloadingPercentage !== undefined" class="download-bar" xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="50%" cy="50%" r="40%" stroke-width="15%" fill="none" stroke-linecap="round" />
                                     <circle cx="50%" cy="50%" r="40%" stroke-width="15%" fill="none" :stroke-dasharray="item.downloadingPercentage === undefined ?
@@ -64,8 +64,9 @@
                                 <img
                                     v-if="['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(data.fileView.ext)"
                                     :src="data.fileView.url">
-                                <video v-if="['mp4', 'avi', 'mkv', 'flv'].includes(data.fileView.ext)" controls>
+                                <video v-if="['mp4', 'avi', 'mkv', 'flv'].includes(data.fileView.ext)" controls muted autoplay>
                                     <source :src="data.fileView.url" :type="'video/' + data.fileView.ext">
+                                    现在还有不支持 video tag 的浏览器吗？
                                 </video>
                                 <span class="txt" v-if="['txt', 'md'].includes(data.fileView.ext) && item.size < 2000000">
                                     <a>&gt; {{ item.name }} - {{ $t('chat_view_file_viewer') }}</a>
@@ -74,12 +75,15 @@
                             </div>
                         </div>
                         <div v-else-if="item.type == 'video'" class="msg-video">
-                            <video v-if="item.url" controls><source :src="item.url" type="video/mp4"></video>
+                            <video v-if="item.url" controls muted autoplay>
+                                <source :src="item.url" type="video/mp4">
+                                现在还有不支持 video tag 的浏览器吗？
+                            </video>
                             <div v-else-if="!getVideo" :class="getVideoUrl(item, data.message_id)"></div>
                         </div>
                         <span v-else-if="item.type == 'forward'" class="msg-unknown" style="cursor: pointer;" @click="View.getForwardMsg(item.id)">{{ $t('chat_show_forward') }}</span>
                         <div v-else-if="item.type == 'reply'" @click="scrollToMsg(item.id)" :class="isMe ? (type == 'merge' ? 'msg-replay' : 'msg-replay me') : 'msg-replay'">
-                            <font-awesome-icon :icon="['fas', 'reply']"/>
+                            <font-awesome-icon :icon="['fas', 'reply']" />
                             <a :class="getRepMsg(item.id) ? '' : 'msg-unknown'" style="cursor: pointer;"> {{ getRepMsg(item.id) ?? $t('chat_jump_reply') }} </a>
                         </div>
 
@@ -112,7 +116,7 @@
             </div>
         </div>
         <div class="sending" v-if="data.fake_msg == true">
-            <font-awesome-icon :icon="['fas', 'spinner']"/>
+            <font-awesome-icon :icon="['fas', 'spinner']" />
         </div>
         <div :class="'emoji-like' + (isMe ? ' me' : '')" v-if="data.emoji_like">
             <div class="emoji-like-body">
@@ -328,17 +332,16 @@ export default defineComponent({
          */
         parseText (text: string) {
             const logger = new Logger()
-
             text = ViewFuns.parseText(text)
             // 链接判定
-            const reg = /(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/gi //eslint-disable-line
+            const reg = /(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-.,@?^=%&:/~+#]*[\w\-@?^=%&/~+#])?/gi
             text = text.replaceAll(reg, '<a href="" data-link="$&" onclick="return false">$&</a>')
             let linkList = text.match(reg)
             if (linkList !== null && !this.gotLink) {
                 this.gotLink = true
                 const fistLink = linkList[0]
                 // 获取链接预览
-                fetch('https://api.stapxs.cn/tool/page-info/' + encodeURIComponent(fistLink))
+                fetch(process.env.VUE_APP_LINK_VIEW + encodeURIComponent(fistLink))
                     .then(res => res.json())
                     .then(res => {
                         if (res.status === undefined && Object.keys(res).length > 0) {
@@ -444,7 +447,10 @@ export default defineComponent({
                 return item.message_id == message_id
             })
             if (list.length === 1) {
-                return list[0].sender.nickname + ': ' + getMsgRawTxt(list[0].message)
+                if(list[0].message.length > 0)
+                    return list[0].sender.nickname + ': ' + getMsgRawTxt(list[0].message)
+                else
+                    return this.$t('chat_jump_reply_fail')
             }
             return null
         },

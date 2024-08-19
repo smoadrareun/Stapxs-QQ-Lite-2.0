@@ -45,7 +45,7 @@
                     :key="'inMessage-' + item.user_id ? item.user_id : item.group_id"
                     :select="chat.show.id === item.user_id || (chat.show.id === item.group_id && chat.group_name != '')"
                     :menu="menu.select && menu.select == item"
-                    :data="item"
+                    :data="item" from="message"
                     @contextmenu.prevent="listMenuShow($event, item)"
                     @click="userClick(item)"
                     @touchstart="showMenuStart($event, item)"
@@ -74,7 +74,7 @@ import { runtimeData, notificationList } from '@/function/msg'
 import { UserFriendElem, UserGroupElem } from '@/function/elements/information'
 import { getRaw as getOpt, run as runOpt } from '@/function/option'
 import { loadHistoryMessage } from '@/function/utils/appUtil'
-import { PopInfo, PopType } from '@/function/base'
+import { Logger, LogType, PopInfo, PopType } from '@/function/base'
 import { MenuStatue } from 'vue3-bcui/packages/dist/types'
 import { library } from '@fortawesome/fontawesome-svg-core'
 
@@ -325,7 +325,7 @@ export default defineComponent({
         library.add(faCheckToSlot, faThumbTack, faTrashCan, faGripLines)
         if(runtimeData.tags.isElectron && runtimeData.reader) {
             this.$watch(() => runtimeData.onMsgList.length, () => {
-                console.log('flush touch bar: ', runtimeData.onMsgList.length)
+                new Logger().add(LogType.UI, 'flush touch bar: ' + runtimeData.onMsgList.length)
                 const list = [] as {
                     id: number,
                     name: string,

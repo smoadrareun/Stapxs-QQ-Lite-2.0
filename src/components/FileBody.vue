@@ -8,8 +8,8 @@
 <template>
     <div :class="(item.type === 2 ? ' folder' : '') + ((item.sub_list && item.sub_list.length > 0) ? ' open' : '')"
         @click="loadFileDir(item.id, item.type)">
-        <font-awesome-icon v-if="item.type === 2" :icon="['fas', 'folder']"/>
-        <font-awesome-icon v-if="item.type === 1" :icon="['fas', 'file']"/>
+        <font-awesome-icon v-if="item.type === 2" :icon="['fas', 'folder']" />
+        <font-awesome-icon v-if="item.type === 1" :icon="['fas', 'file']" />
         <div class="main">
             <span>{{ toHtml(item.name) }}</span>
             <div>
@@ -26,7 +26,7 @@
             </div>
         </div>
         <div v-if="item.type === 1 && item.downloadingPercentage === undefined" class="download" @click="getFile(item)">
-            <font-awesome-icon :icon="['fas', 'angle-down']"/>
+            <font-awesome-icon :icon="['fas', 'angle-down']" />
         </div>
         <svg v-if="item.downloadingPercentage !== undefined" class="download-bar" xmlns="http://www.w3.org/2000/svg">
             <circle cx="50%" cy="50%" r="40%" stroke-width="15%" fill="none" stroke-linecap="round" />
@@ -44,7 +44,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
-import { getTrueLang, htmlDecodeByRegExp, getSizeFromBytes } from '@/function/utils/systemUtil'
+import { getTrueLang, escape2Html, getSizeFromBytes } from '@/function/utils/systemUtil'
 import { Connector } from '@/function/connect'
 import { runtimeData } from '@/function/msg'
 
@@ -55,7 +55,7 @@ export default defineComponent({
         return {
             trueLang: getTrueLang(),
             getSize: getSizeFromBytes,
-            toHtml: htmlDecodeByRegExp
+            toHtml: escape2Html
         }
     },
     methods: {
