@@ -6,12 +6,21 @@ import { ipcMain, shell, systemPreferences, app, Menu, MenuItemConstructorOption
 import { GtkTheme, GtkData } from '@jakejarrett/gtk-theme'
 import { runCommand } from './util'
 import { win, touchBarInstance } from '@/background'
+import { Connector } from '@/function/electron/connector'
 
+let connector = undefined as Connector | undefined
 const store = new Store()
 let template = [] as any[]
 export const noticeList = {} as {[key: string]: ELNotification[]}
 
 export function regIpcListener() {
+    // 后端连接模式
+    ipcMain.on('onebot:connect', (event, args) => {
+        if(!connector && win) {
+            connector = new Connector(win)
+        }
+        connector?.connect(args.address, args.token)
+    })
     // 获取系统平台
     ipcMain.handle('sys:getPlatform', () => {
         return process.platform
@@ -89,7 +98,7 @@ export function regIpcListener() {
     })
     // 获取补充的调试信息
     ipcMain.handle('opt:getSystemInfo', () => {
-        const systemInfo = {} as { [key: string]: any }
+        const systemInfo = {} as { [key: string]: [string, string] }
         systemInfo.electron = ['Electron Version', process.versions.electron]
         return systemInfo
     })

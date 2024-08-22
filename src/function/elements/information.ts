@@ -1,9 +1,6 @@
 export enum BotMsgType {
     CQCode, Array, Auto
 }
-export const botMsgTypeName: string[] = [
-    'CQ 码', 'Array 数组', '自动检测'
-]
 
 export interface RunTimeDataElem {
     reader?: Electron.IpcRenderer | null,
@@ -35,7 +32,8 @@ export interface RunTimeDataElem {
         release: string | undefined,
         connectSsl: boolean,
         classes: any[],
-        sw?: boolean
+        sw?: boolean,
+        darkMode: boolean
     },
     watch: {                // PS: 一些给监听器捕捉用的数据
         newMsg: any
@@ -108,6 +106,7 @@ export interface UserGroupElem {
     remark: string,
     py_name?: string,
     class_id?: number,
+    class_name?: string,
 
     new_msg?: boolean,
     raw_msg?: string,

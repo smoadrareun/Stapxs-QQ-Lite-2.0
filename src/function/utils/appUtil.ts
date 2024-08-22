@@ -476,6 +476,17 @@ export function createIpc() {
         runtimeData.reader.on('app:jumpChat', (event, info) => {
             jumpToChat(info.userId, info.msgId)
         })
+        
+        // 后端连接模式
+        runtimeData.reader.on('onebot:onopen', (event, data) => {
+            Connector.onopen(data.address, data.token)
+        })
+        runtimeData.reader.on('onebot:onmessage', (event, message) => {
+            Connector.onmessage(message)
+        })
+        runtimeData.reader.on('onebot:onclose', (event, data) => {
+            Connector.onclose(data.code, data.reason, data.address, data.token)
+        })
     }
 }
 
@@ -726,4 +737,23 @@ export function BackendRequest(type: 'GET' | 'POST', url: string, cookies: strin
             data: data
         })
     }
+}
+
+export function loadJsonMap(name: string) {
+    let msgPath = null as any
+    if (name !== undefined) {
+        try {
+            // eslint-disable-next-line
+            msgPath = require(`@/assets/pathMap/${name}.yaml`)
+            logger.debug('加载映射表：' + msgPath.name)
+            if(msgPath.redirect) {
+                msgPath = require(`@/assets/pathMap/${msgPath.redirect}.yaml`)
+                logger.debug('加载映射表（重定向）：' + msgPath.name)
+            }
+            runtimeData.jsonMap = msgPath
+        } catch (ex) {
+            logger.debug('加载映射表失败：' + ex)
+        }
+    }
+    return msgPath
 }

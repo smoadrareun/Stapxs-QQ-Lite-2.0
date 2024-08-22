@@ -39,7 +39,7 @@ export function getMsgData(name: string, msg: { [key: string]: any }, map: strin
                                         nameKey = name
                                         regexKey = key
                                     }
-                                    itemObj[key] = jp.query(item, replaceJPValue(nameKey))[0]
+                                    itemObj[key] = jp.query(item, replaceJPValue(nameKey))
                                     if(regexKey != null) {
                                         const regex = new RegExp(regexKey)
                                         const match = itemObj[key].match(regex)

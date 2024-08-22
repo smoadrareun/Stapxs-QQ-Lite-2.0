@@ -652,20 +652,20 @@
 }
 .script-view .list > header > span {
     margin: 10px -5px 0 -5px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
 }
 .script-view .list-body {
     margin: 0 -5px;
 }
 .script-view .list-body h2 {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 .script-view .list-body span {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
 }
 .script-view .list-body span svg {
     margin: 0;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
 }
 .script-view .editor-main {
     box-shadow: -5px 0px 4px -5px var(--color-shader);

@@ -20,10 +20,10 @@ user_list:
         group_id: /group_id
         group_name: /group_name
         member_count: /member_count
-        admin_flag: $.admins[?(@ == '<uin>')]
+        admin_flag: null
 
-        class_id: /group_id
-        class_name: /group_name
+        class_id: $.group.group_id
+        class_name: $.group.group_name
         user_id: /user_id
         nickname: /nickname
         remark: /remark

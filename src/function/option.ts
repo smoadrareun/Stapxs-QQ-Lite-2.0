@@ -251,6 +251,8 @@ function changeColorMode(mode: string) {
         (meta as HTMLMetaElement).content = getComputedStyle(document.documentElement)
             .getPropertyValue('--color-main')
     }
+    // 记录
+    runtimeData.tags.darkMode = mode === 'dark'
 }
 
 /**

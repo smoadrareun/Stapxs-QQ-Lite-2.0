@@ -50,7 +50,18 @@
                 </div>
                 <select @change="save" name="msg_type" title="msg_type" v-model="runtimeData.sysConfig.msgType">
                     <option v-for="item in BotMsgType" v-show="(typeof item == 'number')" :value="item" :key="item">{{
-                        botMsgTypeName[item] }}</option>
+                        getBotTypeName(item) }}</option>
+                </select>
+            </div>
+            <div class="opt-item">
+                <font-awesome-icon :icon="['fas', 'gear']" />
+                <div>
+                    <span>{{ $t('option_dev_config_type') }}</span>
+                    <span>{{ $t('option_dev_config_type_tip') }}</span>
+                </div>
+                <select v-model="jsonMapName" @change="changeJsonMap">
+                    <option v-if="jsonMapName == ''" value="">{{ $t('option_dev_config_type_none') }}</option>
+                    <option v-for="item in getPathMapList()" :value="item" :key="item">{{ item.replace('Chat', '') }}</option>
                 </select>
             </div>
         </div>
@@ -193,15 +204,17 @@ import { runtimeData } from '@/function/msg'
 import app from '@/main'
 import { BrowserInfo, detect } from 'detect-browser'
 import packageInfo from '../../../package.json'
-import { BotMsgType, botMsgTypeName } from '@/function/elements/information'
+import { BotMsgType } from '@/function/elements/information'
 import { uptime } from '@/main'
+import { loadJsonMap } from '@/function/utils/appUtil'
 
 export default defineComponent({
     name: 'ViewOptDev',
     data () {
         return {
+            jsonMapName: runtimeData.jsonMap?.name ?? '',
+
             BotMsgType: BotMsgType,
-            botMsgTypeName: botMsgTypeName,
             runtimeData: runtimeData,
             save: save,
             ws_text: '',
@@ -255,7 +268,7 @@ export default defineComponent({
             info += `    Browser Name     -> ${browser.name}\n`
             info += `    Browser Version  -> ${browser.version}\n`
             if(addInfo) {
-                const get = addInfo as {[key: string]: any}
+                const get = addInfo as { [key: string]: [string, string] }
                 Object.keys(get).forEach((name: string) => {
                     info += `    ${get[name][0]} -> ${get[name][1]}\n`
                 })
@@ -434,7 +447,33 @@ export default defineComponent({
             if (runtimeData.reader) {
                 runtimeData.reader.send('win:relaunch')
             }
+        },
+        getBotTypeName(index: BotMsgType) {
+            switch (index) {
+                case BotMsgType.CQCode: return this.$t('cq_code')
+                case BotMsgType.Array: return this.$t('array_code')
+                case BotMsgType.Auto: return this.$t('option_dev_msg_type_auto')
+            }
+        },
+        getPathMapList() {
+            // 获取 PathMap 配置文件列表，它放置在项目 src/assets/pathMap 下
+            const pathMap = require.context('@/assets/pathMap', true, /\.yaml$/)
+            const pathMapList: string[] = []
+            pathMap.keys().forEach((key: string) => {
+                const name = key.split('/').pop()?.replace('.yaml', '')
+                if(name) pathMapList.push(name)
+            })
+            return pathMapList
+        },
+        changeJsonMap() {
+            const getPath = loadJsonMap(this.jsonMapName)
+            if(getPath)  runtimeData.jsonMap = getPath
         }
+    },
+    mounted() {
+        this.$watch(() => runtimeData.jsonMap?.name, () => {
+            this.jsonMapName = runtimeData.jsonMap?.name ?? ''
+        })
     }
 })
 </script>

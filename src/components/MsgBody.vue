@@ -23,19 +23,13 @@
                 {{ isMe ? runtimeData.loginInfo.nickname : runtimeData.chatInfo.show.name }}
             </a>
             <div>
-                <!-- 回复指示框（独立版本） -->
-                <div v-if="data.source && data.source.seq" :class="isMe ? (type == 'merge' ? 'msg-replay' : 'msg-replay me') : 'msg-replay'"
-                    @click="scrollToMsg(data.source.seq)">
-                    <font-awesome-icon :icon="['fas', 'reply']" />
-                    <a> {{ getRepInfo((data.source ? data.source.message : ''), data) }} </a>
-                </div>
                 <!-- 消息体 -->
                 <template v-if="!hasCard()">
                     <div v-for="(item, index) in data.message" :class="View.isMsgInline(item.type) ? 'msg-inline' : ''" :key="data.message_id + '-m-' + index">
                         <div v-if="item.type === undefined"></div>
                         <span v-else-if="isDebugMsg" class="msg-text">{{ item }}</span>
                         <span v-else-if="item.type == 'text'" @click="textClick" v-show="item.text !== ''" class="msg-text" v-html="parseText(item.text)"></span>
-                        <img v-else-if="item.type == 'image'" :title="$t('chat_view_pic')" :alt="$t('chat_group_pic')" @load="scrollButtom" @error="imgLoadFail" @click="imgClick(data.message_id)" :class="imgStyle(data.message.length, index, item.asface)" :src="item.url">
+                        <img v-else-if="item.type == 'image'" :title="$t('chat_view_pic')" :alt="$t('chat_pic')" @load="scrollButtom" @error="imgLoadFail" @click="imgClick(data.message_id)" :class="imgStyle(data.message.length, index, item.asface)" :src="item.url">
                         <template v-else-if="item.type == 'face'">
                             <img v-if="getFace(item.id)" :alt="item.text" class="msg-face" :src="getFace(item.id)" :title="item.text">
                             <span v-else-if="item.id == 394" class="msg-face-long"><span v-for="i in 15" :key="data.message_id + '-l-' + i">🐲</span></span>
@@ -44,7 +38,7 @@
                         <img v-else-if="item.type == 'mface' && item.url" @load="scrollButtom" @error="imgLoadFail" :class="imgStyle(data.message.length, index, item.asface) + ' msg-mface'" :src="item.url">
                         <span v-else-if="item.type == 'mface' && item.text" class="msg-unknown">{{ item.text }}</span>
                         <span v-else-if="item.type == 'bface'" style="font-style: italic;opacity: 0.7;">[ {{ $t('chat_fun_menu_pic') }}：{{ item.text }} ]</span>
-                        <div v-else-if="item.type == 'at'" v-show="isAtShow(data.source, item.qq)" :class="getAtClass(item.qq)">
+                        <div v-else-if="item.type == 'at'" :class="getAtClass(item.qq)">
                             <a @mouseenter="showUserInfo" :data-id="item.qq" :data-group="data.group_id">{{ getAtName(item) }}</a>
                         </div>
                         <div v-else-if="item.type == 'file'" :class="'msg-file' + (isMe ? ' me' : '')">
@@ -172,18 +166,6 @@ export default defineComponent({
          */
         getMsgRawTxt (message: any) {
             return getMsgRawTxt(message)
-        },
-
-        /**
-         * 判断是否需要隐藏重复的 At
-         * @param source 回复信息
-         * @param at at 信息
-         */
-        isAtShow (source: any, at: any) {
-            if (source) {
-                return !(at === source.user_id)
-            }
-            return true
         },
 
         /**
@@ -421,21 +403,6 @@ export default defineComponent({
             if(runtimeData.chatInfo.info.now_member_info !== undefined) {
                 runtimeData.chatInfo.info.now_member_info = undefined
             }
-        },
-
-        /**
-         * 获取回复内容（拼接名字和消息内容）
-         * @param msg 消息对象
-         * @param data 回复信息
-         */
-        getRepInfo (msg: any, data: any) {
-            const list = this.runtimeData.chatInfo.info.group_members.filter((item) => {
-                return Number(item.user_id) === Number(data.source.user_id)
-            })
-            if (list.length === 1) {
-                return (list[0].card !== '' ? list[0].card : list[0].nickname) + ': ' + msg
-            }
-            return msg
         },
 
         /**

@@ -95,7 +95,7 @@ export default defineComponent({
          * @param notice 申请信息
          * @param deal 同意 / 拒绝
          */
-        dealFriend(notice:any, deal: boolean) {
+        dealFriend(notice:{ flag: string }, deal: boolean) {
             Connector.send(
                 'set_friend_add_request',
                 {
@@ -111,7 +111,7 @@ export default defineComponent({
          * @param notice 申请信息
          * @param deal 同意 / 拒绝
          */
-        dealGroupAdd(notice:any, deal: boolean) {
+        dealGroupAdd(notice: { flag: string, sub_type: string }, deal: boolean) {
             Connector.send(
                 'set_group_add_request',
                 {

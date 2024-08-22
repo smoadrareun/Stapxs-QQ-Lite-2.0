@@ -32,6 +32,16 @@ export class Connector {
     static create(address: string, token?: string, wss: boolean | undefined = undefined) {
         const $t = app.config.globalProperties.$t
 
+        // Electron 默认使用后端连接模式
+        if(runtimeData.tags.isElectron) {
+            logger.add(LogType.WS, $t('log_con_backend'))
+            const reader = runtimeData.reader
+            if(reader) {
+                reader.send('onebot:connect', { address: address, token: token })
+                return
+            }
+        }
+
         // PS：只有在未设定 wss 类型的情况下才认为是首次连接
         if(wss == undefined) retry = 0; else retry ++
         // 最多自动重试连接五次
@@ -63,34 +73,57 @@ export class Connector {
         }
 
         websocket.onopen = () => {
-            logger.add(LogType.WS, $t('log_con_success'))
-            // 保存登录信息
-            Option.save('address', address)
-            // 保存密钥
-            if(runtimeData.sysConfig.save_password && runtimeData.sysConfig.save_password != '') {
-                Option.save('save_password', token)
-            }
-            // 清空应用通知
-            popInfo.clear()
-            // 加载初始化数据
-            // PS：标记登陆成功在获取用户信息的回调位置，防止无法获取到内容
-            Connector.send('get_version_info', {}, 'getVersionInfo')
-            // 更新菜单
-            updateMenu({
-                id: 'logout',
-                action: 'visible',
-                value: true
-            })
+            this.onopen(address, token)
         }
         websocket.onmessage = (e) => {
-            // 心跳包输出到日志里太烦人了
-            if ((e.data as string).indexOf('"meta_event_type":"heartbeat"') < 0) {
-                logger.add(LogType.WS, 'GET：' + e.data)
-            }
-            parse(e.data)
+            this.onmessage(e.data)
         }
         websocket.onclose = (e) => {
-            websocket = undefined
+            this.onclose(e.code, e.reason, address, token)
+        }
+        websocket.onerror = (e) => {
+            popInfo.add(PopType.ERR, $t('pop_log_con_fail') + ': ' + e.type, false)
+            return
+        }
+    }
+
+    // 连接事件 =====================================================
+
+    static onopen(address: string, token: string | undefined) {
+        const $t = app.config.globalProperties.$t
+
+        logger.add(LogType.WS, $t('log_con_success'))
+        // 保存登录信息
+        Option.save('address', address)
+        // 保存密钥
+        if (runtimeData.sysConfig.save_password && runtimeData.sysConfig.save_password != '') {
+            Option.save('save_password', token)
+        }
+        // 清空应用通知
+        popInfo.clear()
+        // 加载初始化数据
+        // PS：标记登陆成功在获取用户信息的回调位置，防止无法获取到内容
+        Connector.send('get_version_info', {}, 'getVersionInfo')
+        // 更新菜单
+        updateMenu({
+            id: 'logout',
+            action: 'visible',
+            value: true
+        })
+    }
+
+    static onmessage(message: string) {
+        // 心跳包输出到日志里太烦人了
+        if ((message as string).indexOf('"meta_event_type":"heartbeat"') < 0) {
+            logger.add(LogType.WS, 'GET：' + message)
+        }
+        parse(message)
+    }
+
+    static onclose(code: number, message: string | undefined, address: string, token: string | undefined) {
+        const $t = app.config.globalProperties.$t
+
+        websocket = undefined
             updateMenu({
                 id: 'logout',
                 action: 'visible',
@@ -102,7 +135,7 @@ export class Connector {
                 value: $t('menu_login')
             })
 
-            switch(e.code) {
+            switch(code) {
                 case 1000: break;   // 正常关闭
                 case 1006: {        // 非正常关闭，尝试重连
                     if(login.status) {
@@ -119,31 +152,35 @@ export class Connector {
                     break;
                 }
                 default: {
-                    popInfo.add(PopType.ERR, $t('pop_log_con_fail') + ': ' + e.code, false)
+                    popInfo.add(PopType.ERR, $t('pop_log_con_fail') + ': ' + code, false)
                     // eslint-disable-next-line no-console
-                    console.log(e)
+                    console.log(message)
                 }
             }
-            logger.error($t('pop_log_con_fail') + ': ' + e.code)
+            logger.error($t('pop_log_con_fail') + ': ' + code)
             login.status = false
             
             // 除了 1006 意外断开（可能要保留数据重连），其他情况都会清空
-            if(e.code != 1006) {
+            if(code != 1006) {
                 resetRimtime()
             }
-        }
-        websocket.onerror = (e) => {
-            popInfo.add(PopType.ERR, $t('pop_log_con_fail') + ': ' + e.type, false)
-            return
-        }
     }
+
+    // 连接器操作 =====================================================
 
     /**
      * 正常断开 Websocket 连接
      */
     static close() {
-        popInfo.add(PopType.INFO, app.config.globalProperties.$t('pop_log_con_close'))
-        if(websocket) websocket.close(1000)
+        if(runtimeData.tags.isElectron) {
+            const reader = runtimeData.reader
+            if(reader) {
+                reader.send('onebot:close')
+            }
+        } else {
+            popInfo.add(PopType.INFO, app.config.globalProperties.$t('pop_log_con_close'))
+            if(websocket) websocket.close(1000)
+        }
     }
 
     /**
@@ -156,11 +193,18 @@ export class Connector {
         // 构建 JSON
         const json = JSON.stringify({ action: name, params: value, echo: echo } as BotActionElem)
         // 发送
-        if(websocket) websocket.send(json)
-        if (Option.get('log_level') === 'debug') {
-            logger.debug('PUT：' + json)
+        if(runtimeData.tags.isElectron) {
+            const reader = runtimeData.reader
+            if(reader) {
+                reader.send('onebot:send', json)
+            }
         } else {
-            logger.add(LogType.WS, 'PUT：' + json)
+            if(websocket) websocket.send(json)
+            if (Option.get('log_level') === 'debug') {
+                logger.debug('PUT：' + json)
+            } else {
+                logger.add(LogType.WS, 'PUT：' + json)
+            }
         }
     }
 }
