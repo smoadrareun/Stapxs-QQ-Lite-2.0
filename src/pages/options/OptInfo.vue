@@ -28,6 +28,11 @@
                 </div>
                 <input class="ss-input" style="width:150px" type="text" @keyup="setGroupCard" v-model="runtimeData.chatInfo.info.me_info.card">
             </div>
+
+            <button class="ss-button" style="width: calc(100% - 60px); margin: 30px 30px 0 30px;"
+                @click="leaveGroup()">
+                {{ $t('exit_group') }}
+            </button>
         </template>
     </div>
 </template>
@@ -36,6 +41,7 @@
 import { defineComponent } from 'vue'
 import { runtimeData } from '@/function/msg'
 import { Connector } from '@/function/connect'
+import { reloadUsers } from '@/function/utils/appUtil'
 
 export default defineComponent({
     name: 'ViewOptInfo',
@@ -79,6 +85,41 @@ export default defineComponent({
                     'setGroupName'
                 )
             }
+        },
+
+        /**
+         * 退出群聊
+        */
+        leaveGroup() {
+            const popInfo = {
+                html: '<span>' + this.$t('trust_leave_group') + '</span>',
+                button: [
+                    {
+                        text: this.$t('btn_yes'),
+                        fun: () => {
+                            if(runtimeData.jsonMap.leave_group?.name) {
+                                Connector.send(runtimeData.jsonMap.leave_group?.name, {
+                                    group_id: this.chat.show.id
+                                }, 'leaveGroup')
+                            }
+                            // 从消息列表中删除该群聊
+                            runtimeData.onMsgList = runtimeData.onMsgList.filter((item: any) => item.group_id !== this.chat.show.id)
+                            // 关闭群聊窗口
+                            runtimeData.chatInfo.show.id = 0
+                            // 刷新好友/群列表
+                            reloadUsers()
+
+                            runtimeData.popBoxList.shift()
+                        }
+                    },
+                    {
+                        text: this.$t('btn_no'),
+                        master: true,
+                        fun: () => { runtimeData.popBoxList.shift() }
+                    }
+                ]
+            }
+            runtimeData.popBoxList.push(popInfo)
         }
     }
 })

@@ -46,8 +46,8 @@ async function createWindow() {
     Menu.setApplicationMenu(null)
     // 创建窗口
     const mainWindowState = windowStateKeeper({
-        defaultWidth: 1200,
-        defaultHeight: 800
+        defaultWidth: 850,
+        defaultHeight: 530
     })
     const store = new Store()
     let windowConfig = {

@@ -8,59 +8,51 @@
 
 <template>
     <div id="chat-pan"
-    :class="'chat-pan sys-not-pan' + (runtimeData.tags.openSideBar ? ' open': '') + (runtimeData.sysConfig.opt_no_window ? ' withBar': '')">
+        :class="'chat-pan sys-not-pan' + (runtimeData.tags.openSideBar ? ' open': '') + (runtimeData.sysConfig.opt_no_window ? ' withBar': '')">
         <div>
             <font-awesome-icon @click="exit" :icon="['fas', 'angle-left']" />
             <span>{{ $t('sys_notice') }}</span>
         </div>
         <div class="sys-not-list">
             <template v-for="(notice, index) in runtimeData.systemNoticesList" :key="'sysNot-' + index">
-                <div v-if="notice.request_type == 'friend' && notice.sub_type == 'add'"
-                    class="sys_not_new_friend">
-                    <span>{{ $t('sys_notice_new_friend') }}</span>
+                <div v-if="notice.request_type == 'friend'">
                     <div>
+                        <img :src="'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + notice.user_id">
                         <div>
-                            <img :src="'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + notice.user_id">
-                            <div>
-                                <span>{{ notice.nickname }}</span>
-                                <div>
-                                    <span>{{ (notice.sex == 'female' ? '♀ ' : '♂ ') + notice.age }}</span>
-                                    <br>
-                                    <span>{{ notice.comment }}</span>
-                                </div>
-                                <span>{{ $t('sys_notice_new_friend_from') + notice.source }}</span>
-                            </div>
-                        </div>
-                        <div>
-                            <button @click="dealFriend(notice, false)" class="ss-button">{{ $t('btn_reject') }}</button>
-                            <button @click="dealFriend(notice, true)" class="ss-button">{{ $t('btn_accept') }}</button>
+                            <span>{{ notice.user_id }} {{ $t('sys_notice_new_friend') }}</span>
+                            <a>{{ Intl.DateTimeFormat(trueLang, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' })
+                                .format(new Date(notice.time * 1000)) }}</a>
+                            <a>{{ $t('sys_notice_message') + notice.comment }}</a>
                         </div>
                     </div>
-                </div>
-                <div v-else-if="notice.request_type == 'group' && notice.sub_type == 'add'"
-                    class="sys_not_new_friend">
-                    <span>{{ $t('sys_notice_new_group_nmember') }}</span>
                     <div>
-                        <div>
-                            <img :src="'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + notice.user_id">
-                            <div>
-                                <span>{{ notice.nickname }}</span>
-                                <div>
-                                    <span style="display: none;"></span>
-                                    <span :style="notice.comment == '' ? 'font-style: italic;' : ''">{{ notice.comment == '' ? $t('sys_notice_new_group_nmember_no_comment') : notice.comment }}</span>
-                                </div>
-                                <span>{{ $t('sys_notice_new_group_nmember_add') + notice.group_name }}</span>
-                            </div>
-                        </div>
-                        <div>
-                            <button @click="dealGroupAdd(notice, false)" class="ss-button">{{ $t('btn_reject') }}</button>
-                            <button @click="dealGroupAdd(notice, true)" class="ss-button">{{ $t('btn_accept') }}</button>
-                        </div>
+                        <button @click="dealFriend(notice, false)" class="ss-button">{{ $t('btn_reject') }}</button>
+                        <button @click="dealFriend(notice, true)" class="ss-button">{{ $t('btn_accept') }}</button>
                     </div>
                 </div>
-                <div v-else v-show="NODE_ENV == 'development'" class="sys_not_new_friend">
-                    <span>不支持的消息类型</span>
-                    <a style="color: var(--color-font-2);word-wrap: anywhere;">{{ JSON.stringify(notice) }}</a>
+                <div v-else-if="notice.request_type == 'group'">
+                    <div>
+                        <img :src="'https://p.qlogo.cn/gh/' + notice.group_id + '/' + notice.group_id + '/0'">
+                        <div>
+                            <span>{{ getName(notice.user_id) }} {{ $t('sys_notice_invite_group') }} {{ notice.group_id }}</span>
+                            <a>{{ Intl.DateTimeFormat(trueLang, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' })
+                                .format(new Date(notice.time * 1000)) }}</a>
+                            <a>{{ $t('sys_notice_message') + notice.comment }}</a>
+                        </div>
+                    </div>
+                    <div>
+                        <button @click="dealGroupAdd(notice, false)" class="ss-button">{{ $t('btn_reject') }}</button>
+                        <button @click="dealGroupAdd(notice, true)" class="ss-button">{{ $t('btn_accept') }}</button>
+                    </div>
+                </div>
+                <div v-else v-show="NODE_ENV == 'development'">
+                    <div>
+                        <img>
+                        <div>
+                            <span>{{ $t('sys_notice_unknow') }}</span>
+                            <a style="color: var(--color-font-2);word-wrap: anywhere;">request: {{ notice.request_type }}; sub: {{ notice.sub_type }}</a>
+                        </div>
+                    </div>
                 </div>
             </template>
         </div>
@@ -72,12 +64,14 @@ import { defineComponent } from 'vue'
 
 import { runtimeData } from '@/function/msg'
 import { Connector } from '@/function/connect'
+import { getTrueLang } from '@/function/utils/systemUtil'
 
 export default defineComponent({
     name: 'ChatSystemNotice',
     components: {},
     data() {
         return {
+            trueLang: getTrueLang(),
             runtimeData: runtimeData,
             NODE_ENV: process.env.NODE_ENV
         }
@@ -102,7 +96,7 @@ export default defineComponent({
                     flag: notice.flag,
                     approve: deal
                 },
-                'setFriendAdd'
+                'setFriendAdd_' + notice.flag
             )
         },
 
@@ -119,16 +113,13 @@ export default defineComponent({
                     approve: deal,
                     sub_type: notice.sub_type
                 },
-                'setGroupAdd'
+                'setGroupAdd_' + notice.flag
             )
+        },
+
+        getName(id: number) {
+            return runtimeData.userList.filter((user) => user.user_id == id)[0].nickname
         }
-    },
-    mounted()  {
-        this.$watch(() => runtimeData.systemNoticesList, () => {
-            if(runtimeData.systemNoticesList && runtimeData.systemNoticesList.length <= 0) {
-                this.exit()
-            }
-        })
     }
 })
 </script>

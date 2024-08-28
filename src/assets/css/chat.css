@@ -207,6 +207,15 @@ input {
     width: 100%;
     border: 0;
 }
+.chat-pan > div.more > div:nth-child(2) > div > form > input:disabled,
+.chat-pan > div.more > div:nth-child(2) > div > form > textarea:disabled {
+    background: var(--color-card);
+    outline: 1px solid var(--color-card-2);
+    color: var(--color-font-2);
+    opacity: 0.7;
+    text-align: center;
+    font-size: 0.8rem;
+}
 .chat-pan > div.more > div:nth-child(2) > div > div {
     border-radius: 7px;
     min-height: 40px;
@@ -281,10 +290,57 @@ input {
 }
 
 .sys-not-list {
-    background: var(--color-card-1);
-    border-radius: 7px;
     margin-top: 10px;
+}
+.sys-not-list > div {
+    background: var(--color-card-1);
+    margin-bottom: 10px;
+    border-radius: 7px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     padding: 10px;
+}
+.sys-not-list > div > div:first-child {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex: 1;
+}
+.sys-not-list > div > div:first-child img {
+    width: 50px;
+    height: 50px;
+    border-radius: 7px;
+    border: 2px solid var(--color-card-2);
+    margin-right: 10px;
+}
+.sys-not-list > div > div:first-child div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    text-align: left;
+}
+.sys-not-list > div > div:first-child span {
+    color: var(--color-main);
+    font-weight: bold;
+}
+.sys-not-list > div > div:first-child a {
+    color: var(--color-font);
+    font-size: 0.9rem;
+}
+.sys-not-list > div > div:first-child a:last-child {
+    color: var(--color-font-2);
+}
+.sys-not-list > div > div:last-child button {
+    margin-right: 10px;
+    width: 90px;
+    height: 35px;
+    font-size: 0.9rem;
+}
+.sys-not-list > div > div:last-child button:first-child {
+    background: var(--color-card-2);
+    color: var(--color-font-1);
 }
 
 .more-detail {

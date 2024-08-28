@@ -457,6 +457,10 @@
 .note-base > a {
     color: var(--color-font);
 }
+.note-ban > a {
+    color: var(--color-main);
+    font-weight: bold;
+}
 .note-time {
     color: var(--color-font-2) !important;
     display: block;

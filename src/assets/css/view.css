@@ -384,10 +384,15 @@ textarea:focus {
     border-radius: 7px;
     transform: translate(0, 0);
     transition: background .2s, color .2s, transform .2s;
+    align-items: center;
 }
 .friend-body.active {
     background: var(--color-main);
     color: var(--color-font-r);
+}
+.friend-body.active > svg {
+    background: var(--color-card-2);
+    color: var(--color-main);
 }
 .friend-body.onmenu,
 .friend-body:hover {
@@ -404,6 +409,7 @@ textarea:focus {
     width: 50px;
 }
 .friend-body > svg {
+    transition: background .3s, color .3s;
     background: var(--color-main);
     color: var(--color-font-1-r);
     pointer-events: none;
@@ -418,6 +424,7 @@ textarea:focus {
     overflow: hidden;
 }
 .friend-body > div:nth-child(1) {
+    height: 54px;
     flex: unset;
     width: 4px;
     background: var(--color-main);
@@ -500,7 +507,7 @@ textarea:focus {
     padding: 10px;
 }
 .msg-menu-body.topOut {
-    transition: transform .1s, margin-top .1s;
+    transition: transform .1s, margin-top .2s;
 }
 .msg-menu-body.show {
     transform: scaleY(1);

@@ -45,6 +45,7 @@ message_list:
     name: get_group_msg_history
     private_name: get_friend_msg_history
     source: $.data.messages[*]
+    pageed: false       # 是否支持分页（id + count 获取）
     type: $.data
     message_type:
         user: private
@@ -115,6 +116,24 @@ group_essence:
         add_digest_nick: /add_digest_nick
         add_digest_time: /add_digest_time
     is_end: $.data.is_end
+# 获取群成员信息
+group_member_info:
+    name: get_group_member_info
+    source: $.data
+    list:
+        group_id: /group_id
+        user_id: /user_id
+        nickname: /nickname
+        card: /card
+        sex: /sex
+        age: /age
+        join_time: /join_time
+        last_sent_time: /last_sent_time
+        is_robot: /is_robot
+        shut_up_timestamp: /shut_up_timestamp
+# 退出群聊
+leave_group:
+    name: set_group_leave
 # 获取收藏表情
 roaming_stamp:
     name: fetch_custom_face

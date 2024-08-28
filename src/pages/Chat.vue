@@ -129,7 +129,7 @@
                 <!-- 回复指示器 -->
                 <div :class="tags.isReply ? 'replay-tag show' : 'replay-tag'">
                     <font-awesome-icon :icon="['fas', 'reply']" />
-                    <span>{{ selectedMsg === null ? '' : (selectedMsg.sender.nickname + ': ' + (selectedMsg.raw_message ?? fun.getMsgRawTxt(selectedMsg.message)))
+                    <span>{{ selectedMsg === null ? '' : (selectedMsg.sender.nickname + ': ' + fun.getMsgRawTxt(selectedMsg.message))
                     }}</span>
                     <div @click="cancelReply"><font-awesome-icon :icon="['fas', 'xmark']" /></div>
                 </div>
@@ -179,7 +179,9 @@
                             type="text"
                             v-model="msg"
                             autocomplete="off"
-                            :disabled="runtimeData.tags.openSideBar"
+                            :disabled="runtimeData.tags.openSideBar || chat.info.me_info.shut_up_timestamp > 0"
+                            :placeholder="chat.info.me_info.shut_up_timestamp > 0 ? $t('chat_send_msg_watermark_ban', {
+                            time: Intl.DateTimeFormat(trueLang, getTimeConfig(new Date(chat.info.me_info.shut_up_timestamp * 1000))).format(new Date(chat.info.me_info.shut_up_timestamp * 1000)) }) : ''"
                             @paste="addImg"
                             @keyup="mainKeyUp"
                             @click="selectSQIn()">
@@ -383,7 +385,7 @@ import imageCompression from 'browser-image-compression'
 
 import { defineComponent, markRaw } from 'vue'
 import { downloadFile, loadHistory as loadHistoryFirst } from '@/function/utils/appUtil'
-import { getTrueLang } from '@/function/utils/systemUtil'
+import { getTimeConfig, getTrueLang } from '@/function/utils/systemUtil'
 import { getMsgRawTxt, sendMsgRaw, getFace } from '@/function/utils/msgUtil'
 import { scrollToMsg } from '@/function/utils/appUtil'
 import { Logger, LogType, PopInfo, PopType } from '@/function/base'
@@ -405,6 +407,7 @@ export default defineComponent({
             getFace: getFace,
             Connector: Connector,
             runtimeData: runtimeData,
+            getTimeConfig: getTimeConfig,
             forwardList: runtimeData.userList,
             trueLang: getTrueLang(),
             tags: {
@@ -519,6 +522,7 @@ export default defineComponent({
                 // 锁定加载防止反复触发
                 this.tags.nowGetHistroy = true
                 // 发起获取历史消息请求
+                const pageed = !(runtimeData.jsonMap.message_list.pageed == false)
                 const type = runtimeData.chatInfo.show.type
                 const id = runtimeData.chatInfo.show.id
                 let name
@@ -530,12 +534,10 @@ export default defineComponent({
                 Connector.send(
                     name ?? 'get_chat_history',
                     {
-                        message_type: runtimeData.jsonMap.message_list.message_type[type],
                         group_id: type == 'group' ? id : undefined,
                         user_id: type != 'group' ? id : undefined,
-                        message_seq: firstMsgId,
                         message_id: firstMsgId,
-                        count: 20
+                        count: !pageed ? runtimeData.messageList.length + 20 : 20
                     },
                     'getChatHistory'
                 )
@@ -799,10 +801,15 @@ export default defineComponent({
                 menu.style.marginLeft = pointX + 'px'
                 menu.style.marginTop = pointY + 'px'
                 // 出界判定
-                const menuWidth = menu.clientWidth
+                let menuWidth = menu.clientWidth
+                if(this.tags.menuDisplay.showRespond) {
+                    // 如果有回应功能，获取回应功能的宽度；它比菜单长
+                    const item = menu.children[0] as HTMLDivElement
+                    menuWidth = item.clientWidth
+                }
                 const msgWidth = msg.offsetWidth
                 if (pointX + menuWidth > msgWidth + 27) {
-                    menu.style.marginLeft = (msgWidth + 27 - menuWidth) + 'px'
+                    menu.style.marginLeft = (msgWidth + 7 - menuWidth) + 'px'
                 }
                 // 显示菜单
                 this.tags.showMsgMenu = true
@@ -811,12 +818,11 @@ export default defineComponent({
                     // 出界判定
                     const menuHeight = menu.clientHeight
                     const bodyHeight = document.body.clientHeight
-                    if (pointY + menuHeight > bodyHeight + 10) {
+                    if (pointY + menuHeight > bodyHeight - 20) {
                         menu.classList.add('topOut')
                         menu.style.marginTop = (bodyHeight - menuHeight - 10) + 'px'
-                        // menu.classList.remove('topOut')
                     }
-                }, 90)
+                }, 100)
                 // 设置消息背景
                 this.tags.openedMenuMsg = msg
                 msg.style.background = '#00000008'
@@ -971,8 +977,7 @@ export default defineComponent({
             const msg = this.selectedMsg
             if (msg !== null) {
             const mface = msg.message[0]
-                const storeFace = option.get('store_face') ?? '[]'
-                const storeFaceList = JSON.parse(storeFace)
+                const storeFaceList = option.get('store_face') ?? []
                 const face = storeFaceList.find((item: any) => {
                     return item.emoji_package_id == mface.emoji_package_id && 
                         item.emoji_id == mface.emoji_id
@@ -981,7 +986,7 @@ export default defineComponent({
                     popInfo.add(PopType.INFO, this.$t('pop_chat_msg_menu_store_face_exist'))
                 } else {
                     storeFaceList.push(mface)
-                    option.save('store_face', JSON.stringify(storeFaceList))
+                    option.save('store_face', storeFaceList)
                     popInfo.add(PopType.INFO, this.$t('pop_chat_msg_menu_store_face_success'))
                 }
             }

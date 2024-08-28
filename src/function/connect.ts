@@ -192,6 +192,9 @@ export class Connector {
     static send(name: string, value: {[key: string]: any}, echo: string = name) {
         // 构建 JSON
         const json = JSON.stringify({ action: name, params: value, echo: echo } as BotActionElem)
+        this.sendRaw(json)
+    }
+    static sendRaw(json: string) {
         // 发送
         if(runtimeData.tags.isElectron) {
             const reader = runtimeData.reader
@@ -200,11 +203,12 @@ export class Connector {
             }
         } else {
             if(websocket) websocket.send(json)
-            if (Option.get('log_level') === 'debug') {
-                logger.debug('PUT：' + json)
-            } else {
-                logger.add(LogType.WS, 'PUT：' + json)
-            }
+        }
+
+        if (Option.get('log_level') === 'debug') {
+            logger.debug('PUT：' + json)
+        } else {
+            logger.add(LogType.WS, 'PUT：' + json)
         }
     }
 }

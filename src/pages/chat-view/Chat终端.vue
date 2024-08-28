@@ -489,6 +489,7 @@ export default defineComponent({
                             const type = runtimeData.chatInfo.show.type
                             const id = runtimeData.chatInfo.show.id
                             let name
+                            const pageed = !(runtimeData.jsonMap.message_list?.pageed == false)
                             if(runtimeData.jsonMap.message_list && type != 'group') {
                                 name = runtimeData.jsonMap.message_list.private_name
                             } else {
@@ -497,12 +498,10 @@ export default defineComponent({
                             Connector.send(
                                 name ?? 'get_chat_history',
                                 {
-                                    message_type: runtimeData.jsonMap.message_list.message_type[type],
                                     group_id: type == 'group' ? id : undefined,
                                     user_id: type != 'group' ? id : undefined,
-                                    message_seq: firstMsgId,
                                     message_id: firstMsgId,
-                                    count: 20
+                                    count: !pageed ? runtimeData.messageList.length + 20 : 20
                                 },
                                 'getChatHistory'
                             )

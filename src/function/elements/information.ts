@@ -86,13 +86,7 @@ export interface BaseChatInfoElem {
     jump?: string
 }
 
-export interface UserFriendElem {
-    group_id: number,
-    group_name: string,
-    py_name?: string,
-    member_count?: number,
-    admin_flag?: boolean,
-    
+export interface UserElem {
     new_msg?: boolean,
     raw_msg?: string,
     time?: number,
@@ -100,19 +94,21 @@ export interface UserFriendElem {
     message_id?: string
 }
 
-export interface UserGroupElem {
+export interface UserFriendElem extends UserElem {
+    group_id: number,
+    group_name: string,
+    py_name?: string,
+    member_count?: number,
+    admin_flag?: boolean
+}
+
+export interface UserGroupElem extends UserElem {
     user_id: number,
     nickname: string,
     remark: string,
     py_name?: string,
     class_id?: number,
-    class_name?: string,
-
-    new_msg?: boolean,
-    raw_msg?: string,
-    time?: number,
-    always_top?: boolean
-    message_id?: string
+    class_name?: string
 }
 
 export interface GroupMemberInfoElem {

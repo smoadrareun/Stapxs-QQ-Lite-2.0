@@ -84,13 +84,13 @@ export default defineComponent({
         },
 
         getStoreFaceList() {
-            this.storeFace = JSON.parse(decodeURIComponent(Option.getRaw('store_face') || '[]'))
+            this.storeFace = Option.get('store_face') ?? []
         },
         removeMface(data: any) {
             const index = this.storeFace.findIndex((face) => face.emoji_id === data.emoji_id)
             if (index !== -1) {
                 this.storeFace.splice(index, 1)
-                Option.save('store_face', JSON.stringify(this.storeFace))
+                Option.save('store_face', this.storeFace)
             }
         }
     },
@@ -104,6 +104,10 @@ export default defineComponent({
             }
         }
         this.getStoreFaceList()
+        // 监听表情商店列表
+        this.$watch(() => runtimeData.sysConfig.store_face.length, () => {
+            this.getStoreFaceList()
+        })
     }
 })
 </script>

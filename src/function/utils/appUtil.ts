@@ -113,6 +113,7 @@ export function loadHistory(info: BaseChatInfoElem) {
 }
 export function loadHistoryMessage(id: number, type: string, count = 20, echo = 'getChatHistoryFist') {
     let name
+    const pageed = !(runtimeData.jsonMap.message_list?.pageed == false)
     if(runtimeData.jsonMap.message_list && type != 'group') {
         name = runtimeData.jsonMap.message_list.private_name
     } else {
@@ -122,12 +123,10 @@ export function loadHistoryMessage(id: number, type: string, count = 20, echo = 
     Connector.send(
         name ?? 'get_chat_history',
         {
-            message_type: runtimeData.jsonMap.message_list.message_type[type],
             group_id: type == 'group' ? id : undefined,
             user_id: type != 'group' ? id : undefined,
-            message_seq: 0,
             message_id: 0,
-            count: count
+            count: !pageed ? runtimeData.messageList.length + count : count
         },
         echo
     )

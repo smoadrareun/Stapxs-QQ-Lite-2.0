@@ -232,3 +232,28 @@ export function getViewTime(time: number) {
         return time
     }
 }
+
+/**
+ * 获取时间的配置
+ * @param date 
+ * @returns 
+ */
+export function getTimeConfig(date: Date) {
+    const base = { hour: 'numeric', minute: 'numeric', second: 'numeric' } as Intl.DateTimeFormatOptions
+    const nowDate = new Date()
+    const todayDate = new Date().setHours(0, 0, 0, 0)
+    const paramsDate = date.setHours(0, 0, 0, 0)
+    if(todayDate != paramsDate) {
+        if (nowDate.getFullYear() == date.getFullYear() && nowDate.getMonth() == date.getMonth()) {
+            base.weekday = 'short'
+        } else if(nowDate.getFullYear() == date.getFullYear()) {
+            base.day = 'numeric'
+            base.month = 'short'
+        } else {
+            base.day = 'numeric'
+            base.month = 'short'
+            base.year = 'numeric'
+        }
+    }
+    return base
+}

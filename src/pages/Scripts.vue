@@ -89,6 +89,7 @@ import { highlight, languages } from 'prismjs'
 
 import { getMsgData } from '@/function/utils/msgUtil'
 import { Logger, PopInfo, PopType } from '@/function/base'
+import { getRaw, save } from '@/function/option'
 
 export default defineComponent({
     name: 'ViewScripts',
@@ -166,13 +167,7 @@ export default defineComponent({
         },
         updateSave() {
             const saveJson = JSON.stringify(this.savedList)
-            if(runtimeData.tags.isElectron) {
-                runtimeData.reader?.send('sys:store', {
-                    key: 'scripts', value: saveJson
-                })
-            } else {
-                localStorage.setItem('scripts', saveJson)
-            }
+            save('scripts', saveJson)
         },
         save() {
             this.editScript = false
@@ -229,20 +224,7 @@ export default defineComponent({
             }
         })
         // 读取保存的脚本
-        const electron = window.require('electron')
-        let data = null
-        if(electron) {
-            const reader = electron.ipcRenderer
-            if(reader) data = await reader.invoke('sys:getStore', 'scripts')
-        }
-        if(data) {
-            this.savedList = JSON.parse(data)
-        } else {
-            data = localStorage.getItem('scripts')
-            if(data) {
-                this.savedList = JSON.parse(data)
-            }
-        }
+        this.savedList = JSON.parse(decodeURIComponent(getRaw('scripts'))) ?? []
         // 监听消息更改
         this.$watch(() => runtimeData.watch.newMsg, () => {
             if(runtimeData.sysConfig.append_scripts) {

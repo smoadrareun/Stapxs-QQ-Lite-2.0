@@ -13,6 +13,7 @@ export class Connector {
 
     private win: BrowserWindow
     private websocket: WebSocket | undefined
+    private reconnectTimes = 0
 
     constructor(win: BrowserWindow) {
         this.logger.level = logLevel
@@ -36,9 +37,15 @@ export class Connector {
         if(!this.websocket) {
             this.logger.info('正在连接到：', url)
             this.websocket = new WebSocket(url + '?access_token=' + token)
+        } else {
+            // 如果前端发起了连接请求，说明前端在未连接状态；断开已有连接，重新连接
+            // PS：这种情况一般不会发生，大部分情况是因为 debug 模式前端热重载导致的
+            this.websocket.close(1000)
+            this.connect(url, token)
         }
 
         this.websocket.onopen = () => {
+            this.reconnectTimes = 0
             this.logger.info('已成功连接到', url)
             this.win.webContents.send('onebot:onopen', { address: url, token: token })
         }
@@ -59,6 +66,8 @@ export class Connector {
             this.win.webContents.send('onebot:onmessage', e.data)
         }
         this.websocket.onclose = (e) => {
+            this.websocket = undefined
+
             this.logger.info('连接已关闭，代码：', e.code)
             if(e.code != 1006 && e.code != 1015) {
                 // 除了需要重连的情况，其他情况都直接常规处理
@@ -68,13 +77,32 @@ export class Connector {
                     address: url,
                     token: token
                 })
-            } else if(e.code == 1015) {
-                // TSL 连接失败，尝试使用非加密连接
-                this.logger.warn('连接失败，尝试使用非加密连接...')
-                this.connect(url.replace('wss://', 'ws://'), token)
+            } else {
+                this.win.webContents.send('onebot:onclose', {
+                    code: -1,
+                    message: e.reason,
+                    address: url,
+                    token: token
+                })
+            }
+            if(this.reconnectTimes < 5) {
+                setTimeout(() => {
+                    if(e.code == 1006) {
+                        // 连接失败，尝试轮替协议重连
+                        if(url.indexOf('wss://') >= 0) {
+                            url = url.replace('wss://', 'ws://')
+                        } else {
+                            url = url.replace('ws://', 'wss://')
+                        }
+                        this.logger.warn('连接失败，尝试重连...')
+                        this.connect(url, token)
+                    }
+                    this.reconnectTimes ++
+                }, 1500)
             }
         }
         this.websocket.onerror = (e) => {
+            this.websocket = undefined
             this.logger.error('连接错误：', e)
         }
     }

@@ -78,6 +78,9 @@
     height: 30px;
     width: 30px;
 }
+.friend-body > div:nth-child(1) {
+    height: 34px;
+}
 .friend-body > div p {
     font-size: 0.8rem;
 }
@@ -685,6 +688,19 @@
 }
 .script-view .editor {
     font-size: 0.8rem;
+}
+
+.sys-not-list > div > div:first-child img {
+    width: 40px;
+    height: 40px;
+}
+.sys-not-list > div > div:first-child a {
+    font-size: 0.75rem;
+}
+.sys-not-list > div > div:last-child button {
+    width: 70px;
+    height: 30px;
+    font-size: 0.75rem;
 }
 
 @media (max-width: 700px) {

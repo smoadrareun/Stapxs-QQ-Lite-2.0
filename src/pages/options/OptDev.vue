@@ -198,7 +198,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { runASWEvent as save, saveAll } from '@/function/option'
-import { websocket as ws } from '@/function/connect'
+import { Connector } from '@/function/connect'
 import { PopInfo, PopType } from '@/function/base'
 import { runtimeData } from '@/function/msg'
 import app from '@/main'
@@ -229,7 +229,7 @@ export default defineComponent({
                 this.ws_text = ''
                 // 修改 echo 防止被消息处理机处理
                 info.echo = 'websocketTest'
-                if(ws) ws.send(JSON.stringify(info))
+                Connector.sendRaw(JSON.stringify(info))
             }
         },
         sendTestAppmsg (event: KeyboardEvent) {
