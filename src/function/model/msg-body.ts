@@ -117,7 +117,7 @@ export class MsgBodyFuns {
             }
             return div.outerHTML
         } catch (ex) {
-            return '<span v-else class="msg-unknown">( ' + app.config.globalProperties.$t('chat_show_msg_error') + ': xml )</span>'
+            return '<span v-else class="msg-unknown">( ' + app.config.globalProperties.$t('解析消息错误') + ': xml )</span>'
         }
     }
 
@@ -230,7 +230,7 @@ export class MsgBodyFuns {
             runtimeData.mergeMessageList = []
             Connector.send(runtimeData.jsonMap.forward_msg.name, { id: id }, 'getForwardMsg')
         } else {
-            popInfo.add(PopType.INFO, app.config.globalProperties.$t('pop_chat_forward_toooomany'))
+            popInfo.add(PopType.INFO, app.config.globalProperties.$t('合并消息层级过多，解析失败。'))
         }
     }
 

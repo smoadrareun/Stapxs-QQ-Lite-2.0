@@ -78,6 +78,13 @@
 .message-body.me a:link::before {
     text-shadow: 0 0 0 var(--color-font-1-r);
 }
+.message-body > span {
+    font-size: 0.7rem;
+    background: var(--color-main);
+    color: #fff;
+    border-radius: 10px;
+    padding: 1px 4px;
+}
 .message-body > a {
     color: var(--color-font-1);
     font-size: 0.9rem;
@@ -200,6 +207,7 @@
     color: var(--color-main) !important;
     /* text-decoration: underline; */
     cursor: pointer;
+    padding: 3px;
 }
 .msg-at.me > a {
     color: var(--color-font-r) !important;
@@ -208,7 +216,6 @@
     color: var(--color-font-r) !important;
     background: var(--color-main);
     border-radius: 4px;
-    padding: 3px;
 }
 
 .msg-replay {
@@ -497,6 +504,24 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     margin: 0 5px;
+}
+
+.note-notify {
+    transition: border .5s;
+    border: 1px solid transparent;
+}
+.note-notify img {
+    display: inline-block;
+    width: 1rem;
+    margin: 0 3px;
+}
+.note-notify span {
+    margin: 0 3px;
+    color: var(--color-main);
+    font-weight: bold;
+}
+.note.poking > div.note-notify {
+    border: 1px solid var(--color-main);
 }
 
 @media (max-width: 992px) {

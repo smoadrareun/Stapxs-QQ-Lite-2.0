@@ -78,7 +78,7 @@ export default defineComponent({
                 // 返回
                 return div.outerHTML
             } catch (ex) {
-                return '<span v-else class="msg-unknown">( ' + app.config.globalProperties.$t('chat_show_msg_error') + ': json )</span>'
+                return '<span v-else class="msg-unknown">( ' + app.config.globalProperties.$t('解析消息错误') + ': json )</span>'
             }
         },
 

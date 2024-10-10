@@ -27,7 +27,7 @@
                         <span @click="copy(msg.sender.user_id)" :class="'sname s' + msg.sender.role + (runtimeData.loginInfo.uin == msg.sender.user_id ? ' smine' : '')">
                             {{ msg.sender.card ? msg.sender.card : msg.sender.nickname }}{{ hasReply(msg) ?? '' }}{{ msg.sub_type == 'friend' ? (runtimeData.loginInfo.uin == msg.sender.user_id ? runtimeData.loginInfo.nickname : runtimeData.chatInfo.show.name) : '' }}{{ msg.sender.user_id == 0 ? '' : ': ' }}
                         </span>
-                        <span class="smsg" @click="copy(msg.message_id)">{{ getMsgRawTxt(msg.message) }}</span>
+                        <span class="smsg" @click="copy(msg.message_id)">{{ getMsgRawTxt(msg) }}</span>
                         <br>
                     </div>
                     <div v-else-if="msg.post_type == 'notice'">
@@ -360,7 +360,7 @@ export default defineComponent({
                         }
                     }
                 } else {
-                    popInfo.add(PopType.INFO, this.$t('pop_chat_image_toooo_big'))
+                    popInfo.add(PopType.INFO, this.$t('图片过大'))
                 }
             }
         }
@@ -489,7 +489,7 @@ export default defineComponent({
                             const type = runtimeData.chatInfo.show.type
                             const id = runtimeData.chatInfo.show.id
                             let name
-                            const pageed = !(runtimeData.jsonMap.message_list?.pageed == false)
+                            const fullPage = runtimeData.jsonMap.message_list?.pagerType == 'full'
                             if(runtimeData.jsonMap.message_list && type != 'group') {
                                 name = runtimeData.jsonMap.message_list.private_name
                             } else {
@@ -501,7 +501,7 @@ export default defineComponent({
                                     group_id: type == 'group' ? id : undefined,
                                     user_id: type != 'group' ? id : undefined,
                                     message_id: firstMsgId,
-                                    count: !pageed ? runtimeData.messageList.length + 20 : 20
+                                    count: fullPage ? runtimeData.messageList.length + 20 : 20
                                 },
                                 'getChatHistory'
                             )

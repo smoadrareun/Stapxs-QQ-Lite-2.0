@@ -1,12 +1,12 @@
 import jp from 'jsonpath'
 import app from '@/main'
+import Umami from '@stapxs/umami-logger-typescript'
 
 import { Logger } from '@/function/base'
 import { runtimeData } from '@/function/msg'
 import { v4 as uuid } from 'uuid'
 import { Connector } from '@/function/connect'
 import { BotMsgType, UserFriendElem, UserGroupElem } from '../elements/information'
-import Umami from '@stapxs/umami-logger-typescript'
 
 const logger = new Logger()
 
@@ -55,9 +55,7 @@ export function getMsgData(name: string, msg: { [key: string]: any }, map: strin
                     back = backList
                 }
             } catch (ex) {
-                logger.error(`解析消息 JSON 错误：${name} -> ${map}`)
-                // eslint-disable-next-line
-                console.log(ex)
+                logger.error(ex as Error, `解析消息 JSON 错误：${name} -> ${map}`)
             }
         } else {
             const data = {} as { [key: string]: any }
@@ -66,9 +64,7 @@ export function getMsgData(name: string, msg: { [key: string]: any }, map: strin
                     try {
                         data[key] = jp.query(msg, replaceJPValue(map[key]))[0]
                     } catch (ex) {
-                        logger.error(`解析 JSON 错误：${name} -> ${map}`)
-                        // eslint-disable-next-line
-                        console.log(ex)
+                        logger.error(ex as Error, `解析 JSON 错误：${name} -> ${map}`)
                     }
             })
             back = [data]
@@ -110,14 +106,15 @@ export function buildMsgList(msgList: { [key: string]: any }): { [key: string]: 
         }
     })
     const result = {} as any
-    keys.reduce((acc, key, index) => {
+    let acc = result
+    keys.forEach((key, index) => {
         if (index === keys.length - 1) {
             acc[key] = msgList
         } else {
             acc[key] = {}
         }
-        return acc[key]
-    }, result)
+        acc = acc[key]
+    })
     return result
 }
 
@@ -197,21 +194,38 @@ export function parseMsgList(list: any, map: string, valueMap: { [key: string]: 
  * @param message 待处理的消息对象
  * @returns 字符串
  */
-export function getMsgRawTxt(message: [{ [key: string]: any }]): string {
+export function getMsgRawTxt(data: any): string {
+    const $t = app.config.globalProperties.$t
+
+    const message = data.message as [{ [key: string]: any }]
+    const fromId = data.group_id ?? data.user_id
     let back = ''
     for (let i = 0; i < message.length; i++) {
         try {
             switch (message[i].type) {
-                case 'at': if (message[i].text == undefined) { break }
+                case 'at': if (message[i].text == undefined) {
+                    // 群内才可以 at，如果 at 消息中没有 text 字段
+                    // 尝试去群成员列表中找到对应的昵称，群成员列表只在当前打开的群才有
+                    if(runtimeData.chatInfo.show.id == fromId && runtimeData.chatInfo.info.group_members) {
+                        const user = runtimeData.chatInfo.info.group_members.find((item) => 
+                            item.user_id == message[i].qq
+                        )
+                        if(user) {
+                            back += '@' + (user.card && user.card != '' ? user.card : user.nickname)
+                            break
+                        }
+                    }
+                    break
+                }
                 // eslint-disable-next-line
                 case 'text': back += message[i].text.replaceAll('\n', ' ').replaceAll('\r', ' '); break
-                case 'face': back += '[表情]'; break
+                case 'face': back += '[' + $t('表情') + ']'; break
                 case 'mface': back += message[i].summary ?? message[i].text; break
                 case 'bface': back += message[i].text; break
-                case 'image': back += '[图片]'; break
-                case 'record': back += '[语音]'; break
-                case 'video': back += '[视频]'; break
-                case 'file': back += '[文件]'; break
+                case 'image': back += '[' + $t('图片') + ']'; break
+                case 'record': back += '[' + $t('语音') + ']'; break
+                case 'video': back += '[' + $t('视频') + ']'; break
+                case 'file': back += '[' + $t('文件') + ']'; break
                 case 'json': {
                     try {
                         back += JSON.parse(message[i].data).prompt;
@@ -228,9 +242,7 @@ export function getMsgRawTxt(message: [{ [key: string]: any }]): string {
                 }
             }
         } catch (error) {
-            logger.error('解析消息短格式错误：' + JSON.stringify(message[i]))
-            // eslint-disable-next-line
-            console.log(error)
+            logger.error(error as Error, '解析消息短格式错误：' + JSON.stringify(message[i]))
         }
     }
     return back
@@ -320,7 +332,7 @@ export function parseCQ(data: any) {
             }
         })
     }
-    logger.debug(app.config.globalProperties.$t('log_cq_msg_parsed') + ': ' + JSON.stringify(back))
+    logger.debug('解析 CQ 消息结果: ' + JSON.stringify(back))
     data.message = back
     return data
 }
@@ -341,7 +353,7 @@ export function sendMsgRaw(id: string, type: string, msg: string | { type: strin
                 nickname: runtimeData.loginInfo.nickname
             },
             message: JSON.parse(JSON.stringify(msg)),
-            raw_message: app.config.globalProperties.$t('chat_msg_sending'),
+            raw_message: app.config.globalProperties.$t('发送中'),
         } as { [key: string]: any }
         if (showMsg.message_type == 'group') {
             showMsg.group_id = runtimeData.chatInfo.show.id
@@ -352,26 +364,9 @@ export function sendMsgRaw(id: string, type: string, msg: string | { type: strin
     }
     // 检查消息体是否需要处理
     if (runtimeData.tags.msgType == BotMsgType.Array) {
-        const map = runtimeData.jsonMap.message_list.type
-        const path = jp.parse(map)
-        const keys = [] as string[]
-        path.forEach((item) => {
-            if (item.expression.value != '*' && item.expression.value != '$') {
-                keys.push(item.expression.value)
-            }
-        })
         if (msg && typeof msg != 'string') {
             const newMsg = [] as any
             msg.forEach((item) => {
-                const result = {} as any
-                keys.reduce((acc, key, index) => {
-                    if (index === keys.length - 1) {
-                        acc[key] = item
-                    } else {
-                        acc[key] = {}
-                    }
-                    return acc[key]
-                }, result)
                 const newResult = {} as { [key: string]: any }
                 newResult.type = item.type
                 newResult.data = item
@@ -433,4 +428,10 @@ export function updateLastestHistory(item: UserFriendElem & UserGroupElem) {
         },
         'getChatHistoryOnMsg_' + id
     )
+}
+
+export function sendMsgAppendInfo(msg: any) {
+    msg.message.forEach(() => {
+        // TODO
+    })
 }

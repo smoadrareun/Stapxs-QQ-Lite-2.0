@@ -19,12 +19,12 @@
                 </div>
             </div>
             <div icon="fa-solid fa-heart">
-                <div class="face-stickers">
-                    <img loading="lazy" v-for="(url, index) in runtimeData.stickerCache" @click="addImgFace(url)"
+                <div class="face-stickers" @scroll="stickersScroll">
+                    <img loading="lazy" v-for="(url, index) in runtimeData.stickerCache" v-show="url != 'end'" @click="addImgFace(url)"
                         :key="'stickers-' + index" :src="url">
                     <div v-show="runtimeData.stickerCache && runtimeData.stickerCache.length <= 0" class="ss-card">
                         <font-awesome-icon :icon="['fas', 'face-dizzy']" />
-                        <span>{{ $t('chat_face_pan_none').split('|')[0] }}</span>
+                        <span>{{ $t('一无所有') }}</span>
                     </div>
                 </div>
             </div>
@@ -66,7 +66,8 @@ export default defineComponent({
             Option: Option,
             runtimeData: runtimeData,
             baseFaceMax: 348,
-            storeFace: [] as {[type: string]: string}[]
+            storeFace: [] as {[type: string]: string}[],
+            stickerPage: 1
         }
     },
     methods: {
@@ -92,14 +93,33 @@ export default defineComponent({
                 this.storeFace.splice(index, 1)
                 Option.save('store_face', this.storeFace)
             }
+        },
+
+        stickersScroll(e: Event) {
+            const target = e.target as HTMLDivElement
+            // 如果滚到了底部
+            if (target.scrollHeight - target.scrollTop === target.clientHeight) {
+                if(runtimeData.stickerCache) {
+                    if(runtimeData.jsonMap.roaming_stamp.pagerType == 'full' &&
+                        runtimeData.stickerCache[runtimeData.stickerCache.length - 1] != 'end') {
+                            const count = 48 + 48 * this.stickerPage
+                        // 全量分页，返回所有内容（napcat 行为）
+                        Connector.send(runtimeData.jsonMap.roaming_stamp.name, 
+                            { count: count }, 'getRoamingStamp_' + count)
+                        this.stickerPage++
+                    }
+                }
+            }
         }
     },
     mounted() {
         // 加载漫游表情
         if (runtimeData.stickerCache === undefined && runtimeData.jsonMap.roaming_stamp) {
-            if(runtimeData.jsonMap.roaming_stamp.paged) {
-                Connector.send(runtimeData.jsonMap.roaming_stamp.name, { count: 20 }, 'getRoamingStamp')
+            if(runtimeData.jsonMap.roaming_stamp.pagerType == 'full') {
+                // 全量分页，返回所有内容（napcat 行为）
+                Connector.send(runtimeData.jsonMap.roaming_stamp.name, { count: 48 }, 'getRoamingStamp_48')
             } else {
+                // 默认不分页，返回所有内容（lgr 行为）
                 Connector.send(runtimeData.jsonMap.roaming_stamp.name, {}, 'getRoamingStamp')
             }
         }

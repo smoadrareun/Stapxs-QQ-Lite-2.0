@@ -9,12 +9,12 @@
     <div class="opt-main">
         <AboutPan showUI></AboutPan>
         <div>
-            <BcTab :title="$t('option_title')" class="opt-tab">
-                <div :name="$t('option_bar_account')"><OptAccount :config="config"></OptAccount></div>
-                <div :name="$t('option_bar_view')"><OptView></OptView></div>
-                <div :name="$t('option_bar_function')"><OptFunction :config="config"></OptFunction></div>
-                <div :name="$t('option_bar_dev')"><OptDev></OptDev></div>
-                <div :name="$t('menu_about')"><AboutPan class="opt-about" showUI></AboutPan></div>
+            <BcTab v-show="show" :title="$t('设置')" class="opt-tab">
+                <div :name="$t('账号')"><OptAccount :config="config"></OptAccount></div>
+                <div :name="$t('界面')"><OptView></OptView></div>
+                <div :name="$t('功能')"><OptFunction :config="config"></OptFunction></div>
+                <div :name="$t('高级')"><OptDev></OptDev></div>
+                <div :name="$t('关于')"><AboutPan class="opt-about" showUI></AboutPan></div>
             </BcTab>
             <div class="ss-card end-card">
                 <div>
@@ -76,6 +76,7 @@ import AboutPan from '@/components/AboutPan.vue'
 export default defineComponent({
     name: 'ViewOption',
     props: {
+        show: Boolean,
         config: {} as { [key: string]: string | number | boolean }
     },
     components: { BcTab, OptAccount, OptView, OptDev, OptFunction, AboutPan },

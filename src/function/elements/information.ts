@@ -36,7 +36,11 @@ export interface RunTimeDataElem {
         darkMode: boolean
     },
     watch: {                // PS: 一些给监听器捕捉用的数据
-        newMsg: any
+        newMsg: any,
+        newNotice: any,
+        heartbeatTime?: number,
+        oldHeartbeatTime?: number,
+        lastHeartbeatTime?: number
     },
     messageList: any[]
     mergeMessageList?: any[] | undefined,
@@ -98,6 +102,7 @@ export interface UserFriendElem extends UserElem {
     group_id: number,
     group_name: string,
     py_name?: string,
+    py_start?: string,
     member_count?: number,
     admin_flag?: boolean
 }
@@ -107,6 +112,7 @@ export interface UserGroupElem extends UserElem {
     nickname: string,
     remark: string,
     py_name?: string,
+    py_start?: string,
     class_id?: number,
     class_name?: string
 }
@@ -123,6 +129,7 @@ export interface GroupMemberInfoElem {
     role: string,
     sex: string,
     shutup_time: number,
+    py_start?: string
 }
 
 export interface SQCodeElem {

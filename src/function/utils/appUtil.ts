@@ -1,5 +1,4 @@
 import app from '@/main'
-import zh from '@/assets/l10n/zh-CN.json'
 import FileDownloader from 'js-file-downloader'
 import option, { remove } from '@/function/option'
 import cmp from 'semver-compare'
@@ -58,20 +57,20 @@ export function scrollToMsg (seqName: string, showAnimation: boolean): boolean {
  * @param url 链接
  */
 export function openLink(url: string, external = false) {
-    runtimeData.popBoxList = []
     // 判断是不是 Electron，是的话打开内嵌 iframe
     if(runtimeData.tags.isElectron) {
         if(!external) {
+            runtimeData.popBoxList = []
             const popInfo = {
                 html: `<iframe src="${url}" class="view-iframe"></iframe>`,
                 full: true,
                 button: [
                     {
-                        text: app.config.globalProperties.$t('btn_iframe_tip'),
+                        text: app.config.globalProperties.$t('请不要在内嵌页面中输入敏感信息，内嵌页面并不安全。'),
                         fun: () => undefined
                     },
                     {
-                        text: app.config.globalProperties.$t('btn_open'),
+                        text: app.config.globalProperties.$t('打开…'),
                         fun: () => {
                             const electron = window.require('electron')
                             const shell = electron ? electron.shell : null
@@ -82,7 +81,7 @@ export function openLink(url: string, external = false) {
                         }
                     },
                     {
-                        text: app.config.globalProperties.$t('btn_close'),
+                        text: app.config.globalProperties.$t('关闭'),
                         master: true,
                         fun: () => { runtimeData.popBoxList.shift() }
                     }
@@ -108,12 +107,12 @@ export function openLink(url: string, external = false) {
 export function loadHistory(info: BaseChatInfoElem) {
     runtimeData.messageList = []
     if (!loadHistoryMessage(info.id, info.type)) {
-        new PopInfo().add(PopType.ERR, app.config.globalProperties.$t('pop_load_history_fail'), false)
+        new PopInfo().add(PopType.ERR, app.config.globalProperties.$t('加载历史消息失败'), false)
     }
 }
 export function loadHistoryMessage(id: number, type: string, count = 20, echo = 'getChatHistoryFist') {
     let name
-    const pageed = !(runtimeData.jsonMap.message_list?.pageed == false)
+    const fullPage = runtimeData.jsonMap.message_list?.pagerType == 'full'
     if(runtimeData.jsonMap.message_list && type != 'group') {
         name = runtimeData.jsonMap.message_list.private_name
     } else {
@@ -126,7 +125,7 @@ export function loadHistoryMessage(id: number, type: string, count = 20, echo = 
             group_id: type == 'group' ? id : undefined,
             user_id: type != 'group' ? id : undefined,
             message_id: 0,
-            count: !pageed ? runtimeData.messageList.length + count : count
+            count: fullPage ? runtimeData.messageList.length + count : count
         },
         echo
     )
@@ -215,18 +214,6 @@ export function initUITest() {
     // Vue.set(runtimeData, 'showData', [{ "group_id": 1000000000, "group_name": "DHW ∞ 行在", "owner_id": 2222222222 }, { "user_id": 3333333333, "nickname": "晓狩", "sex": "male", "remark": "" }])
     // Vue.set(runtimeData, 'mergeMessageList', [{ "user_id": 2222222222, "time": 1669942039, "nickname": "林小槐 - Stapx_Steve", "group_id": 1111111111, "message": [{ "type": "image", "file": "6b02169dd9cb486330e400fdebf8312a5310-290-290.jpg", "url": "https://gchat.qpic.cn/gchatpic_new/1007028430/560932983-2842238012-6B02169DD9CB486330E400FDEBF8312A/0?term=2&is_origin=0", "asface": true }], "raw_message": "[动画表情]", "sender": { "user_id": 2222222222, "nickname": "林小槐 - Stapx_Steve", "card": "林小槐 - Stapx_Steve" } }, { "time": 1669893493, "user_id": 2222222222, "nickname": "林小槐 - Stapx_Steve", "group_id": 1111111111, "message": [{ "type": "text", "text": "烦内" }], "raw_message": "烦内", "sender": { "user_id": 2222222222, "nickname": "林小槐 - Stapx_Steve", "card": "林小槐 - Stapx_Steve" } }])
     // Vue.set(runtimeData, 'stickers', [])
-    // 输出所有的 popInfo
-    popInfo.add(PopType.INFO, app.config.globalProperties.$t('pop_print_all_pop'), true)
-    setTimeout(() => {
-        const lang = zh
-        const list = Object.keys(lang).filter((item) => { return item.startsWith('pop') })
-        for (let i = 0; i < list.length; i++) {
-            const item = list[i]
-            setTimeout(() => {
-                popInfo.add(PopType.INFO, app.config.globalProperties.$t(item, { code: 'test' }), true)
-            }, 3000 * i)
-        }
-    }, 5000)
 }
 
 /**
@@ -387,34 +374,34 @@ export function createMenu() {
     if (runtimeData.reader) {
         // 初始化菜单
         const menuTitles = {} as { [key: string]: string }
-        menuTitles.success = $t('load_success', { name: $t('name')})
+        menuTitles.success = $t('应用显示完成，应用初始化完成！欢迎使用 {name}！', { name: $t('Stapxs QQ Lite')})
 
-        menuTitles.title = $t('name')
-        menuTitles.about = $t('menu_about') + ' ' + $t('name')
-        menuTitles.update = $t('menu_update')
-        menuTitles.hide = $t('menu_hide') + ' ' + $t('name')
-        menuTitles.hideOthers = $t('menu_hide_others')
-        menuTitles.unhide = $t('menu_unhide')
-        menuTitles.quit = $t('menu_quit') + ' ' + $t('name')
+        menuTitles.title = $t('Stapxs QQ Lite')
+        menuTitles.about = $t('关于') + ' ' + $t('Stapxs QQ Lite')
+        menuTitles.update = $t('检查更新…')
+        menuTitles.hide = $t('隐藏') + ' ' + $t('Stapxs QQ Lite')
+        menuTitles.hideOthers = $t('隐藏其他')
+        menuTitles.unhide = $t('全部显示')
+        menuTitles.quit = $t('退出') + ' ' + $t('Stapxs QQ Lite')
 
-        menuTitles.edit = $t('menu_edit')
-        menuTitles.undo = $t('menu_undo')
-        menuTitles.redo = $t('menu_redo')
-        menuTitles.cut = $t('menu_cut')
-        menuTitles.copy = $t('menu_copy')
-        menuTitles.paste = $t('menu_paste')
-        menuTitles.selectAll = $t('menu_select_all')
+        menuTitles.edit = $t('编辑')
+        menuTitles.undo = $t('撤销')
+        menuTitles.redo = $t('重做')
+        menuTitles.cut = $t('剪切')
+        menuTitles.copy = $t('复制')
+        menuTitles.paste = $t('粘贴')
+        menuTitles.selectAll = $t('全选')
 
-        menuTitles.account = $t('menu_account')
-        menuTitles.login = $t('menu_login')
-        menuTitles.logout = $t('menu_logout')
-        menuTitles.userList = $t('menu_user_list', { count: runtimeData.userList.length })
-        menuTitles.flushUser = $t('menu_flush_user')
+        menuTitles.account = $t('账户')
+        menuTitles.login = $t('连接')
+        menuTitles.logout = $t('登出')
+        menuTitles.userList = $t('用户列表（{count}）', { count: runtimeData.userList.length })
+        menuTitles.flushUser = $t('刷新列表…')
 
-        menuTitles.help = $t('menu_help')
-        menuTitles.doc = $t('menu_doc')
-        menuTitles.feedback = $t('menu_feedback')
-        menuTitles.license = $t('menu_license')
+        menuTitles.help = $t('帮助')
+        menuTitles.doc = $t('帮助文档')
+        menuTitles.feedback = $t('在 Github 上反馈问题')
+        menuTitles.license = $t('许可协议')
 
         runtimeData.reader.send('sys:createMenu', menuTitles)
     }
@@ -431,7 +418,7 @@ export function createIpc() {
     if (runtimeData.reader) {
         runtimeData.reader.on('bot:flushUser', () => {
             reloadUsers()
-            popInfo.add(PopType.INFO, app.config.globalProperties.$t('pop_reload_user_success'))
+            popInfo.add(PopType.INFO, app.config.globalProperties.$t('刷新用户列表成功'))
         })
         runtimeData.reader.on('bot:logout', () => {
             remove('auto_connect')
@@ -457,7 +444,7 @@ export function createIpc() {
         })
         runtimeData.reader.on('app:about', () => {
             const popInfo = {
-                title: app.config.globalProperties.$t('menu_about') + ' ' + app.config.globalProperties.$t('name'),
+                title: app.config.globalProperties.$t('关于') + ' ' + app.config.globalProperties.$t('Stapxs QQ Lite'),
                 template: AboutPan,
                 allowQuickClose: false
             }
@@ -526,6 +513,19 @@ export function loadAppendStyle() {
             })
         }
     }
+    // 全透明模式
+    if(option.get('vibrancy_mode') != 'default') {
+        import('@/assets/css/append/append_full_transparent.css').then(() => {
+            logger.info('全透明 UI 附加样式加载完成')
+        })
+        // 将 card 颜色透明化
+        document.documentElement.style.setProperty('--color-bg', 'rgba(var(--color-bg-rgb), 0.5)')
+        document.documentElement.style.setProperty('--color-card', 'rgba(var(--color-card-rgb), 0.5)')
+        document.documentElement.style.setProperty('--color-card-1', 'rgba(var(--color-card-1-rgb), 0.5)')
+        document.documentElement.style.setProperty('--color-card-2', 'rgba(var(--color-card-2-rgb), 0.5)')
+        // 恢复设置项
+        option.save('vibrancy_mode', 'default')
+    }
 }
 
 export function checkUpdate() {
@@ -586,19 +586,19 @@ function showReleaseLog(data: any, isUpdated: boolean) {
     }
     const buttonGoUpdate = runtimeData.tags.isElectron ? [
         {
-            text: $t('btn_know'),
+            text: $t('知道了'),
             fun: () => runtimeData.popBoxList.shift()
         }, {
-            text: $t('btn_download_update'),
+            text: $t('下载更新…'),
             master: true,
             fun: () => openLink(data.html_url, true)
         }
     ] : [
         {
-            text: $t('btn_see'),
+            text: $t('查看…'),
             fun: () => openLink(data.html_url)
         }, {
-            text: $t('btn_reflush'),
+            text: $t('刷新页面'),
             master: true,
             fun: () => location.reload()
         }
@@ -608,10 +608,10 @@ function showReleaseLog(data: any, isUpdated: boolean) {
         templateValue: toRaw(info),
         button: isUpdated ? [
             {
-                text: $t('btn_see'),
+                text: $t('查看…'),
                 fun: () => openLink(data.html_url, true)
             }, {
-                text: $t('btn_know'),
+                text: $t('知道了'),
                 master: true,
                 fun: () => { runtimeData.popBoxList.shift() }
             }
@@ -630,19 +630,19 @@ export function checkOpenTimes() {
             // 构建 HTML
             let html = '<div style="display:flex;flex-direction:column;padding:10px 5%;align-items:center;">'
             html += '<svg style="height:2rem;fill:var(--color-font);margin-bottom:20px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M16 0H144c5.3 0 10.3 2.7 13.3 7.1l81.1 121.6c-49.5 4.1-94 25.6-127.6 58.3L2.7 24.9C-.6 20-.9 13.7 1.9 8.5S10.1 0 16 0zM509.3 24.9L401.2 187.1c-33.5-32.7-78.1-54.2-127.6-58.3L354.7 7.1c3-4.5 8-7.1 13.3-7.1H496c5.9 0 11.3 3.2 14.1 8.5s2.5 11.5-.8 16.4zM432 336c0 97.2-78.8 176-176 176s-176-78.8-176-176s78.8-176 176-176s176 78.8 176 176zM264.4 241.1c-3.4-7-13.3-7-16.8 0l-22.4 45.4c-1.4 2.8-4 4.7-7 5.1L168 298.9c-7.7 1.1-10.7 10.5-5.2 16l36.3 35.4c2.2 2.2 3.2 5.2 2.7 8.3l-8.6 49.9c-1.3 7.6 6.7 13.5 13.6 9.9l44.8-23.6c2.7-1.4 6-1.4 8.7 0l44.8 23.6c6.9 3.6 14.9-2.2 13.6-9.9l-8.6-49.9c-.5-3 .5-6.1 2.7-8.3l36.3-35.4c5.6-5.4 2.5-14.8-5.2-16l-50.1-7.3c-3-.4-5.7-2.4-7-5.1l-22.4-45.4z"/></svg>'
-            html += `<span>${$t('popbox_open_times_1', { times: getTimes })}</span>`
-            html += `<span>${$t('popbox_open_times_2')}</span>`
+            html += `<span>${$t('好耶！Stapxs QQ Lite 已经被打开 {times} 次了！', { times: getTimes })}</span>`
+            html += `<span>${$t('真的不去点个 star 吗 ……')}</span>`
             html += '</div>'
             const popInfo = {
-                title: $t('popbox_ohh'),
+                title: $t('好耶'),
                 svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"/></svg>',
                 html: html,
                 button: [
                     {
-                        text: $t('btn_open_times_no'),
+                        text: $t('不要'),
                         fun: () => { runtimeData.popBoxList.shift() }
                     }, {
-                        text: $t('btn_open_times_ok'),
+                        text: $t('好喔'),
                         master: true,
                         fun: () => { openLink('https://github.com/Stapxs/Stapxs-QQ-Lite-2.0'); runtimeData.popBoxList.shift(); }
                     }
@@ -706,7 +706,7 @@ export function checkNotice() {
                             html: info.html ? info.html : '',
                             button: [
                                 {
-                                    text: (notice.pops.length > 1 && i != notice.pops.length - 1) ? app.config.globalProperties.$t('btn_next') : app.config.globalProperties.$t('btn_yes'),
+                                    text: (notice.pops.length > 1 && i != notice.pops.length - 1) ? app.config.globalProperties.$t('继续') : app.config.globalProperties.$t('确定'),
                                     master: true,
                                     fun: () => {
                                         // 添加已读记录
@@ -746,7 +746,15 @@ export function loadJsonMap(name: string) {
             msgPath = require(`@/assets/pathMap/${name}.yaml`)
             logger.debug('加载映射表：' + msgPath.name)
             if(msgPath.redirect) {
-                msgPath = require(`@/assets/pathMap/${msgPath.redirect}.yaml`)
+                // eslint-disable-next-line
+                const newMsgPath = require(`@/assets/pathMap/${msgPath.redirect}.yaml`)
+                // 合并映射表
+                Object.keys(msgPath).forEach((key) => {
+                    if (key != 'name' && newMsgPath[key]) {
+                        newMsgPath[key] = msgPath[key]
+                    }
+                })
+                msgPath = newMsgPath
                 logger.debug('加载映射表（重定向）：' + msgPath.name)
             }
             runtimeData.jsonMap = msgPath

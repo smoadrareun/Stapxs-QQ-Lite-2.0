@@ -50,19 +50,6 @@ export class Connector {
             this.win.webContents.send('onebot:onopen', { address: url, token: token })
         }
         this.websocket.onmessage = (e) => {
-            try {
-                const message = JSON.parse((e.data as string))
-                if(message.echo)
-                    this.logger.debug('收到消息：', message.echo)
-                else if(message.post_type) {
-                    if(message.notice_type)
-                        this.logger.debug('收到消息：', message.post_type, message.notice_type)
-                    else
-                        this.logger.debug('收到消息：', message.post_type)
-                }
-            } catch(e) {
-                //
-            }
             this.win.webContents.send('onebot:onmessage', e.data)
         }
         this.websocket.onclose = (e) => {
@@ -85,7 +72,7 @@ export class Connector {
                     token: token
                 })
             }
-            if(this.reconnectTimes < 5) {
+            if(this.reconnectTimes < 4) {
                 setTimeout(() => {
                     if(e.code == 1006) {
                         // 连接失败，尝试轮替协议重连

@@ -15,7 +15,7 @@ module.exports = {
     transpileDependencies: true,
     productionSourceMap: false,
     configureWebpack: {
-        devtool: 'source-map',
+        devtool: process.env.NODE_ENV == 'development' ? 'eval-source-map' : false,
         module: {
             rules: [
                 {
@@ -23,10 +23,19 @@ module.exports = {
                     use: 'raw-loader',
                 },
                 {
-                    test: /\.yaml$/,
+                    test: /\.po$/i,
+                    use: 'raw-loader',
+                },
+                {
+                    test: /\.yaml$/i,
                     use: 'js-yaml-loader',
                 }
             ]
+        },
+        resolve: {
+            fallback: {
+                util: require.resolve('util/')
+            }
         }
     },
     pwa: {

@@ -10,12 +10,15 @@
  -->
 
 <template>
-    <div :class="'message' + (type ? ' ' + type : '') + (data.revoke ? ' revoke' : '') + (isMe ? ' me': '')" :data-raw="getMsgRawTxt(data.message)"
+    <div :class="'message' + (type ? ' ' + type : '') + (data.revoke ? ' revoke' : '') + (isMe ? ' me': '')" :data-raw="getMsgRawTxt(data)"
         :id="'chat-' + data.message_id" :data-sender="data.sender.user_id" :data-time="data.time"
         @mouseleave="hiddenUserInfo">
         <img name="avatar" :src="'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + data.sender.user_id" v-show="!isMe || type == 'merge'">
         <div class="message-space" v-if="isMe && type != 'merge'"></div>
         <div :class="isMe ? (type == 'merge' ? 'message-body' : 'message-body me') : 'message-body'">
+            <template v-if="runtimeData.chatInfo.show.type == 'group' && !isMe && senderInfo?.title && senderInfo?.title != ''">
+                <span>{{ senderInfo?.title }}</span>
+            </template>
             <a v-if="data.sender.card || data.sender.nickname" v-show="!isMe || type == 'merge'">
                 {{ data.sender.card ? data.sender.card : data.sender.nickname }}
             </a>
@@ -29,7 +32,7 @@
                         <div v-if="item.type === undefined"></div>
                         <span v-else-if="isDebugMsg" class="msg-text">{{ item }}</span>
                         <span v-else-if="item.type == 'text'" @click="textClick" v-show="item.text !== ''" class="msg-text" v-html="parseText(item.text)"></span>
-                        <img v-else-if="item.type == 'image'" :title="$t('chat_view_pic')" :alt="$t('chat_pic')" @load="scrollButtom" @error="imgLoadFail" @click="imgClick(data.message_id)" :class="imgStyle(data.message.length, index, item.asface)" :src="item.url">
+                        <img v-else-if="item.type == 'image'" :title="$t('预览图片')" :alt="$t('图片')" @load="scrollButtom" @error="imgLoadFail" @click="imgClick(data.message_id)" :class="imgStyle(data.message.length, index, item.asface)" :src="item.url">
                         <template v-else-if="item.type == 'face'">
                             <img v-if="getFace(item.id)" :alt="item.text" class="msg-face" :src="getFace(item.id)" :title="item.text">
                             <span v-else-if="item.id == 394" class="msg-face-long"><span v-for="i in 15" :key="data.message_id + '-l-' + i">🐲</span></span>
@@ -37,7 +40,7 @@
                         </template>
                         <img v-else-if="item.type == 'mface' && item.url" @load="scrollButtom" @error="imgLoadFail" :class="imgStyle(data.message.length, index, item.asface) + ' msg-mface'" :src="item.url">
                         <span v-else-if="item.type == 'mface' && item.text" class="msg-unknown">{{ item.text }}</span>
-                        <span v-else-if="item.type == 'bface'" style="font-style: italic;opacity: 0.7;">[ {{ $t('chat_fun_menu_pic') }}：{{ item.text }} ]</span>
+                        <span v-else-if="item.type == 'bface'" style="font-style: italic;opacity: 0.7;">[ {{ $t('图片') }}：{{ item.text }} ]</span>
                         <div v-else-if="item.type == 'at'" :class="getAtClass(item.qq)">
                             <a @mouseenter="showUserInfo" :data-id="item.qq" :data-group="data.group_id">{{ getAtName(item) }}</a>
                         </div>
@@ -63,25 +66,24 @@
                                     现在还有不支持 video tag 的浏览器吗？
                                 </video>
                                 <span class="txt" v-if="['txt', 'md'].includes(data.fileView.ext) && item.size < 2000000">
-                                    <a>&gt; {{ item.name }} - {{ $t('chat_view_file_viewer') }}</a>
+                                    <a>&gt; {{ item.name }} - {{ $t('文件预览') }}</a>
                                     {{ getTxtUrl(data.fileView.url, data.message_id) }}{{ data.fileView.txt }}
                                 </span>
                             </div>
                         </div>
                         <div v-else-if="item.type == 'video'" class="msg-video">
-                            <video v-if="item.url" controls muted autoplay>
+                            <video controls muted autoplay>
                                 <source :src="item.url" type="video/mp4">
                                 现在还有不支持 video tag 的浏览器吗？
                             </video>
-                            <div v-else-if="!getVideo" :class="getVideoUrl(item, data.message_id)"></div>
                         </div>
-                        <span v-else-if="item.type == 'forward'" class="msg-unknown" style="cursor: pointer;" @click="View.getForwardMsg(item.id)">{{ $t('chat_show_forward') }}</span>
+                        <span v-else-if="item.type == 'forward'" class="msg-unknown" style="cursor: pointer;" @click="View.getForwardMsg(item.id)">{{ $t('（点击查看合并转发消息）') }}</span>
                         <div v-else-if="item.type == 'reply'" @click="scrollToMsg(item.id)" :class="isMe ? (type == 'merge' ? 'msg-replay' : 'msg-replay me') : 'msg-replay'">
                             <font-awesome-icon :icon="['fas', 'reply']" />
-                            <a :class="getRepMsg(item.id) ? '' : 'msg-unknown'" style="cursor: pointer;"> {{ getRepMsg(item.id) ?? $t('chat_jump_reply') }} </a>
+                            <a :class="getRepMsg(item.id) ? '' : 'msg-unknown'" style="cursor: pointer;"> {{ getRepMsg(item.id) ?? $t('（查看回复消息）') }} </a>
                         </div>
 
-                        <span v-else class="msg-unknown">{{ '( ' + $t('chat_unsupported_msg') + ': ' + item.type + ' )' }}</span>
+                        <span v-else class="msg-unknown">{{ '( ' + $t('不支持的消息') + ': ' + item.type + ' )' }}</span>
                     </div>
                 </template>
                 <template v-else>
@@ -156,7 +158,8 @@ export default defineComponent({
             runtimeData: runtimeData,
             pageViewInfo: undefined as { [key: string]: any } | undefined,
             gotLink: false,
-            getVideo: false
+            getVideo: false,
+            senderInfo: null as any
         }
     },
     methods: {
@@ -188,6 +191,9 @@ export default defineComponent({
          * @param item 
          */
         getAtName (item: { [key: string]: any }) {
+            if(item.qq == 'all') {
+                return '@' + this.$t('全体成员')
+            }
             if(item.text != undefined) {
                 return item.text
             } else {
@@ -247,7 +253,7 @@ export default defineComponent({
                     viewer.show()
                     runtimeData.tags.viewer.index = num
                 } else {
-                    new PopInfo().add(PopType.INFO, this.$t('pop_find_pic_fail'))
+                    new PopInfo().add(PopType.INFO, this.$t('定位图片失败'))
                 }
             }
         },
@@ -286,7 +292,7 @@ export default defineComponent({
             parent.appendChild(svg)
             // 新建 span
             const span = document.createElement('span')
-            span.innerText = this.$t('chat_load_img_fail')
+            span.innerText = this.$t('加载图片失败')
             span.style.marginTop = '10px'
             span.style.fontSize = '0.8rem'
             span.style.color = 'var(--color-font-2)'
@@ -296,7 +302,7 @@ export default defineComponent({
             parent.appendChild(span)
             // 链接
             const a = document.createElement('a')
-            a.innerText = this.$t('chat_view_pic')
+            a.innerText = this.$t('预览图片')
             a.target = '__blank'
             a.href = sender.src
             a.style.marginTop = '10px'
@@ -327,7 +333,7 @@ export default defineComponent({
                     .then(res => res.json())
                     .then(res => {
                         if (res.status === undefined && Object.keys(res).length > 0) {
-                            logger.debug(this.$t('chat_link_view_success') + ': ' + res['og:title'])
+                            logger.debug('获取链接预览成功: ' + res['og:title'])
                             const pageData = {
                                 site: res['og:site_name'] === undefined ? '' : res['og:site_name'],
                                 title: res['og:title'] === undefined ? '' : res['og:title'],
@@ -348,7 +354,7 @@ export default defineComponent({
                     })
                     .catch(error => {
                         if (error) {
-                            logger.error(this.$t('chat_link_view_fail') + ': ' + fistLink)
+                            logger.error(error as Error, '获取链接预览失败: ' + fistLink)
                             // UM：上传使用链接预览功能的事件用于分析（失败）
                             const reg1 = /\/\/(.*?)\//g
                             const getDom = fistLink.match(reg1)
@@ -415,9 +421,9 @@ export default defineComponent({
             })
             if (list.length === 1) {
                 if(list[0].message.length > 0)
-                    return list[0].sender.nickname + ': ' + getMsgRawTxt(list[0].message)
+                    return list[0].sender.nickname + ': ' + getMsgRawTxt(list[0])
                 else
-                    return this.$t('chat_jump_reply_fail')
+                    return this.$t('（获取回复消息失败）')
             }
             return null
         },
@@ -442,21 +448,6 @@ export default defineComponent({
                     fid: data.fid
                 }, 'downloadFile_' + message_id + '_' + data.name)
             }
-        },
-
-        /**
-         * 
-         * @param msgId 消息 ID
-         * @param fid 文件 ID
-         */
-        getVideoUrl(data: any, message_id: string) {
-            this.getVideo = true
-            Connector.send('get_video_url', {
-                id: runtimeData.chatInfo.show.id,
-                message_id: message_id,
-                fid: data.fid,
-                md5: data.md5
-            }, 'getVideoUrl_' + message_id)
         },
 
         /**
@@ -549,6 +540,15 @@ export default defineComponent({
     mounted () {
         // 初始化 isMe 参数
         this.isMe = Number(runtimeData.loginInfo.uin) === Number(this.data.sender.user_id)
+        // 补充发送者信息
+        this.$watch(() => runtimeData.chatInfo.info.group_members.length, () => {
+            this.senderInfo = runtimeData.chatInfo.info.group_members.filter((item: any) => {
+                return item.user_id == this.data.sender.user_id
+            })[0]
+        })
+        this.senderInfo = runtimeData.chatInfo.info.group_members.filter((item: any) => {
+            return item.user_id == this.data.sender.user_id
+        })[0]
     }
 })
 </script>

@@ -19,14 +19,14 @@
                 <path d="M707.28 499.9C707.28 499.9 635.68 522.5 540.58 523.2H539.98C445.08 522.6 373.58 500 373.28 499.9L349.28 559.8C409.28 577.9 483.68 589.6 539.88 588.9H540.48C596.68 589.6 671.08 577.9 731.18 559.8L707.28 499.9Z" />
             </svg>
             <div>
-                <span>{{ $t('name') }}</span>
+                <span>{{ $t('Stapxs QQ Lite') }}</span>
                 <a>2.0</a>
             </div>
-            <span style="text-align: center;">{{ $t('description') }}</span>
+            <span style="text-align: center;">{{ $t('一个兼容 OneBot 的非官方网页版 QQ 客户端') }}</span>
             <a>v{{ packageInfo.version }}</a>
             <div class="buttons">
                 <a class="ss-button" @click="goGithub()">{{
-                $t('option_info_visit_github') }}</a>
+                $t('访问 GitHub 仓库') }}</a>
                 <a class="ss-button" style="width: 30px;" @click="goBlog()">
                     <font-awesome-icon :icon="['fas', 'circle-info']" />
                 </a>
@@ -40,7 +40,7 @@
             </div>
         </div>
         <div class="ss-card jump-card" @click="dependencies" :style="showUI ? '' : 'background: var(--color-card-1);'">
-            <header><div></div>{{ $t('list_of_dependencies') }}</header>
+            <header><div></div>{{ $t('许可版权声明') }}</header>
             <font-awesome-icon :icon="['fas', 'angle-right']" />
         </div>
         <div v-if="showUI" class="ss-card bcd-about" @click="openLink('https://stapxs.github.io/Border-Card-UI/docs/')">
@@ -156,7 +156,7 @@ export default defineComponent({
         dependencies() {
             runtimeData.popBoxList = []
             const popInfo = {
-                    title: this.$t('list_of_dependencies'),
+                    title: this.$t('许可版权声明'),
                     template: DepPan
                 }
                 runtimeData.popBoxList.push(popInfo)

@@ -1,4 +1,8 @@
 <template>
+    <div v-if="dev" class="dev-bar">
+            {{ 'Stapxs QQ Lite Development Mode' }}
+            {{ ' / fps: ' + fps.value }}
+    </div>
     <div class="top-bar" name="appbar" v-if="runtimeData.sysConfig.opt_no_window">
         <div class="bar-button" @click="barMainClick()"></div>
         <div class="space"></div>
@@ -31,38 +35,37 @@
                 </li>
             </ul>
             <div :style="get('fs_adaptation') > 0 ? `height: calc(100% - ${75 + Number(get('fs_adaptation'))}px);` : ''">
-                <div :name="$t('home_title')" v-if="tags.page == 'Home'">
+                <div :name="$t('主页')" v-if="tags.page == 'Home'">
                     <div class="home-body">
                         <div class="login-pan-card ss-card">
                             <font-awesome-icon :icon="['fas', 'circle-nodes']" />
-                            <p>{{ $t('home_card_title') }}</p>
+                            <p>{{ $t('连接到 OneBot') }}</p>
                             <form @submit.prevent @submit="connect">
                                 <label>
                                     <font-awesome-icon :icon="['fas', 'link']" />
-                                    <input v-model="loginInfo.address" :placeholder="$t('home_card_address')"
+                                    <input v-model="loginInfo.address" :placeholder="$t('连接地址')"
                                         class="ss-input" id="sev_address" autocomplete="off">
                                 </label>
                                 <label>
                                     <font-awesome-icon :icon="['fas', 'lock']" />
-                                    <input v-model="loginInfo.token" :placeholder="$t('home_card_key')" class="ss-input"
+                                    <input v-model="loginInfo.token" :placeholder="$t('连接密钥')" class="ss-input"
                                         type="password" id="access_token" autocomplete="off">
                                 </label>
                                 <div style="display: flex;">
                                     <label class="default">
                                         <input id="in_" type="checkbox" name="save_password" @click="savePassword" v-model="tags.savePassword">
-                                        <a>{{ $t('home_card_save_pwd') }}</a>
+                                        <a>{{ $t('记住密码') }}</a>
                                     </label>
                                     <div style="flex: 1;"></div>
                                     <label class="default" style="justify-content: flex-end;">
                                         <input type="checkbox" name="auto_connect" @click="saveAutoConnect" v-model="runtimeData.sysConfig.auto_connect">
-                                        <a>{{ $t('home_card_auto_con') }}</a>
+                                        <a>{{ $t('自动连接') }}</a>
                                     </label>
                                 </div>
-                                <button @mousemove="afd" id="connect_btn" class="ss-button" type="submit">{{ $t('home_card_connect')
-                                }}</button>
+                                <button @mousemove="afd" id="connect_btn" class="ss-button" type="submit">{{ $t('连接')}}</button>
                             </form>
                             <a href="https://github.com/Stapxs/Stapxs-QQ-Lite-2.0#%E5%BF%AB%E9%80%9F%E4%BD%BF%E7%94%A8"
-                                target="_blank" style="margin-bottom: -20px;">{{ $t('home_card_how_to_connect') }}</a>
+                                target="_blank" style="margin-bottom: -20px;">{{ $t('如何连接') }}</a>
                             <div class="wave-pan" style="margin-left: -30px;">
                                 <svg id="login-wave" xmlns="http://www.w3.org/2000/svg"
                                     xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 170 70"
@@ -102,6 +105,7 @@
                 </div>
                 <div class="opt-main-tab">
                     <Options
+                        :show="tags.page == 'Options'"
                         :class="tags.page == 'Options' ? 'active' : ''"
                         :config="runtimeData.sysConfig"
                         :info="runtimeData.loginInfo"
@@ -111,15 +115,15 @@
             </div>
         </div>
         <component
-          ref="chat"
-          v-if="loginInfo.status && runtimeData.chatInfo && runtimeData.chatInfo.show.id != 0"
-          v-show="tags.showChat"
-          :is="runtimeData.pageView.chatView"
-          :mumberInfo="runtimeData.chatInfo.info.now_member_info == undefined ? {} : runtimeData.chatInfo.info.now_member_info"
-          :mergeList="runtimeData.mergeMessageList"
-          :list= "runtimeData.messageList"
-          :chat="runtimeData.chatInfo"
-          @userClick="changeChat">
+            ref="chat"
+            v-if="loginInfo.status && runtimeData.chatInfo && runtimeData.chatInfo.show.id != 0"
+            v-show="tags.showChat"
+            :is="runtimeData.pageView.chatView"
+            :mumberInfo="runtimeData.chatInfo.info.now_member_info == undefined ? {} : runtimeData.chatInfo.info.now_member_info"
+            :mergeList="runtimeData.mergeMessageList"
+            :list= "runtimeData.messageList"
+            :chat="runtimeData.chatInfo"
+            @userClick="changeChat">
         </component>
         <TransitionGroup class="app-msg" name="appmsg" tag="div">
           <div v-for="msg in appMsgs" :key="'appmsg-' + msg.id">
@@ -232,7 +236,12 @@ export default defineComponent({
                 savePassword: false
             },
             viewerOpt: { inline: false, button: false, title: false, navbar: false, toolbar: { prev: true, rotateLeft: true, reset: true, rotateRight: true, next: true } },
-            viewerBody: undefined as HTMLDivElement | undefined
+            viewerBody: undefined as HTMLDivElement | undefined,
+            fps: {
+                last: Date.now(),
+                ticks: 0,
+                value: 0
+            }
         }
     },
     methods: {
@@ -296,6 +305,24 @@ export default defineComponent({
                 }, 50)
                 return timer
             }
+        },
+
+        /**
+         * 刷新页面 fps 数据
+         * @param timestamp 时间戳
+         */
+        rafLoop() {
+            this.fps.ticks += 1
+            //每30帧统计一次帧率
+            if (this.fps.ticks >= 30) {
+                const now = Date.now()
+                const diff = now - this.fps.last
+                const fps = Math.round(1000 / (diff / this.fps.ticks))
+                this.fps.last = now
+                this.fps.ticks = 0
+                this.fps.value = fps
+            }
+            requestAnimationFrame(this.rafLoop)
         },
 
         /**
@@ -373,11 +400,11 @@ export default defineComponent({
                 Option.save('save_password', true)
                 // 创建提示弹窗
                 const popInfo = {
-                    title: this.$t('popbox_tip'),
-                    html: `<span>${this.$t('auto_connect_tip')}</span>`,
+                    title: this.$t('提醒'),
+                    html: `<span>${this.$t('连接密钥将以明文存储在浏览器 Cookie 中，请确保设备安全以防止密钥泄漏。')}</span>`,
                     button: [
                         {
-                            text: app.config.globalProperties.$t('btn_know'),
+                            text: app.config.globalProperties.$t('知道了'),
                             master: true,
                             fun: () => { runtimeData.popBoxList.shift() }
                         }
@@ -458,12 +485,13 @@ export default defineComponent({
             // 初始化功能
             App.createMenu()            // Electron：创建菜单
             App.createIpc()             // Electron：创建 IPC 通信
-            App.loadAppendStyle()       // 加载额外样式
             // 加载开发者相关功能
             if (process.env.NODE_ENV == 'development') {
                 document.title = 'Stapxs QQ Lite (Dev)'
                 // 布局检查工具
                 Spacing.start()
+                // FPS 检查
+                this.rafLoop()
             }
             // 加载设置项
             runtimeData.sysConfig = Option.load()
@@ -477,6 +505,12 @@ export default defineComponent({
                 if(app) app.classList.add('withBar')
             }
             Option.runAS('opt_auto_gtk', Option.get('opt_auto_gtk'))
+
+            // 基础初始化完成
+            logger.debug('欢迎使用 Stapxs QQ Lite！')
+            logger.debug('当前启动模式为: ' + process.env.NODE_ENV)
+            // 加载额外样式
+            App.loadAppendStyle()
             // 加载密码保存和自动连接
             loginInfo.address = runtimeData.sysConfig.address
             if(runtimeData.sysConfig.save_password && runtimeData.sysConfig.save_password != true) {
@@ -488,8 +522,6 @@ export default defineComponent({
             }
             // =========================================================================
             // 初始化完成
-            logger.debug(this.$t('log_welcome'))
-            logger.debug(this.$t('log_runtime') + ': ' + process.env.NODE_ENV)
             // UM：加载 Umami 统计功能
             if (!Option.get('close_ga') && process.env.NODE_ENV == 'production') {
                 // 给页面添加一个来源域名方便在 electron 中获取
@@ -502,7 +534,7 @@ export default defineComponent({
                 }
                 Umami.initialize(config)
             } else if (process.env.NODE_ENV == 'development') {
-                logger.debug(this.$t('log_GA_auto_closed'))
+                logger.debug('由于运行在调试模式下，分析组件并未加载 ……')
             }
             App.checkUpdate()                // 检查更新
             App.checkOpenTimes()             // 检查打开次数

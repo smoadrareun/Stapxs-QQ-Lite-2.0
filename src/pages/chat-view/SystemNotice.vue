@@ -11,7 +11,7 @@
         :class="'chat-pan sys-not-pan' + (runtimeData.tags.openSideBar ? ' open': '') + (runtimeData.sysConfig.opt_no_window ? ' withBar': '')">
         <div>
             <font-awesome-icon @click="exit" :icon="['fas', 'angle-left']" />
-            <span>{{ $t('sys_notice') }}</span>
+            <span>{{ $t('系统消息') }}</span>
         </div>
         <div class="sys-not-list">
             <template v-for="(notice, index) in runtimeData.systemNoticesList" :key="'sysNot-' + index">
@@ -19,30 +19,30 @@
                     <div>
                         <img :src="'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + notice.user_id">
                         <div>
-                            <span>{{ notice.user_id }} {{ $t('sys_notice_new_friend') }}</span>
+                            <span>{{ notice.user_id }} {{ $t('请求加为好友') }}</span>
                             <a>{{ Intl.DateTimeFormat(trueLang, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' })
                                 .format(new Date(notice.time * 1000)) }}</a>
-                            <a>{{ $t('sys_notice_message') + notice.comment }}</a>
+                            <a>{{ $t('留言') + notice.comment }}</a>
                         </div>
                     </div>
                     <div>
-                        <button @click="dealFriend(notice, false)" class="ss-button">{{ $t('btn_reject') }}</button>
-                        <button @click="dealFriend(notice, true)" class="ss-button">{{ $t('btn_accept') }}</button>
+                        <button @click="dealFriend(notice, false)" class="ss-button">{{ $t('拒绝') }}</button>
+                        <button @click="dealFriend(notice, true)" class="ss-button">{{ $t('同意') }}</button>
                     </div>
                 </div>
                 <div v-else-if="notice.request_type == 'group'">
                     <div>
                         <img :src="'https://p.qlogo.cn/gh/' + notice.group_id + '/' + notice.group_id + '/0'">
                         <div>
-                            <span>{{ getName(notice.user_id) }} {{ $t('sys_notice_invite_group') }} {{ notice.group_id }}</span>
+                            <span>{{ getName(notice.user_id) }} {{ $t('邀请你加入群聊') }} {{ notice.group_id }}</span>
                             <a>{{ Intl.DateTimeFormat(trueLang, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' })
                                 .format(new Date(notice.time * 1000)) }}</a>
-                            <a>{{ $t('sys_notice_message') + notice.comment }}</a>
+                            <a>{{ $t('留言') + notice.comment }}</a>
                         </div>
                     </div>
                     <div>
-                        <button @click="dealGroupAdd(notice, false)" class="ss-button">{{ $t('btn_reject') }}</button>
-                        <button @click="dealGroupAdd(notice, true)" class="ss-button">{{ $t('btn_accept') }}</button>
+                        <button @click="dealGroupAdd(notice, false)" class="ss-button">{{ $t('拒绝') }}</button>
+                        <button @click="dealGroupAdd(notice, true)" class="ss-button">{{ $t('同意') }}</button>
                     </div>
                 </div>
                 <div v-else v-show="NODE_ENV == 'development'">

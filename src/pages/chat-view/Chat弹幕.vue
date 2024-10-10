@@ -149,12 +149,12 @@
                     <span class="name">{{ runtimeData.chatInfo.show.name }}</span>
                     <div class="info">
                         <span class="time">
-                            {{ list[list.length - 1] ? $t('chat_last_msg', {
+                            {{ list[list.length - 1] ? $t('上次消息 - {time}', {
                             time: Intl.DateTimeFormat(trueLang,
                             { hour: "numeric", minute: "numeric", second: "numeric" }).format(new Date(list[list.length
                             - 1].time *
                             1000))
-                            }) : $t('chat_no_msg')
+                            }) : $t('暂无消息')
                             }}
                         </span>
                     </div>
@@ -282,7 +282,7 @@ export default defineComponent({
                         }
                     }
                 } else {
-                    popInfo.add(PopType.INFO, this.$t('pop_chat_image_toooo_big'))
+                    popInfo.add(PopType.INFO, this.$t('图片过大'))
                 }
             }
         },
@@ -311,7 +311,7 @@ export default defineComponent({
                     const id = runtimeData.chatInfo.show.id
                     const firstMsgId = this.list[0].message_id ?? 0
                     let name
-                    const pageed = !(runtimeData.jsonMap.message_list?.pageed == false)
+                    const fullPage = runtimeData.jsonMap.message_list?.pagerType == 'full'
                     if(runtimeData.jsonMap.message_list && type != 'group') {
                         name = runtimeData.jsonMap.message_list.private_name
                     } else {
@@ -323,14 +323,14 @@ export default defineComponent({
                             group_id: type == 'group' ? id : undefined,
                             user_id: type != 'group' ? id : undefined,
                             message_id: firstMsgId,
-                            count: !pageed ? runtimeData.messageList.length + 10 : 10
+                            count: fullPage ? runtimeData.messageList.length + 10 : 10
                         },
                         'getChatHistory'
                     )
                 }
                 const list = this.list.map((data: any) => {
                     return {
-                        text: getMsgRawTxt(data.message),
+                        text: getMsgRawTxt(data),
                         id: data.sender.user_id
                     }
                 })
@@ -343,7 +343,7 @@ export default defineComponent({
             } else {
                 // 只添加最后一条
                 (this.$refs.danmakuRef as any)?.push({
-                    text: getMsgRawTxt(this.list[this.list.length - 1].message),
+                    text: getMsgRawTxt(this.list[this.list.length - 1]),
                     id: this.list[this.list.length - 1].sender.user_id
                 })
             }

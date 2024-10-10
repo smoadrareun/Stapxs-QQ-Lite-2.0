@@ -45,7 +45,7 @@ message_list:
     name: get_group_msg_history
     private_name: get_friend_msg_history
     source: $.data.messages[*]
-    pageed: false       # 是否支持分页（id + count 获取）
+    pagerType: full     # 分页类型：全量 full / 增量 incremental / 无分页 none
     type: $.data
     message_type:
         user: private
@@ -137,7 +137,7 @@ leave_group:
 # 获取收藏表情
 roaming_stamp:
     name: fetch_custom_face
-    pageed: true
+    pagerType: full
 # 获取历史会话
 recent_contact:
     name: get_recent_contact

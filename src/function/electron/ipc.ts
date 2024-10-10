@@ -72,6 +72,27 @@ export function regIpcListener() {
         app.relaunch()
         app.exit()
     })
+    // 置顶窗口
+    ipcMain.on('win:alwaysTop', (event, args) => {
+        if(win) win.setAlwaysOnTop(args)
+    })
+    // 获取窗口信息
+    ipcMain.handle('win:getWindowInfo', () => {
+        if(win) {
+            const [x, y] = win.getPosition()
+            const [width, height] = win.getSize()
+            return {
+                x: x, y: y,
+                width: width, height: height
+            }
+        }
+    })
+    // 移动窗口位置
+    ipcMain.on('win:move', (event, point) => {
+        if(win) {
+            win.setPosition(point.x, point.y)
+        }
+    })
     // 保存信息
     ipcMain.on('sys:store', (event, arg) => {
         store.set(arg.key, arg.value)

@@ -14,8 +14,8 @@
                 v-if="(chat.info.group_info.gOwner && chat.info.group_info.gOwner === runtimeData.loginInfo.uin) || (chat.info.group_info.gAdmins && chat.info.group_info.gAdmins.indexOf(runtimeData.loginInfo.uin) >= 0)">
                 <font-awesome-icon :icon="['fas', 'pen']" />
                 <div>
-                    <span>{{ $t('chat_chat_info_group_name') }}</span>
-                    <span>{{ $t('chat_chat_info_group_name_tip') }}</span>
+                    <span>{{ $t('群聊名称') }}</span>
+                    <span>{{ $t('“你们真是害人不浅呐你们这个群”') }}</span>
                 </div>
                 <input class="ss-input" style="width:150px" type="text" @keyup="setGroupName"
                     v-model="runtimeData.chatInfo.show.name">
@@ -23,15 +23,15 @@
             <div class="opt-item">
                 <font-awesome-icon :icon="['fas', 'note-sticky']" />
                 <div>
-                    <span>{{ $t('chat_chat_info_group_card') }}</span>
-                    <span>{{ $t('chat_chat_info_group_card_tip') }}</span>
+                    <span>{{ $t('我的本群昵称') }}</span>
+                    <span>{{ $t('￡爺↘僞ηι慹著彡') }}</span>
                 </div>
                 <input class="ss-input" style="width:150px" type="text" @keyup="setGroupCard" v-model="runtimeData.chatInfo.info.me_info.card">
             </div>
 
             <button class="ss-button" style="width: calc(100% - 60px); margin: 30px 30px 0 30px;"
                 @click="leaveGroup()">
-                {{ $t('exit_group') }}
+                {{ $t('退出群聊') }}
             </button>
         </template>
     </div>
@@ -92,10 +92,10 @@ export default defineComponent({
         */
         leaveGroup() {
             const popInfo = {
-                html: '<span>' + this.$t('trust_leave_group') + '</span>',
+                html: '<span>' + this.$t('确定要退出群聊吗？') + '</span>',
                 button: [
                     {
-                        text: this.$t('btn_yes'),
+                        text: this.$t('确定'),
                         fun: () => {
                             if(runtimeData.jsonMap.leave_group?.name) {
                                 Connector.send(runtimeData.jsonMap.leave_group?.name, {
@@ -113,7 +113,7 @@ export default defineComponent({
                         }
                     },
                     {
-                        text: this.$t('btn_no'),
+                        text: this.$t('取消'),
                         master: true,
                         fun: () => { runtimeData.popBoxList.shift() }
                     }

@@ -24,20 +24,20 @@
                 <font-awesome-icon @click="exitConnect" :icon="['fas', 'right-from-bracket']" />
             </div>
             <div class="ss-card">
-                <header>{{ $t('option_account_config') }}</header>
+                <header>{{ $t('账号设置') }}</header>
                 <div class="opt-item">
                     <font-awesome-icon :icon="['fas', 'address-card']" />
                     <div>
-                        <span>{{ $t('option_account_nick') }}</span>
-                        <span>{{ $t('option_account_nick_tip') }}</span>
+                        <span>{{ $t('昵称') }}</span>
+                        <span>{{ $t('就只是个名字而已 ……') }}</span>
                     </div>
                     <input class="ss-input" style="width:150px" type="text" @keyup="setNick" v-model="runtimeData.loginInfo.nickname">
                 </div>
                 <div v-if="runtimeData.loginInfo.info && Object.keys(runtimeData.loginInfo.info).length > 0" class="opt-item">
                     <font-awesome-icon :icon="['fas', 'pen']" />
                     <div>
-                        <span>{{ $t('option_account_lnick') }}</span>
-                        <span>{{ $t('option_account_lnick_tip') }}</span>
+                        <span>{{ $t('签名') }}</span>
+                        <span>{{ $t('啊吧啊吧（智慧的眼神）') }}</span>
                     </div>
                     <input class="ss-input" style="width:150px" type="text" @keyup="setLNick" v-model="runtimeData.loginInfo.info.lnick">
                 </div>
@@ -46,20 +46,24 @@
         <template v-else>
             <div class="ss-card account-not-login">
                 <font-awesome-icon :icon="['fas', 'fish']" />
-                <span>{{ $t('option_account_notlogin') }}</span>
-                <button @click="goLogin" class="ss-button">{{ $t('option_account_gologin') }}</button>
+                <span>{{ $t('还没有连接到 OneBot 耶') }}</span>
+                <button @click="goLogin" class="ss-button">{{ $t('去连接') }}</button>
             </div>
         </template>
         <div class="ss-card" v-if="Object.keys(runtimeData.botInfo).length > 0">
-            <header>{{ $t('option_account_bot') }}</header>
+            <header>{{ $t('后端信息') }}</header>
             <div class="l10n-info">
                 <font-awesome-icon :icon="['fas', 'robot']" />
                 <div>
                     <span>{{ runtimeData.botInfo.app_name }}<a>{{ runtimeData.botInfo.app_version !== undefined ?
                             runtimeData.botInfo.app_version : runtimeData.botInfo.version
                     }}</a></span>
-                    <span>{{ $t('option_account_bot_tip') }}</span>
+                    <span>{{ $t('这是你连接的 QQ Bot 的相关信息') }}</span>
                 </div>
+            </div>
+            <div :class="'bot-status ' + getRunStatus()" v-if="getRunStatus() != 'unknown'">
+                <div></div>
+                <span>{{ $t('连接_' + getRunStatus(), { step: runtimeData.watch.heartbeatTime, timeout: (runtimeData.watch.lastHeartbeatTime ?? 0) - (runtimeData.watch.oldHeartbeatTime ?? 0)}) }}</span>
             </div>
             <div class="bot-info">
                 <div v-for="key in Object.keys(runtimeData.botInfo)" :key="'botinfo-' + key">
@@ -148,6 +152,25 @@ export default {
             // TODO: 这玩意的返回好像永远是错误的 …… 所以干脆不处理返回了
             if (event.key === 'Enter' && runtimeData.loginInfo.info.lnick !== '') {
                 Connector.send('set_signature', {signature: runtimeData.loginInfo.info.lnick}, 'setSignature')
+            }
+        },
+
+        getRunStatus() {
+            const step = runtimeData.watch.heartbeatTime
+            const old = runtimeData.watch.oldHeartbeatTime
+            const last = runtimeData.watch.lastHeartbeatTime
+            
+            if(step && old && last) {
+                if(last - old == step) {
+                    return 'normal'
+                } else {
+                    return 'slow'
+                }
+            } else {
+                if(step == 0) {
+                    return 'loading'
+                }
+                return 'unknown'
             }
         }
     }

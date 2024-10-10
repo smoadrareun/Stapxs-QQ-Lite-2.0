@@ -10,26 +10,28 @@
         <div class="list">
             <header>
                 <div>
-                    <span>{{ $t('title_scripts') }}</span>
+                    <span>{{ $t('脚本') }}</span>
                     <font-awesome-icon :icon="['fas', 'globe']" style="margin-right: 15px;" />
                     <font-awesome-icon @click="cnewScript" :icon="['fas', 'add']" />
                 </div>
-                <span>{{ $t('scripts_tip') }}</span>
+                <span>{{ $t('脚本功能提供了一种简便的自动化操作方式，能够执行如自动回复等任务。') }}</span>
             </header>
             <div class="list-body">
                 <div v-for="(item, index) in savedList"
-                    :class="{selected: (select == item.title && editScript)}"
+                    :id="item.title"
+                    :class="{selected: (select?.title == item.title && editScript)}"
                     :key="index">
                     <div>
                         <div style="flex: 1" @click="selectItem(item)">
                             <h2>
                                 {{ item.title }}
-                                <span style="font-size: 0.7rem;" v-if="item.enabled">{{ $t('statue_enabled') }}</span>
-                                <span style="font-size: 0.7rem;" v-else>{{ $t('statue_disabled') }}</span>
+                                <span style="font-size: 0.7rem;" v-if="item.enabled">{{ $t('已启用') }}</span>
+                                <span style="font-size: 0.7rem;" v-else>{{ $t('已禁用') }}</span>
                             </h2>
                             <span>
+                                <font-awesome-icon v-if="item.inner" style="margin-right: 5px;" :icon="['fas', 'star']" />
                                 <font-awesome-icon :icon="['fas', 'code-branch']" />
-                                {{ $t('scripts_run_' + item.condition) }}{{ $t('scripts_run_trigger') }}
+                                {{ $t('脚本类型_' + item.condition) }}{{ $t('触发') }}
                             </span>
                         </div>
                         <div :style="item.enabled ? 'color: #ed6a5e;' : ''" @click="item.enabled = !item.enabled;updateSave();">
@@ -40,24 +42,29 @@
             </div>
         </div>
         <div class="editor-main" v-if="editScript">
+            <div v-if="select?.inner" class="inner">
+                <font-awesome-icon :icon="['fas', 'info']" />
+                <span>{{ $t('这是个内嵌示例脚本，你可以修改它并保存使用。') }}</span>
+            </div>
             <div class="save-controller">
                 <font-awesome-icon :icon="['fas', 'code-branch']" />
-                <span>{{ $t('scripts_run_condition') }}</span>
+                <span>{{ $t('条件') }}</span>
                 <div class="opt-item">
                     <select v-model="condition">
-                        <option value="message">{{ $t('scripts_run_message') }}</option>
-                        <option value="userFlush">{{ $t('scripts_run_userFlush') }}</option>
+                        <option value="message">{{ $t('脚本类型_message') }}</option>
+                        <option value="userFlush">{{ $t('脚本类型_userFlush') }}</option>
+                        <option value="newNotice">{{ $t('脚本类型_newNotice') }}</option>
                     </select>
                 </div>
                 <div style="flex: 1;"></div>
                 <button class="ss-button"
                     @click="save">
                     <font-awesome-icon :icon="['fas', 'save']" />
-                    <span>{{ $t('scripts_run_save') }}</span>
+                    <span>{{ $t('保存') }}</span>
                 </button>
-                <button class="ss-button"
-                    @click="editScript = false;remove(select);">
-                    <font-awesome-icon v-if="select == ''" :icon="['fas', 'times']" />
+                <button class="ss-button" v-if="!select?.inner"
+                    @click="editScript = false;remove(select?.title);">
+                    <font-awesome-icon v-if="!select" :icon="['fas', 'times']" />
                     <font-awesome-icon v-else :icon="['fas', 'trash-alt']" />
                 </button>
             </div>
@@ -67,7 +74,7 @@
         <div class="editor-main notice" v-else>
             <div class="ss-card">
                 <font-awesome-icon :icon="['fas', 'info-circle']" />
-                <span>{{ $t('scripts_run_notice') }}</span>
+                <span>{{ $t('脚本方法将限制在当前页面内，你可以参考当前页面的源代码来了解可用的方法可用。') }}</span>
                 <button class="ss-button" style="width: 100%; margin-top: 10px;"
                     @click="openLink('https://github.com/Stapxs/Stapxs-QQ-Lite-2.0/blob/next/src/pages/Scripts.vue')">
                     Github
@@ -78,6 +85,7 @@
 </template>
 
 <script lang="ts">
+import sysScriptsList from '@/assets/scripts/_scriptList.json'
 
 import { Connector } from '@/function/connect'
 import { runtimeData } from '@/function/msg'
@@ -88,7 +96,7 @@ import { PrismEditor } from 'vue-prism-editor'
 import { highlight, languages } from 'prismjs'
 
 import { getMsgData } from '@/function/utils/msgUtil'
-import { Logger, PopInfo, PopType } from '@/function/base'
+import { PopInfo, PopType } from '@/function/base'
 import { getRaw, save } from '@/function/option'
 
 export default defineComponent({
@@ -98,6 +106,7 @@ export default defineComponent({
     },
     data() {
         return {
+            cacheValues: {} as {[key: string]: any},
             runtimeData: runtimeData,
             openLink: openLink,
             script: '',
@@ -107,9 +116,16 @@ export default defineComponent({
                 title: string,
                 condition: string,
                 script: string,
-                enabled: boolean
+                enabled: boolean,
+                inner?: boolean
             }[],
-            select: '',
+            select: undefined as {
+                title: string,
+                condition: string,
+                script: string,
+                enabled: boolean,
+                inner?: boolean
+            } | undefined,
 
             message: null as any | null,
             msgInfo: null as {[key: string]: any} | null,
@@ -148,9 +164,12 @@ export default defineComponent({
 
         onEvent(type: string) {
             const scripts = this.savedList.filter((item) => item.condition == type)
-            if(scripts.length > 0) new Logger().debug('触发脚本：' + type)
-            for(const script of scripts) {
-                if(script.enabled) {
+            for (const script of scripts) {
+                if (script.enabled) {
+                    document.getElementById(script.title)?.classList.add('active')
+                    setTimeout(() => {
+                        document.getElementById(script.title)?.classList.remove('active')
+                    }, 1500)
                     eval(script.script)
                 }
             }
@@ -161,20 +180,21 @@ export default defineComponent({
          */
 
         cnewScript() {
-            this.select = ''
+            this.select = undefined
             this.script = '/*\n    title: Demo Script\n*/\n\nconsole.log(\'Hello World!\')'
             this.editScript = true
         },
         updateSave() {
-            const saveJson = JSON.stringify(this.savedList)
-            save('scripts', saveJson)
+            const saveInfo = JSON.parse(JSON.stringify(this.savedList))
+            // 移除带有 inner 属性的条目，它们不需要保存
+            save('scripts', JSON.stringify(saveInfo.filter((item: any) => !item.inner)))
         },
         save() {
             this.editScript = false
             // title 获取 script 第二行 title: 后的内容
             const title = this.script.split('\n')[1].split(':')[1].trim()
             if(title == '') {
-                new PopInfo().add(PopType.ERR, this.$t('scripts_run_title_err'))
+                new PopInfo().add(PopType.ERR, this.$t('脚本标题已存在'))
                 return
             }
             if(this.savedList.find((item) => item.title == title)) {
@@ -194,16 +214,24 @@ export default defineComponent({
                     enabled: false
                 })
             }
+            // 如果修改的这条存在 inner 属性，那么删除 inner 属性
+            this.savedList.forEach((item) => {
+                if(item.title == title) {
+                    delete item.inner
+                }
+            })
             this.updateSave()
         },
-        remove(title: string) {
-            this.savedList = this.savedList.filter((item) => item.title != title)
-            this.updateSave()
+        remove(title: string | undefined) {
+            if(title != undefined) {
+                this.savedList = this.savedList.filter((item) => item.title != title)
+                this.updateSave()
+            }
         },
 
         selectItem(item: { title: string, condition: string, script: string, enabled: boolean }) {
             // 选中脚本
-            this.select = item.title
+            this.select = item
             this.script = item.script
             this.condition = item.condition
             this.editScript = true
@@ -224,7 +252,27 @@ export default defineComponent({
             }
         })
         // 读取保存的脚本
-        this.savedList = JSON.parse(decodeURIComponent(getRaw('scripts'))) ?? []
+        this.savedList = getRaw('scripts') ? JSON.parse(decodeURIComponent(getRaw('scripts'))) : []
+        // 读取内嵌脚本
+        for (const scriptInfo of sysScriptsList) {
+            const title = scriptInfo.title
+            if(this.savedList.find((item) => item.title == title)) {
+                continue
+            }
+            // 读取 js 文件为纯文本
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            const script = require('raw-loader!@/assets/scripts/' + scriptInfo.name + '.js')
+            if(script.default) {
+                this.savedList.unshift({
+                    title: title,
+                    condition: scriptInfo.condition,
+                    script: script.default,
+                    enabled: false,
+                    inner: true
+                })
+            }
+        }
+
         // 监听消息更改
         this.$watch(() => runtimeData.watch.newMsg, () => {
             if(runtimeData.sysConfig.append_scripts) {
@@ -243,6 +291,10 @@ export default defineComponent({
                     this.onEvent('message')
                 }
             }
+        })
+        // 监听新通知
+        this.$watch(() => runtimeData.watch.newNotice, () => {
+            this.onEvent('newNotice')
         })
         // 监听好友/群列表刷新
         this.$watch(() => runtimeData.userList.length, () => {
@@ -266,7 +318,7 @@ export default defineComponent({
 }
 .list > header {
     padding: 10px 10px 0 10px;
-    margin: 15px;
+    margin: 15px 15px 10px 15px;
 }
 .list > header > div {
     align-items: center;
@@ -294,15 +346,16 @@ export default defineComponent({
 
 .list-body {
     overflow-x: scroll;
-    padding: 0 25px;
+    padding: 5px 25px;
     flex: 1;
 }
 .list-body::-webkit-scrollbar {
     display: none;
 }
 .list-body > div {
+    outline: 1px solid transparent;;
     background: var(--color-card-1);
-    transition: background .3s;
+    transition: background .3s, outline .3s;
     flex-direction: column;
     margin-bottom: 10px;
     border-radius: 7px;
@@ -330,6 +383,10 @@ export default defineComponent({
 }
 .list-body > div.selected > div:last-child > div:last-child svg {
     color: var(--color-main);
+}
+
+.list-body > div.active {
+    outline: 2px solid var(--color-main);
 }
 
 .list-body > div.selected {
@@ -399,6 +456,26 @@ export default defineComponent({
     font-size: 2.5rem;
     color: var(--color-main);
     margin: 20px 0;
+}
+
+.editor-main > div.inner {
+    background: var(--color-card-1);
+    border-radius: 7px;
+    padding: 10px;
+    margin: -10px 10px 10px 10px;
+    font-size: 0.8rem;
+    color: var(--color-font-2);
+    display: flex;
+    align-items: center;
+}
+.editor-main > div.inner > svg {
+    background: var(--color-main);
+    width: 0.5rem;
+    color: var(--color-font-r);
+    border-radius: 100%;
+    padding: 4px;
+    margin-right: 5px;
+    font-size: 0.5rem;
 }
 
 .editor {

@@ -19,7 +19,7 @@ import { markRaw, defineAsyncComponent } from 'vue'
 import { Logger, LogType, PopInfo, PopType } from './base'
 import { runtimeData } from './msg'
 import { initUITest, loadSystemThemeColor, loadWinColor, updateWinColor } from '@/function/utils/appUtil'
-import { getTrueLang } from '@/function/utils/systemUtil'
+import { getPortableFileLang, getTrueLang } from '@/function/utils/systemUtil'
 
 let cacheConfigs: { [key: string]: any }
 
@@ -34,7 +34,9 @@ const optDefault: { [key: string]: any } = {
     fs_adaptation: 0,
     theme_color: 0,
     chat_background_blur: 0,
-    msg_type: 2
+    msg_type: 2,
+    vibrancy_mode: 'default',
+    store_face: '[]'
 }
 
 // =============== 设置项事件 ===============
@@ -51,6 +53,13 @@ const configFunction: { [key: string]: (value: any) => void } = {
     opt_auto_gtk: updateGTKColor,
     opt_auto_win_color: updateWinColorOpt,
     opt_revolve: viewRevolve,
+    opt_always_top: viewAlwaysTop,
+}
+
+function viewAlwaysTop(value: boolean) {
+    if(runtimeData.reader) {
+        runtimeData.reader.send('win:alwaysTop', value)
+    }
 }
 
 function viewRevolve(value: boolean) {
@@ -117,19 +126,17 @@ function changeInitialScale(value: number) {
  * @param name 语言文件名（不是实际语言代码）
  */
 function setLanguage(name: string) {
-    // 加载主语言
-    import(`../assets/l10n/${name}.json`).then(lang => {
-        i18n.global.setLocaleMessage(name, lang)
-    })
+    // 加载语言文件
+    const lang = getPortableFileLang(name)
+    i18n.global.setLocaleMessage(name, lang)
     app.config.globalProperties.$i18n.locale = name
     // 检查是否设置了备选语言
     let get = false
     for(let i=0; i<languageConfig.length; i++) {
         if(languageConfig[i].value == name && (languageConfig[i] as any).fallback) {
             const fbname = (languageConfig[i] as any).fallback
-            import(`../assets/l10n/${fbname}.json`).then(lang => {
-                i18n.global.setLocaleMessage(fbname, lang)
-            })
+            const fbLang = getPortableFileLang(fbname)
+            i18n.global.setLocaleMessage(fbname, fbLang)
             get = true
             app.config.globalProperties.$i18n.fallbackLocale = fbname
             break
@@ -207,7 +214,7 @@ function changeColorMode(mode: string) {
         runtimeData.tags.firstLoad = false
     }
     // 切换颜色
-    const match_list = ['color-.*.css', 'prism-.*.css']
+    const match_list = ['color-.*.css', 'prism-.*.css', 'append-.*.css']
     const css_list = document.getElementsByTagName('link')
     for (let i = 0; i < css_list.length; i++) {
         const name = css_list[i].href
@@ -483,6 +490,43 @@ export function runASWEvent(event: Event) {
         if (name !== null) {
             runAS(name, value)
         }
+    }
+    // 有些设置项需要重启/刷新
+    if(sender.dataset.reload == 'true') {
+        const $t = app.config.globalProperties.$t
+
+        let html = '<span>' + $t('此操作将在重启应用后生效，现在就要重启吗？') + '</span>'
+
+        // 模糊模式的特殊情况
+        if(sender.title == 'vibrancy_mode') {
+            html += '<span>' + $t('此操作仅供娱乐，将会在下次关闭时恢复。') + '</span>'
+        }
+
+        const popInfo = {
+            svg: 'trash-arrow-up',
+            html: html,
+            title: $t('重启应用'),
+            button: [
+                {
+                    text: app.config.globalProperties.$t('确定'),
+                    fun: () => {
+                        if(runtimeData.tags.isElectron) {
+                            if (runtimeData.reader) {
+                                runtimeData.reader.send('win:relaunch')
+                            }
+                        } else {
+                            location.reload()
+                        }
+                    }
+                },
+                {
+                    text: app.config.globalProperties.$t('取消'),
+                    master: true,
+                    fun: () => { runtimeData.popBoxList.shift() }
+                }
+            ]
+        }
+        runtimeData.popBoxList.push(popInfo)
     }
 }
 

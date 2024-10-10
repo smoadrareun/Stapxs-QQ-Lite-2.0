@@ -1,3 +1,7 @@
+html, body {
+    background: transparent;
+}
+
 .home-body {
     background: rgba(var(--color-card-rgb), 0.6);
 }
@@ -94,7 +98,6 @@
 }
 .script-view .list > header > span,
 .script-view .list-body > div {
-    background: transparent;
     backdrop-filter: blur(10px);
 }
 

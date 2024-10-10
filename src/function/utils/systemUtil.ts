@@ -1,6 +1,7 @@
 import app from '@/main'
 
 import l10nConfig from '@/assets/l10n/_l10nconfig.json'
+import * as getText from 'gettext-parser'
 
 /**
  * 区分安卓、iOS、MacOS 和其他
@@ -30,6 +31,28 @@ export function getTrueLang(): string {
             back = item.lang
         }
     })
+    return back
+}
+
+/**
+ * 读取 PO 语言文件，转换为 JSON 格式
+ * @param name 文件名
+ */
+export function getPortableFileLang(name: string) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const file = require(`@/assets/l10n/${name}.po`)
+    const pot = getText.po.parse(file.default)
+    // 将翻译平铺为一个对象 {msgid: msgstr}
+    const back = {} as Record<string, string>
+    for (const item of Object.keys(pot.translations[''])) {
+        if (item !== '') {
+            // 如果不存在则不添加，防止影响到 vue-i18n 的 fallback
+            if(pot.translations[''][item].msgstr) {
+                back[item] = pot.translations[''][item].msgstr[0] != '' ?
+                    pot.translations[''][item].msgstr[0] : item
+            }
+        }
+    }
     return back
 }
 

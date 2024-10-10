@@ -9,8 +9,8 @@
     <div v-if="tags.openChatInfo" class="chat-info-pan">
         <div class="ss-card chat-info">
             <header>
-                <span v-if="chat.show.type === 'group'">{{ $t('chat_chat_info_group') }}</span>
-                <span v-if="chat.show.type === 'user'">{{ $t('chat_chat_info_user') }}</span>
+                <span v-if="chat.show.type === 'group'">{{ $t('群资料') }}</span>
+                <span v-if="chat.show.type === 'user'">{{ $t('好友') }}</span>
                 <font-awesome-icon @click="closeChatInfoPan" :icon="['fas', 'xmark']" />
             </header>
             <div :class="'chat-info-base ' + chat.show.type">
@@ -23,17 +23,17 @@
                 </div>
                 <div v-if="chat.show.type === 'group'" v-show="Object.keys(chat.info.group_info).length > 0">
                     <header>
-                        <span>{{ $t('chat_chat_info_introduction') }}</span>
+                        <span>{{ $t('介绍') }}</span>
                     </header>
                     <span v-html="(chat.info.group_info.gIntro === undefined || chat.info.group_info.gIntro === '') ?
-                    $t('chat_chat_info_nointroduction') : chat.info.group_info.gIntro"></span>
+                    $t('群主很懒，还没有群介绍哦～') : chat.info.group_info.gIntro"></span>
                     <div class="tags">
                         <div v-for="item in chat.info.group_info.tags" :key="item.md">
                             {{ item.tag }}
                         </div>
                     </div>
                     <!-- <header v-if="chat.info.group_info.gAdmins !== undefined">
-                        <span>{{ $t('chat_member_type_admin') }}</span>
+                        <span>{{ $t('成员类型_admin') }}</span>
                     </header>
                     <div class="admin" v-if="chat.info.group_info.gAdmins !== undefined">
                         <img v-for="(item, index) in chat.info.group_info.gAdmins" :key="'chatinfoadmin-' + item"
@@ -42,26 +42,26 @@
                 </div>
                 <div v-else-if="chat.show.type === 'user'">
                     <header>
-                        <span>{{ $t('chat_chat_info_lnick') }}</span>
+                        <span>{{ $t('签名') }}</span>
                     </header>
                     <span v-html="(chat.info.user_info.lnick === undefined || chat.info.user_info.lnick === '') ?
-                    $t('chat_chat_info_nolnick') : chat.info.user_info.lnick"></span>
+                    $t('签名') : chat.info.user_info.lnick"></span>
                     <header>
-                        <span>{{ $t('chat_chat_info_other') }}</span>
+                        <span>{{ $t('其他信息') }}</span>
                     </header>
                     <div class="outher">
-                        <span>{{ $t('chat_chat_info_birthday') }}:
+                        <span>{{ $t('生日') }}:
                             <span>
                                 {{ chat.info.user === undefined ? '' : Intl.DateTimeFormat(trueLang,
                                         { year: 'numeric', month: "short", day: "numeric" }).format(
                                             new
                                                 Date(`${chat.info.user_info.birthday.year}-${chat.info.user_info.birthday.month}-${chat.info.user_info.birthday.day}`)
-                                        ) + ` (${$t('chat_chat_info_chinese_zodiac').split('&')[chat.info.user_info.shengxiao -
+                                        ) + ` (${$t('生肖').split('&')[chat.info.user_info.shengxiao -
                                         1]})`
                                 }}
                             </span>
                         </span>
-                        <span>{{ $t('chat_chat_info_district') }}:
+                        <span>{{ $t('地区') }}:
                             <span>
                                 {{
                                         `${chat.info.user_info.country}-${chat.info.user_info.province}-${chat.info.user_info.city}`
@@ -72,17 +72,17 @@
                     <template v-if="!chat.show.temp">
                         <!-- 临时会话没有这个板块 -->
                         <header>
-                            <span>{{ $t('chat_chat_info_config') }}</span>
+                            <span>{{ $t('设置') }}</span>
                         </header>
                         <OptInfo :type="'number'" :chat="chat"></OptInfo>
                     </template>
                 </div>
             </div>
             <BcTab v-if="chat.show.type === 'group'" class="chat-info-tab">
-                <div :name="$t('chat_chat_info_member')">
+                <div :name="$t('成员')">
                     <div class="chat-info-tab-member">
                         <div class="search-view">
-                            <input :placeholder="$t('base_search')" @input="searchList">
+                            <input :placeholder="$t('搜索 ……')" @input="searchList">
                         </div>
                         <div @click="startChat(item)" v-for="item in number_cache.length > 0 ? number_cache : chat.info.group_members" :key="'chatinfomlist-' + item.user_id">
                             <img loading="lazy" :src="`https://q1.qlogo.cn/g?b=qq&s=0&nk=${item.user_id}`">
@@ -95,7 +95,7 @@
                         </div>
                     </div>
                 </div>
-                <div :name="$t('chat_chat_info_notice')">
+                <div :name="$t('公告')">
                     <div class="bulletins">
                         <BulletinBody
                             v-for="(item, index) in chat.info.group_notices ?? []"
@@ -105,7 +105,7 @@
                         </BulletinBody>
                     </div>
                 </div>
-                <div :name="$t('chat_chat_info_file')">
+                <div :name="$t('文件')">
                     <div class="group-files" @scroll="fileLoad">
                         <div v-for="item in chat.info.group_files.file_list" :key="'file-' + item.id">
                             <FileBody :chat="chat" :item="item"></FileBody>
@@ -117,7 +117,7 @@
                         </div>
                     </div>
                 </div>
-                <div :name="$t('chat_chat_info_config')">
+                <div :name="$t('设置')">
                     <div style="padding: 0 20px;">
                         <OptInfo :type="'group'" :chat="chat"></OptInfo>
                     </div>
@@ -191,7 +191,7 @@ export default defineComponent({
                         const user = {
                             user_id: info.user_id,
                             // 因为临时消息没有返回昵称
-                            nickname: app.config.globalProperties.$t('chat_temp'),
+                            nickname: app.config.globalProperties.$t('临时会话'),
                             remark: info.user_id,
                             group_id: info.group_id,
                             group_name: ''

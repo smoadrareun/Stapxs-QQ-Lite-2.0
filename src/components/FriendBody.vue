@@ -36,15 +36,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { getTrueLang } from '@/function/utils/systemUtil'
-import { getMsgRawTxt } from '@/function/utils/msgUtil'
 
 export default defineComponent({
     name: 'FriendBody',
     props: ['data', 'select', 'menu', 'from'],
     data () {
         return {
-            trueLang: getTrueLang(),
-            getMsgRawTxt: getMsgRawTxt
+            trueLang: getTrueLang()
         }
     },
     methods: {

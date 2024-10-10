@@ -25,9 +25,11 @@ import './assets/css/msg.css'
 import './assets/css/options.css'
 import './assets/css/sys_notice.css'
 
-import zh from './assets/l10n/zh-CN.json'
+import { getPortableFileLang } from './function/utils/systemUtil'
 
 /* eslint-disable no-console */
+
+const zh = getPortableFileLang('zh-CN')
 
 // 载入 l10n
 const messages = { 'zh-CN': zh }
@@ -56,12 +58,8 @@ app.mount('#app')
 export default app
 export const uptime = new Date().getTime()
 
-console.log(' _____ _____ _____ _____ __ __  \n' +
-            '|   __|_   _|  _  |  _  |  |  | \n' +
-            '|__   | | | |     |   __|-   -| \n' +
-            '|_____| |_| |__|__|__|  |__|__| CopyRight © Stapx Steve')
 const strList = ['VERSION', 'WELCOME', 'HELLO']
 const colorList = ['50534f', 'f9a633', '8076a3', 'f0a1a8', '92aa8a', '606E7A', '7abb7e', 'b573f7', 'ff5370', '99b3db', '677480']
 const color = colorList[Math.floor(Math.random() * colorList.length)]
 const str = strList[Math.floor(Math.random() * strList.length)]
-console.log(`%c${str}%c Stapxs QQ Lite - ${packageInfo.version} ( ${process.env.NODE_ENV} ) `, `font-weight:bold;background:#${color};color:#fff;border-radius:7px 0 0 7px;display:inline-block;padding:7px 14px;margin:7px 0 7px 7px;`, 'background:#F8F9FA;color:#000;border-radius:0 7px 7px 0;display:inline-block;padding:7px 14px;margin:7px 7px 7px 0;');
+console.log(`%c${str}%c Stapxs QQ Lite - ${packageInfo.version} ( ${process.env.NODE_ENV} ) `, `font-weight:bold;background:#${color};color:#fff;border-radius:7px 0 0 7px;padding:7px 14px;margin:7px 0 7px 7px;`, 'background:#e3e8ec;color:#000;border-radius:0 7px 7px 0;display:inline-block;padding:7px 14px;margin:7px 7px 7px 0;');

@@ -18,16 +18,16 @@
         <div class="info">
             <font-awesome-icon @click="openLeftBar" :icon="['fas', 'bars-staggered']" /><img :src="chat.show.avatar">
             <div class="info">
-                <p>{{ chat.show.name }}</p>
+                <p>{{ chat.show.name }}<template v-if="runtimeData.chatInfo.show.type == 'group'"> ({{ runtimeData.chatInfo.info.group_members.length }})</template></p>
                 <span v-if="chat.show.temp">
-                    {{ $t('chat_temp_from', { group: chat.show.temp }) }}
+                    {{ $t('来自群聊：{group}', { group: chat.show.temp }) }}
                 </span>
                 <span v-else>
-                    {{ list[list.length - 1] ? $t('chat_last_msg', {
+                    {{ list[list.length - 1] ? $t('上次消息 - {time}', {
                             time: Intl.DateTimeFormat(trueLang,
                                 { hour: "numeric", minute: "numeric", second: "numeric" }).format(new Date(list[list.length - 1].time *
                                     1000))
-                        }) : $t('chat_no_msg')
+                        }) : $t('暂无消息')
                     }}
                 </span>
             </div>
@@ -39,16 +39,16 @@
         <!-- 加载中指示器 -->
         <div :class="'loading' + (tags.nowGetHistroy && runtimeData.tags.canLoadHistory ? ' show': '')">
             <font-awesome-icon :icon="['fas', 'spinner']" />
-            <span>{{ $t('loading') }}</span>
+            <span>{{ $t('加载中') }}</span>
         </div>
         <!-- 消息显示区 -->
-        <div class="chat" @scroll="chatScroll" id="msgPan" style="scroll-behavior: smooth;">
+        <div v-if="!details[3].open" class="chat" @scroll="chatScroll" id="msgPan" style="scroll-behavior: smooth;">
             <div class="note note-nomsg" v-if="!runtimeData.tags.canLoadHistory">
                 <hr>
-                <a>{{ $t('chat_no_more_msg') }}</a>
+                <a>{{ $t('没有更多消息了') }}</a>
             </div>
             <!-- 时间戳，在下滑加载的时候会显示，方便在大段的相连消息上让用户知道消息时间 -->
-            <NoticeBody v-if="tags.nowGetHistroy" :data="{sub_type: 'time', time: list[0].time}"></NoticeBody>
+            <NoticeBody v-if="tags.nowGetHistroy && list.length > 0" :data="{sub_type: 'time', time: list[0].time}"></NoticeBody>
             <TransitionGroup name="msglist" tag="div">
                 <template v-for="(msg, index) in list">
                     <!-- 时间戳 -->
@@ -66,7 +66,29 @@
                         @touchend="msgMoveEnd($event, msg)">
                     </MsgBody>
                     <!-- 其他通知消息 -->
-                    <NoticeBody v-if="msg.post_type === 'notice'" :key="'notice-' + index" :data="msg"></NoticeBody>
+                    <NoticeBody :id="uuid()" v-if="msg.post_type === 'notice'" :key="'notice-' + index" :data="msg"></NoticeBody>
+                </template> 
+            </TransitionGroup>
+        </div>
+        <div v-else class="chat" id="msgPan" style="scroll-behavior: smooth;">
+            <TransitionGroup name="msglist" tag="div">
+                <template v-for="(msg, index) in tags.search.list">
+                    <!-- 时间戳 -->
+                    <NoticeBody v-if="isShowTime((list[index - 1] ? list[index - 1].time : undefined), msg.time)" :key="'notice-time-' + index" :data="{sub_type: 'time', time: msg.time}"></NoticeBody>
+                    <!-- 消息体 -->
+                    <MsgBody
+                        v-if="(msg.post_type === 'message' || msg.post_type === 'message_sent') && msg.message.length > 0"
+                        :key="msg.message_id"
+                        :data="msg"
+                        @scrollToMsg="scrollToMsg"
+                        @scrollButtom="imgLoadedScroll"
+                        @contextmenu.prevent="showMsgMeun($event, msg)"
+                        @touchstart="msgStartMove($event, msg)"
+                        @touchmove="msgOnMove"
+                        @touchend="msgMoveEnd($event, msg)">
+                    </MsgBody>
+                    <!-- 其他通知消息 -->
+                    <NoticeBody :id="uuid()" v-if="msg.post_type === 'notice'" :key="'notice-' + index" :data="msg"></NoticeBody>
                 </template> 
             </TransitionGroup>
         </div>
@@ -91,7 +113,7 @@
                         <div v-show="details[2].open && runtimeData.chatInfo.info.jin_info.list.length > 0" class="ss-card jin-pan">
                             <div>
                                 <font-awesome-icon :icon="['fas', 'message']" />
-                                <span>{{ $t('chat_fun_menu_jin') }}</span>
+                                <span>{{ $t('精华消息') }}</span>
                                 <font-awesome-icon @click="details[2].open = !details[2].open" :icon="['fas', 'xmark']" />
                             </div>
                             <div class="jin-pan-body" @scroll="jinScroll">
@@ -103,9 +125,9 @@
                                             <a>{{ item.sender_nick }}</a>
                                             <span>{{ Intl.DateTimeFormat(trueLang,
                                                 { hour: "numeric", minute: "numeric" })
-                                                .format(new Date(item.sender_time * 1000)) }} {{ $t('chat_send') }}</span>
+                                                .format(new Date(item.sender_time * 1000)) }} {{ $t('发送') }}</span>
                                         </div>
-                                        <span>{{ $t('chat_fun_menu_jin_sender',
+                                        <span>{{ $t('{time}，由 {name} 设置',
                                          { time: Intl.DateTimeFormat(trueLang,
                                                     { hour: "numeric", minute: "numeric" })
                                                     .format(new Date(item.add_digest_time * 1000)),name: item.add_digest_nick }) }}</span>
@@ -126,10 +148,16 @@
                         </div>
                     </Transition>
                 </div>
+                <!-- 搜索指示器 -->
+                 <div :class="details[3].open ? 'search-tag show' : 'search-tag'">
+                    <font-awesome-icon :icon="['fas', 'search']" />
+                    <span>{{ $t('搜索已加载的消息') }}</span>
+                    <div @click="closeSearch"><font-awesome-icon :icon="['fas', 'xmark']" /></div>
+                </div>
                 <!-- 回复指示器 -->
                 <div :class="tags.isReply ? 'replay-tag show' : 'replay-tag'">
                     <font-awesome-icon :icon="['fas', 'reply']" />
-                    <span>{{ selectedMsg === null ? '' : (selectedMsg.sender.nickname + ': ' + fun.getMsgRawTxt(selectedMsg.message))
+                    <span>{{ selectedMsg === null ? '' : (selectedMsg.sender.nickname + ': ' + fun.getMsgRawTxt(selectedMsg))
                     }}</span>
                     <div @click="cancelReply"><font-awesome-icon :icon="['fas', 'xmark']" /></div>
                 </div>
@@ -143,27 +171,30 @@
                         <a>{{ item.user_id }}</a>
                     </div>
                     <div v-if="atFindList?.length == 0" class="emp">
-                        <span>{{ $t('chat_fun_at_find_emp') }}</span>
+                        <span>{{ $t('没有找到匹配的群成员') }}</span>
                     </div>
                 </div>
                 <!-- 更多功能 -->
                 <div :class="tags.showMoreDetail ? 'more-detail show' : 'more-detail'">
-                    <div :title="$t('chat_fun_menu_pic')" @click="runSelectImg">
+                    <div :title="$t('图片')" @click="runSelectImg">
                         <font-awesome-icon :icon="['fas', 'image']" />
                         <input id="choice-pic" type="file" style="display: none;" @change="selectImg">
                     </div>
-                    <div :title="$t('chat_fun_menu_file')" @click="runSelectFile">
+                    <div :title="$t('文件')" @click="runSelectFile">
                         <font-awesome-icon :icon="['fas', 'folder']" />
                         <input id="choice-file" type="file" style="display: none;" @change="selectFile">
                     </div>
-                    <div :title="$t('chat_fun_menu_face')"
+                    <div :title="$t('表情')"
                         @click="details[1].open = !details[1].open, tags.showMoreDetail = false">
                         <font-awesome-icon :icon="['fas', 'face-laugh']" />
                     </div>
-                    <div :title="$t('chat_fun_menu_poke')" v-if="chat.show.type === 'user'" @click="sendPoke">
+                    <div :title="$t('戳一戳')" v-if="chat.show.type === 'user'" @click="sendPoke">
                         <font-awesome-icon :icon="['fas', 'bomb']" /></div>
-                    <div :title="$t('chat_fun_menu_jin')" v-if="chat.show.type === 'group'" @click="showJin">
+                    <div :title="$t('精华消息')" v-if="chat.show.type === 'group'" @click="showJin">
                         <font-awesome-icon :icon="['fas', 'star']" /></div>
+                    <div class="space"></div>
+                    <div :title="$t('搜索消息')" @click="openSearch">
+                        <font-awesome-icon :icon="['fas', 'search']" /></div>    
                 </div>
             </div>
             <!-- 消息发送框 -->
@@ -180,11 +211,12 @@
                             v-model="msg"
                             autocomplete="off"
                             :disabled="runtimeData.tags.openSideBar || chat.info.me_info.shut_up_timestamp > 0"
-                            :placeholder="chat.info.me_info.shut_up_timestamp > 0 ? $t('chat_send_msg_watermark_ban', {
+                            :placeholder="chat.info.me_info.shut_up_timestamp > 0 ? $t('已被禁言至：{time}', {
                             time: Intl.DateTimeFormat(trueLang, getTimeConfig(new Date(chat.info.me_info.shut_up_timestamp * 1000))).format(new Date(chat.info.me_info.shut_up_timestamp * 1000)) }) : ''"
                             @paste="addImg"
                             @keyup="mainKeyUp"
-                            @click="selectSQIn()">
+                            @click="selectSQIn()"
+                            @input="searchMessage">
                         <textarea
                             v-else
                             id="main-input"
@@ -194,11 +226,13 @@
                             @paste="addImg"
                             @keydown="mainKey"
                             @keyup="mainKeyUp"
-                            @click="selectSQIn()">
+                            @click="selectSQIn()"
+                            @input="searchMessage">
                         </textarea>
                     </form>
                     <div @click="sendMsg">
-                        <font-awesome-icon :icon="['fas', 'angle-right']" />
+                        <font-awesome-icon v-if="details[3].open" :icon="['fas', 'search']" />
+                        <font-awesome-icon v-else :icon="['fas', 'angle-right']" />
                     </div>
                 </div>
             </div>
@@ -210,12 +244,12 @@
             <div class="ss-card">
                 <div>
                     <font-awesome-icon style="margin-top: 5px;" :icon="['fas', 'message']" />
-                    <span>{{ $t('chat_merge_msg') }}</span>
+                    <span>{{ $t('合并消息') }}</span>
                     <font-awesome-icon @click="closeMergeMsg" :icon="['fas', 'xmark']" />
                 </div>
                 <div :class="'loading' + ((mergeList && mergeList.length == 0) ? ' show': '')">
                     <font-awesome-icon :icon="['fas', 'spinner']" />
-                    <span>{{ $t('loading') }}</span>
+                    <span>{{ $t('加载中') }}</span>
                 </div>
                 <div>
                     <template v-for="(msg, index) in mergeList"
@@ -223,6 +257,7 @@
                         <NoticeBody
                             v-if="isShowTime((mergeList[index - 1] ? mergeList[index - 1].time : undefined), msg.time, index == 0)"
                             :key="'notice-time-' + index"
+                            :id="uuid()"
                             :data="{sub_type: 'time', time: msg.time}">
                         </NoticeBody>
                         <!-- 合并转发消息忽略是不是自己的判定 -->
@@ -242,12 +277,12 @@
                         <a>{{ mumberInfo.card == '' ? mumberInfo.nickname : mumberInfo.card }}</a>
                         <div>
                             <span v-if="mumberInfo.role !== 'member'">
-                                {{ $t('chat_member_type_' + mumberInfo.role) }}
+                                {{ $t('成员类型_' + mumberInfo.role) }}
                             </span>
                             <span>Lv {{ mumberInfo.level }}</span>
                         </div>
                     </div>
-                    <span v-if="mumberInfo.join_time"> {{ $t('chat_join_time', {
+                    <span v-if="mumberInfo.join_time"> {{ $t('{time} 加入群聊', {
                             time: Intl.DateTimeFormat(trueLang,
                                 { year: 'numeric', month: "short", day: "numeric" }).format(new Date(mumberInfo.join_time * 1000))
                         })
@@ -270,47 +305,47 @@
                 </div>
                 <div @click="forwardSelf()" v-show="tags.menuDisplay.add">
                     <div><font-awesome-icon :icon="['fas', 'plus']" /></div>
-                    <a>{{ $t('chat_msg_menu_plus') }}</a>
+                    <a>{{ $t('+ 1') }}</a>
                 </div>
                 <div @click="replyMsg(true)" v-show="tags.menuDisplay.relpy">
                     <div><font-awesome-icon :icon="['fas', 'message']" /></div>
-                    <a>{{ $t('chat_msg_menu_reply') }}</a>
+                    <a>{{ $t('回复') }}</a>
                 </div>
                 <div @click="showForWard()" v-show="tags.menuDisplay.forward">
                    <div><font-awesome-icon :icon="['fas', 'share']" /></div>
-                   <a>{{ $t('chat_msg_menu_forward') }}</a>
+                   <a>{{ $t('转发') }}</a>
                 </div>
                 <!-- <div v-show="tags.menuDisplay.select">
            <div><font-awesome-icon :icon="['fas', 'circle-check']" /></div>
-           <a>{{ $t('chat_msg_menu_multiple_choice') }}</a>
+           <a>{{ $t('多选') }}</a>
         </div> -->
                 <div @click="copyMsg" v-show="tags.menuDisplay.copy">
                     <div><font-awesome-icon :icon="['fas', 'clipboard']" /></div>
-                    <a>{{ $t('chat_msg_menu_copy') }}</a>
+                    <a>{{ $t('复制') }}</a>
                 </div>
                 <div @click="copySelectMsg" v-show="tags.menuDisplay.copySelect">
                     <div><font-awesome-icon :icon="['fas', 'code']" /></div>
-                    <a>{{ $t('chat_msg_menu_copy_selected') }}</a>
+                    <a>{{ $t('复制选中文本') }}</a>
                 </div>
                 <div @click="downloadImg" v-show="tags.menuDisplay.downloadImg != false">
                     <div><font-awesome-icon :icon="['fas', 'floppy-disk']" /></div>
-                    <a>{{ $t('chat_msg_menu_download_img') }}</a>
+                    <a>{{ $t('下载图片') }}</a>
                 </div>
                 <div @click="addStoreFace" v-show="tags.menuDisplay.addStoreFace != false">
                     <div><font-awesome-icon :icon="['fas', 'heart']" /></div>
-                    <a>{{ $t('chat_msg_menu_add_store_face') }}</a>
+                    <a>{{ $t('收藏商城表情') }}</a>
                 </div>
                 <div @click="revokeMsg" v-show="tags.menuDisplay.revoke">
                     <div><font-awesome-icon :icon="['fas', 'xmark']" /></div>
-                    <a>{{ $t('chat_msg_menu_withdraw') }}</a>
+                    <a>{{ $t('撤回') }}</a>
                 </div>
                 <div @click="(selectedMsg ? addSpecialMsg({ msgObj: { type: 'at', qq: selectedMsg.sender.user_id }, addText: true }) : '');toMainInput();closeMsgMenu();" v-show="tags.menuDisplay.at">
                     <div><font-awesome-icon :icon="['fas', 'at']" /></div>
-                    <a>{{ $t('chat_msg_menu_at') }}</a>
+                    <a>{{ $t('提及') }}</a>
                 </div>
                 <div @click="removeUser" v-show="tags.menuDisplay.remove">
                     <div><font-awesome-icon :icon="['fas', 'trash-can']" /></div>
-                    <a>{{ $t('chat_msg_menu_remove') }}</a>
+                    <a>{{ $t('移出群聊') }}</a>
                 </div>
             </div>
         </div>
@@ -323,8 +358,8 @@
             <div class="img-sender" v-show="imgCache.length > 0">
                 <div class="card ss-card">
                     <div class="hander">
-                        <span>{{ $t('chat_send_pic_title') }}</span>
-                        <button @click="sendMsg" class="ss-button">{{ $t('chat_send') }}</button>
+                        <span>{{ $t('发送图片') }}</span>
+                        <button @click="sendMsg" class="ss-button">{{ $t('发送') }}</button>
                     </div>
                     <div class="imgs">
                         <div v-for="(img64, index) in imgCache" :key="'sendImg-' + index">
@@ -347,10 +382,10 @@
             <div class="forward-pan" v-if="tags.showForwardPan">
                 <div class="ss-card card">
                     <header>
-                        <span>{{ $t('chat_msg_forward_pan') }}</span>
+                        <span>{{ $t('转发消息') }}</span>
                         <font-awesome-icon  @click="cancelForward" :icon="['fas', 'xmark']" />
                     </header>
-                    <input @input="searchForward" :placeholder="$t('base_search')">
+                    <input @input="searchForward" :placeholder="$t('搜索 ……')">
                     <div>
                         <div @click="forwardMsg(data)" v-for="data in forwardList" :key="'forwardList-' + data.user_id ? data.user_id : data.group_id">
                             <img loading="lazy" :title="data.group_name ? data.group_name :
@@ -361,7 +396,7 @@
                                 <p>{{ data.group_name ? data.group_name :
                                         data.remark === data.nickname ? data.nickname : data.remark + '（' + data.nickname + '）'
                                 }}</p>
-                                <span>{{ data.group_id ? $t('chat_type_group')  : $t('chat_type_user')}}</span>
+                                <span>{{ data.group_id ? $t('群组')  : $t('好友')}}</span>
                             </div>
                         </div>
                     </div>
@@ -369,7 +404,7 @@
                 <div class="bg" @click="cancelForward"></div>
             </div>
         </Transition>
-        <div class="bg" :style="`backdrop-filter: blur(${runtimeData.sysConfig.chat_background_blur}px);`"></div>
+        <div class="bg" :style="runtimeData.sysConfig.option_view_background ? `backdrop-filter: blur(${runtimeData.sysConfig.chat_background_blur}px);` : ''"></div>
     </div>
 </template>
 
@@ -383,7 +418,8 @@ import NoticeBody from '@/components/NoticeBody.vue'
 import FacePan from '@/components/FacePan.vue'
 import imageCompression from 'browser-image-compression'
 
-import { defineComponent, markRaw } from 'vue'
+import { defineComponent, markRaw, reactive } from 'vue'
+import { v4 as uuid } from 'uuid'
 import { downloadFile, loadHistory as loadHistoryFirst } from '@/function/utils/appUtil'
 import { getTimeConfig, getTrueLang } from '@/function/utils/systemUtil'
 import { getMsgRawTxt, sendMsgRaw, getFace } from '@/function/utils/msgUtil'
@@ -400,6 +436,7 @@ export default defineComponent({
     components: { Info, MsgBody, NoticeBody, FacePan },
     data() {
         return {
+            uuid,
             fun: {
                 getMsgRawTxt: getMsgRawTxt
             },
@@ -436,6 +473,10 @@ export default defineComponent({
                     respond: false,
                     showRespond: true
                 },
+                search: {
+                    userId: -1,
+                    list: reactive(this.list)
+                },
                 msgTouch: {
                     x: -1,
                     y: -1,
@@ -443,7 +484,7 @@ export default defineComponent({
                     onMove: 'no'
                 }
             },
-            details: [{ open: false }, { open: false }, { open: false }],
+            details: [{ open: false }, { open: false }, { open: false }, { open: false }],
             msgMenus: [],
             NewMsgNum: 0,
             msg: '',
@@ -522,7 +563,7 @@ export default defineComponent({
                 // 锁定加载防止反复触发
                 this.tags.nowGetHistroy = true
                 // 发起获取历史消息请求
-                const pageed = !(runtimeData.jsonMap.message_list.pageed == false)
+                const fullPage = runtimeData.jsonMap.message_list?.pagerType == 'full'
                 const type = runtimeData.chatInfo.show.type
                 const id = runtimeData.chatInfo.show.id
                 let name
@@ -537,7 +578,7 @@ export default defineComponent({
                         group_id: type == 'group' ? id : undefined,
                         user_id: type != 'group' ? id : undefined,
                         message_id: firstMsgId,
-                        count: !pageed ? runtimeData.messageList.length + 20 : 20
+                        count: fullPage ? runtimeData.messageList.length + 20 : 20
                     },
                     'getChatHistory'
                 )
@@ -569,7 +610,7 @@ export default defineComponent({
         },
         scrollToMsg (message_id: string) {
             if (!scrollToMsg(message_id, true)) {
-                new PopInfo().add(PopType.INFO, this.$t('pop_chat_msg_not_load'))
+                new PopInfo().add(PopType.INFO, this.$t('无法定位上下文'))
             }
         },
         imgLoadedScroll () {
@@ -947,16 +988,16 @@ export default defineComponent({
                 })
                 // 二次确认转发
                 const popInfo = {
-                    title: this.$t('chat_msg_forward_pan'),
+                    title: this.$t('转发消息'),
                     template: MsgBody,
                     templateValue: markRaw({data: msg, type: 'forward'}),
                     button: [
                         {
-                            text: this.$t('btn_no'),
+                            text: this.$t('取消'),
                             fun: () => { runtimeData.popBoxList.shift() }
                         },
                         {
-                            text: this.$t('btn_yes'),
+                            text: this.$t('确定'),
                             master: true,
                             fun: () => {
                                 sendMsgRaw(this.chat.show.id, this.chat.show.type, msg.message, true)
@@ -983,11 +1024,11 @@ export default defineComponent({
                         item.emoji_id == mface.emoji_id
                 })
                 if(face) {
-                    popInfo.add(PopType.INFO, this.$t('pop_chat_msg_menu_store_face_exist'))
+                    popInfo.add(PopType.INFO, this.$t('表情已被收藏'))
                 } else {
                     storeFaceList.push(mface)
                     option.save('store_face', storeFaceList)
-                    popInfo.add(PopType.INFO, this.$t('pop_chat_msg_menu_store_face_success'))
+                    popInfo.add(PopType.INFO, this.$t('表情收藏成功'))
                 }
             }
             this.closeMsgMenu()
@@ -1004,7 +1045,7 @@ export default defineComponent({
                 Connector.send(runtimeData.jsonMap.send_respond.name, {
                     'message_id': msgId,
                     'emoji_id': String(num)
-                }, 'SendRespondBack')
+                }, 'SendRespondBack_' + msgId + '_' + num)
             }
             this.closeMsgMenu()
         },
@@ -1017,13 +1058,13 @@ export default defineComponent({
             if (msg !== null) {
                 // 如果消息体没有简述消息的话 ……
                 if(!msg.raw_message) {
-                    msg.raw_message = getMsgRawTxt(msg.message)
+                    msg.raw_message = getMsgRawTxt(msg)
                 }
                 const popInfo = new PopInfo()
                 app.config.globalProperties.$copyText(msg.raw_message).then(() => {
-                    popInfo.add(PopType.INFO, this.$t('pop_chat_msg_menu_copy_success'), true)
+                    popInfo.add(PopType.INFO, this.$t('复制成功'), true)
                 }, () => {
-                    popInfo.add(PopType.ERR, this.$t('pop_chat_msg_menu_copy_err'), true)
+                    popInfo.add(PopType.ERR, this.$t('复制失败'), true)
                 })
             }
             this.closeMsgMenu()
@@ -1036,9 +1077,9 @@ export default defineComponent({
             if (this.selectCache != '') {
                 const popInfo = new PopInfo()
                 app.config.globalProperties.$copyText(this.selectCache).then(() => {
-                    popInfo.add(PopType.INFO, this.$t('pop_chat_msg_menu_copy_success'), true)
+                    popInfo.add(PopType.INFO, this.$t('复制成功'), true)
                 }, () => {
-                    popInfo.add(PopType.ERR, this.$t('pop_chat_msg_menu_copy_err'), true)
+                    popInfo.add(PopType.ERR, this.$t('复制失败'), true)
                 })
             }
             this.closeMsgMenu()
@@ -1075,11 +1116,11 @@ export default defineComponent({
             const msg = this.selectedMsg
             if (msg !== null) {
                 const popInfo = {
-                    title: this.$t('popbox_tip'),
-                    html: `<span>${this.$t('chat_msg_menu_remove_tip', { user: msg.sender.nickname })}</span>`,
+                    title: this.$t('提醒'),
+                    html: `<span>${this.$t('真的要将 {user} 移出群聊吗', { user: msg.sender.nickname })}</span>`,
                     button: [
                         {
-                            text: app.config.globalProperties.$t('btn_yes'),
+                            text: app.config.globalProperties.$t('确定'),
                             fun: () => {
                                 if(msg) {
                                     Connector.send('set_group_kick', 
@@ -1093,7 +1134,7 @@ export default defineComponent({
                             }
                         },
                         {
-                            text: app.config.globalProperties.$t('btn_no'),
+                            text: app.config.globalProperties.$t('取消'),
                             master: true,
                             fun: () => { runtimeData.popBoxList.shift() }
                         }
@@ -1291,7 +1332,7 @@ export default defineComponent({
                     var onProgress = function (e: ProgressEvent) {
                        const percent = Math.round(e.loaded / e.total * 100)
                        if(percent % 10 === 0) {
-                           new PopInfo().add(PopType.INFO, app.config.globalProperties.$t('pop_send_file', { percent: percent}))
+                           new PopInfo().add(PopType.INFO, app.config.globalProperties.$t('正在发送文件 {percent}%', { percent: percent}))
                        }
                     }
 
@@ -1309,11 +1350,11 @@ export default defineComponent({
                             // 发送成功，直接刷新整个历史消息
                             loadHistoryFirst(runtimeData.chatInfo.show)
                         } else {
-                            new PopInfo().add(PopType.ERR, app.config.globalProperties.$t('pop_send_file_fail'))
+                            new PopInfo().add(PopType.ERR, app.config.globalProperties.$t('发送文件失败'))
                         }
                     }
                 } catch(e) {
-                    new PopInfo().add(PopType.ERR, app.config.globalProperties.$t('pop_send_file_err'))
+                    new PopInfo().add(PopType.ERR, app.config.globalProperties.$t('发送文件错误'))
                 }
             }
         },
@@ -1353,12 +1394,12 @@ export default defineComponent({
                     // 压缩图片
                     const options = { maxSizeMB: 3,useWebWorker: true }
                     try {
-                        popInfo.add(PopType.INFO, this.$t('pop_chat_image_compression'))
+                        popInfo.add(PopType.INFO, this.$t('正在压缩图片 ……'))
                         const compressedFile = await imageCompression(blob, options)
                         new Logger().add(LogType.INFO, '图片压缩成功，原大小：' + blob.size / 1024 / 1024 + ' MB，压缩后大小：' + compressedFile.size / 1024 / 1024 + ' MB')
                         this.setImg(compressedFile)
                     } catch (error) {
-                        popInfo.add(PopType.INFO, this.$t('pop_chat_image_compression_fail'))
+                        popInfo.add(PopType.INFO, this.$t('压缩图片失败'))
                     }
                 }
             }
@@ -1379,6 +1420,10 @@ export default defineComponent({
          * 发送消息
          */
         sendMsg () {
+            // 在搜索消息的时候不允许发送消息
+            if(this.details[3].open) {
+                return
+            }
             // 关闭所有其他的已打开的更多功能弹窗
             this.details.forEach((item) => {
                 item.open = false
@@ -1639,6 +1684,29 @@ export default defineComponent({
                 }, 'getJin' )
             }
             this.tags.showMoreDetail = !this.tags.showMoreDetail
+        },
+
+        searchMessage(event: Event) {
+            if(this.details[3].open) {
+                const value = (event.target as HTMLInputElement).value
+                if(value.length == 0) {
+                    this.tags.search.list = reactive(this.list)
+                } else if(value.length > 0) {
+                    this.tags.search.list = this.list.filter((item: any) => {
+                        const rawMessage = getMsgRawTxt(item)
+                        return rawMessage.indexOf(value) !== -1
+                    })
+                }
+            }
+        },
+        openSearch() {
+            this.details[3].open = !this.details[3].open
+            this.tags.showMoreDetail = !this.tags.showMoreDetail
+        },
+        closeSearch() {
+            this.details[3].open = !this.details[3].open
+            this.msg = ''
+            this.tags.search.list = reactive(this.list)
         },
 
         /**

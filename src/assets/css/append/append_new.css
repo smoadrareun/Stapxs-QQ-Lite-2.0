@@ -100,11 +100,23 @@
 }
 
 .mumber-info > div:first-child {
-    padding: 10px;
+    padding: 15px;
+}
+.mumber-info > div:first-child > div {
+    margin-left: 15px;
+}
+.mumber-info > div:first-child > div > div > a {
+    font-size: 0.8rem;
 }
 .mumber-info > div:first-child img {
-    height: 45px;
-    width: 45px;
+    height: 35px;
+    width: 35px;
+}
+.mumber-info > div:first-child > div > span {
+    font-size: 0.75rem;
+}
+.mumber-info > div:first-child > div > div > div > span {
+    font-size: 0.6rem;
 }
 
 .chat-pan {
@@ -161,11 +173,14 @@
     height: 15px;
     margin: 7px;
 }
-
+.search-tag.show {
+    margin: 10px 20px 10px 20px !important;
+}
 .replay-tag.show {
     margin: 10px 20px 0 20px;
     margin-top: 10px;
 }
+
 .face-pan {
     border: 1px solid var(--color-card-2);
 }
@@ -218,6 +233,9 @@
     border: 1px solid var(--color-card-2);
     height: 30px;
     width: 30px;
+}
+.message-body > span {
+    font-size: 0.6rem;
 }
 .message-body > a {
     font-size: 0.8rem;
@@ -701,6 +719,10 @@
     width: 70px;
     height: 30px;
     font-size: 0.75rem;
+}
+
+.update-info > div.info {
+    font-size: 0.8rem;
 }
 
 @media (max-width: 700px) {

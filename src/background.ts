@@ -50,6 +50,7 @@ async function createWindow() {
         defaultHeight: 530
     })
     const store = new Store()
+    const vibrancyMode = store.get('vibrancy_mode')
     let windowConfig = {
         x: mainWindowState.x,
         y: mainWindowState.y,
@@ -71,7 +72,7 @@ async function createWindow() {
             ...windowConfig,
             titleBarStyle: 'hidden',
             trafficLightPosition: { x: 11, y: 10 },
-            vibrancy: 'fullscreen-ui',
+            vibrancy: vibrancyMode == 'transparent' ? undefined : 'fullscreen-ui',
             transparent: true,
 
             visualEffectState: process.env.NODE_ENV 
@@ -82,7 +83,7 @@ async function createWindow() {
         windowConfig = {
             ...windowConfig,
             backgroundColor: '#00000000',
-            backgroundMaterial: 'acrylic',
+            backgroundMaterial: vibrancyMode == 'transparent' ? undefined : 'acrylic',
             frame: false
         }
         store.set('opt_no_window', 'true')
@@ -121,21 +122,31 @@ async function createWindow() {
             const ignoreAddress = [
                 'devtools://',
                 'chrome-extension://',
+                'https://registry.npmjs.org',
+                // 本地开发地址
                 'http://localhost:8080',
-                'https://registry.npmjs.org'
+                'http://127.0.0.1:8080',
+                'http://localhost:8081',
+                'http://127.0.0.1:8081'
             ]
             if(imageAddress.some((address) => details.url.startsWith(address))) {
-                // 给这个域名添加文件名头
+                // 不缓存图片
+                details.responseHeaders['cache-control'] = ['max-age=300']
                 const contentType = details.responseHeaders['content-type']
                 if(contentType && contentType[0]) {
                     const typeName = contentType[0].split('/')[1]
-                    details.responseHeaders['content-disposition'] =
-                            ['attachment; filename="file.' + typeName]
+                    // 添加文件名方便下载
+                    details.responseHeaders['content-disposition'] = ['inline; filename="image.' + typeName + '"']
                 }
             } else if (!ignoreAddress.some((address) => details.url.startsWith(address))) {
                 // 绕过 CSP 限制，X-Frame-Options 限制
                 details.responseHeaders['content-security-policy'] = ['*']
                 delete details.responseHeaders['x-frame-options']
+                // 修改缓存时间
+                if(details.url.indexOf('qlogo.cn') !== -1) {
+                    // QQ 头像 URL 默认有 2592000（30 天）的缓存时间，这里修改为 3 天
+                    details.responseHeaders['cache-control'] = ['max-age=259200']
+                }
             }
         }
         callback({ cancel: false, responseHeaders: details.responseHeaders })

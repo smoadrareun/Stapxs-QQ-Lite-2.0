@@ -1,6 +1,6 @@
 <template>
     <div class="update-info">
-        <span>{{ updated ? $t('update_history') : $t('new_update') }}</span>
+        <span>{{ updated ? $t('更新记录') : $t('新版本') }}</span>
         <a>{{ version }}</a>
         <div class="title">
             <img :src="user.avatar">
@@ -10,8 +10,13 @@
         </div>
         <div class="info"><span>{{ info.title }}</span>
             <div>
-                <div v-for="(str, index) in info.content" :key="'changelog-' + index">
-                    <span>{{ str }}</span>
+                <div v-for="(item, index) in info.content" :key="'changelog-' + index">
+                    <span>{{ item.text }}</span>
+                    <div v-if="item.issue" class="log-issue">
+                        <span> -&gt; </span>
+                        <div></div>
+                        <a @click="openLink(`https://github.com/Stapxs/Stapxs-QQ-Lite-2.0/issues/${item.issue}`, true)">#{{ item.issue }}</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -22,16 +27,18 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { getTrueLang, gitmojiToEmoji } from '@/function/utils/systemUtil'
+import { openLink } from '@/function/utils/appUtil'
 
 export default defineComponent({
     name: 'UpdatePan',
     props: ['version', 'date', 'user', 'message', 'updated'],
     data() {
         return {
+            openLink,
             getTrueLang,
             info: {
                 title: '' as string,
-                content: [] as string[]
+                content: [] as { [key: string]: string }[]
             }
         }
     },
@@ -39,6 +46,7 @@ export default defineComponent({
         const updateInfo = this.message.split('\n')
         this.info.title = updateInfo[0]
         for (let i = 1; i < updateInfo.length; i++) {
+            let item = { text: '' } as { [key: string]: string }
             let text = updateInfo[i]
             if (text.startsWith(':')) {
                 const end = text.substring(1).indexOf(':')
@@ -48,8 +56,44 @@ export default defineComponent({
                     text = text.replace(name, emj)
                 }
             }
-            this.info.content.push(text)
+            // 匹配 issue 编号
+            const regexIssue = /<- #(\d+)/
+            const matchIssue = text.match(regexIssue)
+            if (matchIssue) {
+                const issueId = matchIssue[1]
+                text = text.replace(regexIssue, '')      // 删除 issue 编号
+                item.issue = issueId
+            }
+            const regexHash = /[a-f0-9]{40}/
+            const matchHash = text.match(regexHash)
+            if (matchHash) {
+                const hash = matchHash[0]
+                // 保留前 7 位
+                text = text.replace(hash, hash.substring(0, 7))
+            }
+            item.text = text
+            this.info.content.push(item)
         }
     }
 })
 </script>
+
+<style scoped>
+.log-issue {
+    cursor: pointer;
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+}
+.log-issue > div {
+    width: calc(0.8rem - 6px);
+    height: calc(0.8rem - 6px);
+    border-radius: 100%;
+    outline: 3px solid var(--color-issue-close);
+    margin: 0 5px;
+}
+.log-issue > a {
+    text-decoration: underline;
+    color: var(--color-issue-close);
+}
+</style>

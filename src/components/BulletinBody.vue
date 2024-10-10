@@ -9,15 +9,15 @@
     <div class="base" @click="showAll = !showAll">
         <header>
             <font-awesome-icon :icon="['fas', 'bookmark']" />
-            <span>{{ $t('chat_chat_info_notice') }}</span>
+            <span>{{ $t('公告') }}</span>
             <div style="flex: 1;"></div>
             <span>{{ Intl.DateTimeFormat(trueLang, { month: "short", day: "numeric", hour: "numeric", minute: "numeric" })
                     .format(data.time) }}</span>
         </header>
         <div :id="'bulletins-msg-' + index" :class="'body' + (!showAll ? '' : ' all')">
-            <span @click="textClick" v-html="parseText(data.content)"></span>
+            <span @click="textClick" v-html="parseText(data.content[0])"></span>
         </div>
-        <span v-show="needShow && !showAll">{{ $t('bulletin_show_tip') }}</span>
+        <span v-show="needShow && !showAll">{{ $t('点击展开') }}</span>
         <div class="info">
             <img :src="'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + data.sender">
             <a>{{ (runtimeData.chatInfo.info.group_members.filter((item) => {
@@ -26,8 +26,8 @@
             }))[0].nickname }}</a>
             <div></div>
             <span v-if="data.is_read">{{
-                $t('chat_chat_info_bulletin_read', {
-                    isRead: data.is_read ? $t('chat_chat_info_bulletin_readed') : $t('chat_chat_info_bulletin_noread'),
+                $t('{readNum} 人已读 | {isRead}', {
+                    isRead: data.is_read ? $t('已读') : $t('未读'),
                 readNum: data.read_num
             })
             }}</span>

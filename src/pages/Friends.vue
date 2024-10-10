@@ -14,13 +14,13 @@
         <div :class="'friend-list' + (runtimeData.tags.openSideBar ? ' open' : '')" id="friend-list">
             <div>
                 <div class="base">
-                    <span>{{ $t('friend_title') }}</span>
+                    <span>{{ $t('联系人') }}</span>
                     <div style="flex: 1;"></div>
                     <font-awesome-icon @click="reloadUser" :icon="['fas', 'rotate-right']" />
                 </div>
                 <div class="small">
                     <label>
-                        <input v-model="searchInfo" @input="search" type="text" :placeholder="$t('base_search')">
+                        <input v-model="searchInfo" @input="search" type="text" :placeholder="$t('搜索 ……')">
                         <font-awesome-icon :icon="['fas', 'magnifying-glass']" />
                     </label>
                     <div class="reload" @click="reloadUser">
@@ -29,43 +29,52 @@
                     <div @click="openLeftBar"><font-awesome-icon :icon="['fas', 'bars-staggered']" /></div>
                 </div>
                 <label>
-                    <input v-model="searchInfo" @input="search" type="text" :placeholder="$t('base_search')">
+                    <input v-model="searchInfo" @input="search" type="text" :placeholder="$t('搜索 ……')">
                     <font-awesome-icon :icon="['fas', 'magnifying-glass']" />
                 </label>
             </div>
             <div :class="(runtimeData.tags.openSideBar ? 'open' : '')">
                 <template v-if="runtimeData.showList.length <= 0">
-                    <template v-for="info in runtimeData.tags.classes"
-                        :key="'class-' + info.class_id">
-                        <div :class="'list exp-body' + (classStatus[info.class_id] == true ? ' open' : '')">
-                            <header :title="info.class_name" :class="'exp-header' + (runtimeData.tags.openSideBar ? ' open' : '')" @click="classClick(info.class_id)">
+                    <template v-if="runtimeData.tags.classes.length > 0">
+                        <template v-for="info in runtimeData.tags.classes"
+                            :key="'class-' + info.class_id">
+                            <div :class="'list exp-body' + (classStatus[info.class_id] == true ? ' open' : '')">
+                                <header :title="info.class_name" :class="'exp-header' + (runtimeData.tags.openSideBar ? ' open' : '')" @click="classClick(info.class_id)">
+                                    <div></div>
+                                    <span>{{ info.class_name }}</span>
+                                    <a>{{ info.user_count ?? runtimeData.userList.filter((get) => { return get.class_id == info.class_id }).length }}</a>
+                                </header>
+                                <div :id="'class-' + info.class_id">
+                                    <FriendBody 
+                                        v-for="item in runtimeData.userList.filter((get) => { return get.class_id == info.class_id })"
+                                        :key="'fb-' + (item.user_id ? item.user_id : item.group_id)" :data="item" from="friend"
+                                        @click="userClick(item, $event)">
+                                    </FriendBody>
+                                </div>
+                            </div>
+                        </template>
+                        <div :class="'list exp-body' + (classStatus['-1'] == true ? ' open' : '')">
+                            <header :title="$t('群组')" :class="'exp-header' + (runtimeData.tags.openSideBar ? ' open' : '')" @click="classClick('-1')">
                                 <div></div>
-                                <span>{{ info.class_name }}</span>
-                                <a>{{ info.user_count ?? runtimeData.userList.filter((get) => { return get.class_id == info.class_id }).length }}</a>
+                                <span>{{ $t('群组') }}</span>
+                                <a>{{ runtimeData.userList.filter((get) => { return get.class_id == undefined }).length }}</a>
                             </header>
-                            <div :id="'class-' + info.class_id">
+                            <div>
                                 <FriendBody 
-                                    v-for="item in runtimeData.userList.filter((get) => { return get.class_id == info.class_id })"
+                                    v-for="item in runtimeData.userList.filter((get) => { return get.class_id == undefined })"
                                     :key="'fb-' + (item.user_id ? item.user_id : item.group_id)" :data="item" from="friend"
                                     @click="userClick(item, $event)">
                                 </FriendBody>
                             </div>
                         </div>
                     </template>
-                    <div :class="'list exp-body' + (classStatus['-1'] == true ? ' open' : '')">
-                        <header :title="$t('friend_group')" :class="'exp-header' + (runtimeData.tags.openSideBar ? ' open' : '')" @click="classClick('-1')">
-                            <div></div>
-                            <span>{{ $t('friend_group') }}</span>
-                            <a>{{ runtimeData.userList.filter((get) => { return get.class_id == undefined }).length }}</a>
-                        </header>
-                        <div>
-                            <FriendBody 
-                                v-for="item in runtimeData.userList.filter((get) => { return get.class_id == undefined })"
-                                :key="'fb-' + (item.user_id ? item.user_id : item.group_id)" :data="item" from="friend"
-                                @click="userClick(item, $event)">
-                            </FriendBody>
-                        </div>
-                    </div>
+                    <template v-else>
+                        <FriendBody 
+                            v-for="item in runtimeData.userList"
+                            :key="'fb-' + (item.user_id ? item.user_id : item.group_id)" :data="item" from="friend"
+                            @click="userClick(item, $event)">
+                        </FriendBody>
+                    </template>
                 </template>
                 <!-- 搜索用的 -->
                 <div v-else class="list">
@@ -78,10 +87,10 @@
                 </div>
             </div>
         </div>
-        <div :class="'friend-list-space' + (runtimeData.tags.openSideBar ? ' open' : '')">
+        <div v-show="!loginInfo.status || runtimeData.chatInfo.show.id == 0" :class="'friend-list-space' + (runtimeData.tags.openSideBar ? ' open' : '')">
             <div class="ss-card">
                 <font-awesome-icon :icon="['fas', 'inbox']" />
-                <span>{{ $t('chat_space') }}</span>
+                <span>{{ $t('选择联系人开始聊天') }}</span>
             </div>
         </div>
     </div>
@@ -96,6 +105,7 @@ import { UserGroupElem } from '@/function/elements/information'
 
 import { runtimeData } from '@/function/msg'
 import { reloadUsers } from '@/function/utils/appUtil'
+import { login as loginInfo } from '@/function/connect'
 
 export default defineComponent({
     name: 'ViewFriends',
@@ -107,7 +117,8 @@ export default defineComponent({
             loading: false,
             isSearch: false,
             searchInfo: '',
-            classStatus: {} as {[key: string]: boolean}
+            classStatus: {} as {[key: string]: boolean},
+            loginInfo: loginInfo
         }
     },
     methods: {
@@ -211,6 +222,29 @@ export default defineComponent({
 </script>
   
 <style scoped>
+.exp-body > div {
+    /* transition: transform .3s;
+    transform-origin: top; */
+    transform: scaleY(0);
+    height: 0;
+}
+.exp-body.open > div {
+    transform: scaleY(1);
+    height: unset;
+}
+.exp-body > header > div {
+    transition: margin-right .3s, transform .3s;
+    transform: scaleY(0);
+    margin-right: 0;
+    width: 0;
+}
+.exp-body.open > header > div {
+    transform: scaleY(1);
+    margin-right: 10px;
+    width: 5px;
+}
+
+
 .exp-header {
     color: var(--color-font);
     align-items: center;
@@ -236,17 +270,6 @@ export default defineComponent({
 .exp-header > a {
     color: var(--color-font-2);
     font-size: 0.9rem;
-}
-
-.exp-body > div {
-    /* transition: transform .3s;
-    transform-origin: top; */
-    transform: scaleY(0);
-    height: 0;
-}
-.exp-body.open > div {
-    transform: scaleY(1);
-    height: unset;
 }
 
 @media (max-width: 700px) {
