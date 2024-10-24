@@ -1297,6 +1297,60 @@ input {
     flex: 1;
 }
 
+.select-tag {
+    background: var(--color-card-1);
+    justify-content: space-evenly;
+    margin: 0 20px 10px 20px;
+    transition: all .3s;
+    align-items: center;
+    flex-direction: row;
+    border-radius: 7px;
+    overflow: hidden;
+    display: flex;
+    height: 0;
+}
+.select-tag.show {
+    margin: 0 20px 10px 20px;
+    margin-top: 20px;
+    padding: 15px 10px;
+    height: auto;
+}
+.select-tag > div {
+    flex-direction: column;
+    align-items: center;
+    display: flex;
+}
+.select-tag > div > svg,
+.select-tag > div > span:first-child {
+    background: var(--color-card-2);
+    color: var(--color-font-1);
+    border-radius: 100%;
+    cursor: pointer;
+    height: 0.8rem;
+    width: 0.8rem;
+    padding: 15px;
+}
+.select-tag > div > span:first-child {
+    border: 1px solid var(--color-main);
+    text-align: center;
+    font-weight: bold;
+    color: var(--color-font);
+    font-size: calc(0.8rem + 3px);
+    padding: 12px 15px 18px 15px;
+}
+.select-tag > div > span {
+    color: var(--color-font-2);
+    font-size: 0.75rem;
+    margin-top: 5px;
+}
+
+.msg-select-tag {
+
+}
+msg-select-tag > svg {
+    
+}
+
 .replay-tag {
     background: var(--color-card-1);
     margin: 0 20px -10px 20px;

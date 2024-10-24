@@ -42,11 +42,11 @@
 
 <script lang="ts">
 import languages from '@/assets/l10n/_l10nconfig.json'
-import Umami from '@stapxs/umami-logger-typescript'
 
 import { defineComponent } from 'vue'
 import { runtimeData } from '@/function/msg'
 import { runASWEvent as save } from '@/function/option'
+import { sendStatEvent } from '@/function/utils/appUtil'
 
 export default defineComponent({
     name: 'WelcomePan',
@@ -62,8 +62,7 @@ export default defineComponent({
     methods: {
         gaLanguage(event: Event) {
             const sender = event.target as HTMLInputElement
-            // UM：上传语言选择
-            Umami.trackEvent('use_language', { name: sender.value })
+            sendStatEvent('use_language', { name: sender.value })
             // 刷新菜单
             // TODO
         },

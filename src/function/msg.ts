@@ -22,7 +22,7 @@ import Umami from '@stapxs/umami-logger-typescript'
 
 import { buildMsgList, getMsgData, parseMsgList, getMsgRawTxt, updateLastestHistory, sendMsgAppendInfo } from '@/function/utils/msgUtil'
 import { getViewTime, escape2Html, randomNum } from '@/function/utils/systemUtil'
-import { reloadUsers, reloadCookies, downloadFile, updateMenu, jumpToChat, loadJsonMap } from '@/function/utils/appUtil'
+import { reloadUsers, reloadCookies, downloadFile, updateMenu, jumpToChat, loadJsonMap, sendStatEvent } from '@/function/utils/appUtil'
 import { reactive, markRaw, defineAsyncComponent } from 'vue'
 import { PopInfo, PopType, Logger, LogType } from './base'
 import { Connector, login } from './connect'
@@ -258,12 +258,11 @@ const msgFunctons = {
             resetRimtime(runtimeData.botInfo.app_name != data.app_name && !login.status)
 
             runtimeData.botInfo = data
-            // UM：提交分析信息，主要在意的是 bot 类型
             if (Option.get('open_ga_bot') !== false) {
                 if (data.app_name !== undefined) {
-                    Umami.trackEvent('connect', { method: data.app_name })
+                    sendStatEvent('connect', { method: data.app_name })
                 } else {
-                    Umami.trackEvent('connect', { method: '' })
+                    sendStatEvent('connect', { method: '（未知）' })
                 }
             }
             if (!login.status) {
@@ -705,9 +704,8 @@ const msgFunctons = {
      * 保存精华消息
      */
     getJin: (name: string, msg: { [key: string]: any }) => {
-        const data = msg.data
-        const jinList = getMsgData('group_essence', data, msgPath.group_essence)
-        const is_end = getMsgData('is_end', data, msgPath.group_essence.is_end)
+        const jinList = getMsgData('group_essence', msg, msgPath.group_essence)
+        const is_end = getMsgData('is_end', msg, msgPath.group_essence.is_end) ?? [true]
         if (jinList && is_end) {
             if (runtimeData.chatInfo.info.jin_info.list.length == 0) {
                 runtimeData.chatInfo.info.jin_info.list = jinList

@@ -148,51 +148,55 @@ export class MsgBodyFuns {
 
     /**
      * 获取具体的 JSON 消息类型用于特殊处理
-     * @param data JSON 消息
+     * @param msg 消息
      * @returns { type: string, app: any }
      */
-    static getJSONType(data: string) {
-        const json = JSON.parse(data)
-        const info = this.getJSON(json)
-        let type = 'default'
-        const append = {} as {[key: string]: any}
-        
-        // 下面就是一大堆特殊判定
-        if (json.desc === '群公告') {
-            info.title = json.desc
-            info.desc = json.prompt
-            info.preview = undefined
-            info.icon = ''
-            info.name = json.desc
-        }
-        if(json.app == 'com.tencent.multimsg') {
-            info.title = json.meta.detail.source
-            info.desc = '<div style="padding: 15px 20px 5px 20px">'
-            json.meta.detail.news.forEach((item: any) => {
-                info.desc += '<span>' + item.text + '</span><br>'
-            })
-            info.desc += '</div>'
-            info.icon = ''
-            info.name = json.meta.detail.summary
+    static getJSONType(msg: any) {
+        if(msg.type != 'xml') {
+            const data = msg.data
+            const json = JSON.parse(data)
+            const info = this.getJSON(json)
+            let type = 'default'
+            const append = {} as {[key: string]: any}
             
-            append.type = 'forward'
-            append.id = json.meta.detail.resid
-        }
-        if(json.app == 'com.tencent.map') {
-            info.title = json.meta['Location.Search'].name
-            append.urlOpenType = '_self'
-            const deviceType = getDeviceType()
-            if(deviceType == 'Android') {
-                info.url = 'geo:' + json.meta['Location.Search'].lat + ',' + json.meta['Location.Search'].lng
-            } else if(deviceType == 'iOS' || deviceType == 'MacOS') {
-                info.url = 'http://maps.apple.com/?ll=' + json.meta['Location.Search'].lat + ',' + json.meta['Location.Search'].lng +
-                    '&q=' + json.meta['Location.Search'].name
+            // 下面就是一大堆特殊判定
+            if (json.desc === '群公告') {
+                info.title = json.desc
+                info.desc = json.prompt
+                info.preview = undefined
+                info.icon = ''
+                info.name = json.desc
             }
-            info.desc = json.meta['Location.Search'].address
-            type = 'tencent.map'
-        }
+            if(json.app == 'com.tencent.multimsg') {
+                info.title = json.meta.detail.source
+                info.desc = '<div style="padding: 15px 20px 5px 20px">'
+                json.meta.detail.news.forEach((item: any) => {
+                    info.desc += '<span>' + item.text + '</span><br>'
+                })
+                info.desc += '</div>'
+                info.icon = ''
+                info.name = json.meta.detail.summary
+                
+                append.type = 'forward'
+                append.id = json.meta.detail.resid
+            }
+            if(json.app == 'com.tencent.map') {
+                info.title = json.meta['Location.Search'].name
+                append.urlOpenType = '_self'
+                const deviceType = getDeviceType()
+                if(deviceType == 'Android') {
+                    info.url = 'geo:' + json.meta['Location.Search'].lat + ',' + json.meta['Location.Search'].lng
+                } else if(deviceType == 'iOS' || deviceType == 'MacOS') {
+                    info.url = 'http://maps.apple.com/?ll=' + json.meta['Location.Search'].lat + ',' + json.meta['Location.Search'].lng +
+                        '&q=' + json.meta['Location.Search'].name
+                }
+                info.desc = json.meta['Location.Search'].address
+                type = 'tencent.map'
+            }
 
-        return { type, app: info, append }
+            return { type, app: info, append }
+        }
+        return null
     }
 
     /**

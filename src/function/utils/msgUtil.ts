@@ -1,12 +1,12 @@
 import jp from 'jsonpath'
 import app from '@/main'
-import Umami from '@stapxs/umami-logger-typescript'
 
 import { Logger } from '@/function/base'
 import { runtimeData } from '@/function/msg'
 import { v4 as uuid } from 'uuid'
 import { Connector } from '@/function/connect'
 import { BotMsgType, UserFriendElem, UserGroupElem } from '../elements/information'
+import { sendStatEvent } from './appUtil'
 
 const logger = new Logger()
 
@@ -220,9 +220,8 @@ export function getMsgRawTxt(data: any): string {
                 // eslint-disable-next-line
                 case 'text': back += message[i].text.replaceAll('\n', ' ').replaceAll('\r', ' '); break
                 case 'face': back += '[' + $t('表情') + ']'; break
-                case 'mface': back += message[i].summary ?? message[i].text; break
                 case 'bface': back += message[i].text; break
-                case 'image': back += '[' + $t('图片') + ']'; break
+                case 'image': back += message[i].summary ?? '[' + $t('图片') + ']'; break
                 case 'record': back += '[' + $t('语音') + ']'; break
                 case 'video': back += '[' + $t('视频') + ']'; break
                 case 'file': back += '[' + $t('文件') + ']'; break
@@ -337,7 +336,7 @@ export function parseCQ(data: any) {
     return data
 }
 
-export function sendMsgRaw(id: string, type: string, msg: string | { type: string; text: string; }[] | undefined, preShow = false) {
+export function sendMsgRaw(id: string, type: string, msg: string | any[] | undefined, preShow = false) {
     // 将消息构建为完整消息体先显示出去
     const msgUUID = uuid()
     if (preShow) {
@@ -401,8 +400,7 @@ export function sendMsgRaw(id: string, type: string, msg: string | { type: strin
                 break
             }
         }
-        // UM：统计消息发送次数
-        Umami.trackEvent('sendMsg', { type: type })
+        sendStatEvent('sendMsg', { type: type })
     }
 }
 
@@ -431,7 +429,10 @@ export function updateLastestHistory(item: UserFriendElem & UserGroupElem) {
 }
 
 export function sendMsgAppendInfo(msg: any) {
-    msg.message.forEach(() => {
-        // TODO
-    })
+    if(msg.message) {
+        msg.message.forEach(() => {
+            // TODO
+        }
+        )
+    }
 }

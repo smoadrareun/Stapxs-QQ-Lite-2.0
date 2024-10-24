@@ -11,14 +11,13 @@
 */
 
 import app from '@/main'
-import Umami from '@stapxs/umami-logger-typescript'
 import languageConfig from '@/assets/l10n/_l10nconfig.json'
 
 import { i18n } from '@/main'
 import { markRaw, defineAsyncComponent } from 'vue'
 import { Logger, LogType, PopInfo, PopType } from './base'
 import { runtimeData } from './msg'
-import { initUITest, loadSystemThemeColor, loadWinColor, updateWinColor } from '@/function/utils/appUtil'
+import { loadSystemThemeColor, loadWinColor, sendStatEvent, updateWinColor } from '@/function/utils/appUtil'
 import { getPortableFileLang, getTrueLang } from '@/function/utils/systemUtil'
 
 let cacheConfigs: { [key: string]: any }
@@ -46,7 +45,6 @@ const configFunction: { [key: string]: (value: any) => void } = {
     opt_dark: setDarkMode,
     opt_auto_dark: setAutoDark,
     theme_color: changeTheme,
-    ui_test: changeUiTest,
     chatview_name: changeChatView,
     initial_scale: changeInitialScale,
     msg_type: setMsgType,
@@ -71,8 +69,7 @@ function viewRevolve(value: boolean) {
             save('opt_revolve', false)
         } else {
             baseApp.classList.add('no-touch')
-            // UM：上传禁用触摸(彩蛋)的选择
-            Umami.trackEvent('click_statistics', { name: 'touch_randomly' })
+            sendStatEvent('click_statistics', { name: 'touch_randomly' })
         }
     }
 }
@@ -97,16 +94,6 @@ function updateGTKColor(value: boolean) {
 function setMsgType(value: any) {
     if(value) {
         runtimeData.tags.msgType = Number(value)
-    }
-}
-
-/**
- * 启用 UI 测试模式以便于翻译等需要浏览全部 UI 的行为
- * @param value 是否启用 UI 测试模式
- */
-function changeUiTest(value: boolean) {
-    if (value === true) {
-        initUITest()
     }
 }
 

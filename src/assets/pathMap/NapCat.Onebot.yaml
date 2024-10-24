@@ -106,16 +106,16 @@ group_notices:
 # 获取群精华消息
 group_essence:
     name: get_essence_msg_list
-    source: $.data.msg_list[*]
+    source: $.data[*]
     list:
-        sender_uin: /sender_uin
+        sender_uin: /sender_id
         sender_nick: /sender_nick
-        sender_time: /sender_time
-        msg_content: /msg_content
-        add_digest_uin: /add_digest_uin
-        add_digest_nick: /add_digest_nick
-        add_digest_time: /add_digest_time
-    is_end: $.data.is_end
+        sender_time: /operator_time
+        msg_content: /content
+        add_digest_uin: /operator_id
+        add_digest_nick: /operator_nick
+        add_digest_time: /operator_time
+    is_end: null
 # 获取群成员信息
 group_member_info:
     name: get_group_member_info
@@ -147,3 +147,7 @@ recent_contact:
         time: /msgTime
         chat_type: /chatType
         name: /peerName
+# 戳一戳
+poke:
+    name: group_poke
+    private_name: friend_poke

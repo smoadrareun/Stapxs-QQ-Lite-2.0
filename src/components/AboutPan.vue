@@ -127,12 +127,11 @@
 </template>
 
 <script lang="ts">
-import Umami from '@stapxs/umami-logger-typescript'
 import DepPan from './DepPan.vue'
 import packageInfo from '../../package.json'
 
 import { defineComponent } from 'vue'
-import { openLink } from '@/function/utils/appUtil'
+import { openLink, sendStatEvent } from '@/function/utils/appUtil'
 import { ContributorElem } from '@/function/elements/system'
 
 import { runtimeData } from '@/function/msg'
@@ -164,14 +163,12 @@ export default defineComponent({
 
         goGithub() {
             openLink('https://github.com/Stapxs/Stapxs-QQ-Lite-2.0')
-            // UM：统计点击事件
-            Umami.trackEvent('click_statistics', { name: 'visit_github' })
+            sendStatEvent('click_statistics', { name: 'visit_github' })
         },
 
         goBlog() {
             openLink('https://blog.stapxs.cn/About.html')
-            // UM：统计点击事件
-            Umami.trackEvent('click_statistics', { name: 'visit_blog' })
+            sendStatEvent('click_statistics', { name: 'visit_blog' })
         }
     },
     mounted() {

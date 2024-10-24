@@ -57,13 +57,16 @@
                     <MsgBody
                         v-if="(msg.post_type === 'message' || msg.post_type === 'message_sent') && msg.message.length > 0"
                         :key="msg.message_id"
+                        :selected="multipleSelectList.includes(msg.message_id) || tags.openedMenuMsg?.id == 'chat-' + msg.message_id"
                         :data="msg"
+                        @click="msgClick($event, msg)"
                         @scrollToMsg="scrollToMsg"
                         @scrollButtom="imgLoadedScroll"
                         @contextmenu.prevent="showMsgMeun($event, msg)"
                         @touchstart="msgStartMove($event, msg)"
                         @touchmove="msgOnMove"
-                        @touchend="msgMoveEnd($event, msg)">
+                        @touchend="msgMoveEnd($event, msg)"
+                        @sendPoke="sendPoke">
                     </MsgBody>
                     <!-- 其他通知消息 -->
                     <NoticeBody :id="uuid()" v-if="msg.post_type === 'notice'" :key="'notice-' + index" :data="msg"></NoticeBody>
@@ -71,6 +74,7 @@
             </TransitionGroup>
         </div>
         <div v-else class="chat" id="msgPan" style="scroll-behavior: smooth;">
+            <!-- 搜索消息结果显示 -->
             <TransitionGroup name="msglist" tag="div">
                 <template v-for="(msg, index) in tags.search.list">
                     <!-- 时间戳 -->
@@ -79,6 +83,7 @@
                     <MsgBody
                         v-if="(msg.post_type === 'message' || msg.post_type === 'message_sent') && msg.message.length > 0"
                         :key="msg.message_id"
+                        :selected="multipleSelectList.includes(msg.message_id) || tags.openedMenuMsg?.id == 'chat-' + msg.message_id"
                         :data="msg"
                         @scrollToMsg="scrollToMsg"
                         @scrollButtom="imgLoadedScroll"
@@ -148,8 +153,32 @@
                         </div>
                     </Transition>
                 </div>
+                <!-- 多选指示器 -->
+                <div :class="multipleSelectList.length > 0 ? 'select-tag show' : 'select-tag'">
+                    <div>
+                        <font-awesome-icon @click="showForWard" :icon="['fas', 'share']" />
+                        <span>{{ $t('合并转发') }}</span>
+                    </div>
+                    <div>
+                        <font-awesome-icon :icon="['fas', 'scissors']" />
+                        <span>{{ $t('截图') }}</span>
+                    </div>
+                    <div>
+                        <font-awesome-icon @click="delMsgs" :icon="['fas', 'trash-can']" />
+                        <span>{{ $t('删除') }}</span>
+                    </div>
+                    <div>
+                        <font-awesome-icon @click="copyMsgs" :icon="['fas', 'copy']" />
+                        <span>{{ $t('复制') }}</span>
+                    </div>
+                    <div>
+                        <span @click="multipleSelectList = []">{{ multipleSelectList.length  }}</span>
+                        <!-- <font-awesome-icon @click="multipleSelectList = []" :icon="['fas', 'xmark']" /> -->
+                        <span>{{ $t('取消') }}</span>
+                    </div>
+                </div>
                 <!-- 搜索指示器 -->
-                 <div :class="details[3].open ? 'search-tag show' : 'search-tag'">
+                <div :class="details[3].open ? 'search-tag show' : 'search-tag'">
                     <font-awesome-icon :icon="['fas', 'search']" />
                     <span>{{ $t('搜索已加载的消息') }}</span>
                     <div @click="closeSearch"><font-awesome-icon :icon="['fas', 'xmark']" /></div>
@@ -188,8 +217,8 @@
                         @click="details[1].open = !details[1].open, tags.showMoreDetail = false">
                         <font-awesome-icon :icon="['fas', 'face-laugh']" />
                     </div>
-                    <div :title="$t('戳一戳')" v-if="chat.show.type === 'user'" @click="sendPoke">
-                        <font-awesome-icon :icon="['fas', 'bomb']" /></div>
+                    <div :title="$t('戳一戳')" v-if="chat.show.type === 'user'" @click="sendPoke(chat.show.id)">
+                        <font-awesome-icon :icon="['fas', 'fa-hand-point-up']" /></div>
                     <div :title="$t('精华消息')" v-if="chat.show.type === 'group'" @click="showJin">
                         <font-awesome-icon :icon="['fas', 'star']" /></div>
                     <div class="space"></div>
@@ -204,8 +233,7 @@
                 </div>
                 <div>
                     <form @submit.prevent="mainSubmit">
-                        <input
-                            v-if="!Option.get('use_breakline')"
+                        <input v-if="!Option.get('use_breakline')"
                             id="main-input"
                             type="text"
                             v-model="msg"
@@ -217,8 +245,7 @@
                             @keyup="mainKeyUp"
                             @click="selectSQIn()"
                             @input="searchMessage">
-                        <textarea
-                            v-else
+                        <textarea v-else
                             id="main-input"
                             type="text"
                             v-model="msg"
@@ -315,10 +342,10 @@
                    <div><font-awesome-icon :icon="['fas', 'share']" /></div>
                    <a>{{ $t('转发') }}</a>
                 </div>
-                <!-- <div v-show="tags.menuDisplay.select">
-           <div><font-awesome-icon :icon="['fas', 'circle-check']" /></div>
-           <a>{{ $t('多选') }}</a>
-        </div> -->
+                <div @click="intoMultipleSelect()" v-show="tags.menuDisplay.select">
+                    <div><font-awesome-icon :icon="['fas', 'circle-check']" /></div>
+                    <a>{{ $t('多选') }}</a>
+                </div>
                 <div @click="copyMsg" v-show="tags.menuDisplay.copy">
                     <div><font-awesome-icon :icon="['fas', 'clipboard']" /></div>
                     <a>{{ $t('复制') }}</a>
@@ -331,10 +358,6 @@
                     <div><font-awesome-icon :icon="['fas', 'floppy-disk']" /></div>
                     <a>{{ $t('下载图片') }}</a>
                 </div>
-                <div @click="addStoreFace" v-show="tags.menuDisplay.addStoreFace != false">
-                    <div><font-awesome-icon :icon="['fas', 'heart']" /></div>
-                    <a>{{ $t('收藏商城表情') }}</a>
-                </div>
                 <div @click="revokeMsg" v-show="tags.menuDisplay.revoke">
                     <div><font-awesome-icon :icon="['fas', 'xmark']" /></div>
                     <a>{{ $t('撤回') }}</a>
@@ -342,6 +365,10 @@
                 <div @click="(selectedMsg ? addSpecialMsg({ msgObj: { type: 'at', qq: selectedMsg.sender.user_id }, addText: true }) : '');toMainInput();closeMsgMenu();" v-show="tags.menuDisplay.at">
                     <div><font-awesome-icon :icon="['fas', 'at']" /></div>
                     <a>{{ $t('提及') }}</a>
+                </div>
+                <div @click="sendPoke(selectedMsg ? selectedMsg.sender.user_id : undefined)" v-show="tags.menuDisplay.poke">
+                    <div><font-awesome-icon :icon="['fas', 'fa-hand-point-up']" /></div>
+                    <a>{{ $t('戳一戳') }}</a>
                 </div>
                 <div @click="removeUser" v-show="tags.menuDisplay.remove">
                     <div><font-awesome-icon :icon="['fas', 'trash-can']" /></div>
@@ -383,7 +410,7 @@
                 <div class="ss-card card">
                     <header>
                         <span>{{ $t('转发消息') }}</span>
-                        <font-awesome-icon  @click="cancelForward" :icon="['fas', 'xmark']" />
+                        <font-awesome-icon @click="cancelForward" :icon="['fas', 'xmark']" />
                     </header>
                     <input @input="searchForward" :placeholder="$t('搜索 ……')">
                     <div>
@@ -421,14 +448,13 @@ import imageCompression from 'browser-image-compression'
 import { defineComponent, markRaw, reactive } from 'vue'
 import { v4 as uuid } from 'uuid'
 import { downloadFile, loadHistory as loadHistoryFirst } from '@/function/utils/appUtil'
-import { getTimeConfig, getTrueLang } from '@/function/utils/systemUtil'
+import { getTimeConfig, getTrueLang, getViewTime } from '@/function/utils/systemUtil'
 import { getMsgRawTxt, sendMsgRaw, getFace } from '@/function/utils/msgUtil'
 import { scrollToMsg } from '@/function/utils/appUtil'
 import { Logger, LogType, PopInfo, PopType } from '@/function/base'
 import { Connector, login as loginInfo } from '@/function/connect'
 import { runtimeData} from '@/function/msg'
 import { BaseChatInfoElem, MsgItemElem, SQCodeElem, GroupMemberInfoElem, UserFriendElem, UserGroupElem } from '@/function/elements/information'
-import option from '@/function/option'
 
 export default defineComponent({
     name: 'ViewChat',
@@ -447,6 +473,7 @@ export default defineComponent({
             getTimeConfig: getTimeConfig,
             forwardList: runtimeData.userList,
             trueLang: getTrueLang(),
+            multipleSelectList: [] as string[],
             tags: {
                 nowGetHistroy: false,
                 showBottomButton: true,
@@ -462,13 +489,13 @@ export default defineComponent({
                     add: true,
                     relpy: true,
                     forward: true,
-                    select: false,
+                    select: true,
                     copy: true,
                     copySelect: false,
                     downloadImg: false as string | false,
-                    addStoreFace: false,
                     revoke: false,
                     at: true,
+                    poke: false,
                     remove: false,
                     respond: false,
                     showRespond: true
@@ -732,6 +759,11 @@ export default defineComponent({
             if (Option.get('log_level') === 'debug') {
                 new Logger().debug('右击消息：' + data)
             }
+            // 如果开着多选模式，不打开右击菜单
+            if(this.multipleSelectList.length > 0) {
+                return
+            }
+
             const menu = document.getElementById('msgMenu')
             let msg = event.currentTarget as HTMLDivElement
             const select = event.target as HTMLElement
@@ -760,6 +792,7 @@ export default defineComponent({
                     })
                     this.tags.menuDisplay.showRespond = false
                     this.tags.menuDisplay.at = true
+                    this.tags.menuDisplay.poke = true
                     this.tags.menuDisplay.remove = true
                     if(runtimeData.chatInfo.show.type != 'group' ||
                         data.sender.user_id === runtimeData.loginInfo.uin ||
@@ -785,6 +818,7 @@ export default defineComponent({
                         this.tags.menuDisplay.relpy = false
                         this.tags.menuDisplay.forward = false
                         this.tags.menuDisplay.revoke = false
+                        this.tags.menuDisplay.select = false
                     }
                     const selection = document.getSelection()
                     const textBody = selection?.anchorNode?.parentElement
@@ -821,9 +855,7 @@ export default defineComponent({
                             this.tags.menuDisplay.add = false
                         }
                     })
-                    if(data.message[0].type == 'mface') {
-                        this.tags.menuDisplay.addStoreFace = true
-                    } else if(select.nodeName == 'IMG') {
+                    if(select.nodeName == 'IMG') {
                         // 右击图片需要显示的内容，这边特例设置为链接
                         this.tags.menuDisplay.downloadImg = (select as HTMLImageElement).src
                     }
@@ -864,9 +896,7 @@ export default defineComponent({
                         menu.style.marginTop = (bodyHeight - menuHeight - 10) + 'px'
                     }
                 }, 100)
-                // 设置消息背景
                 this.tags.openedMenuMsg = msg
-                msg.style.background = '#00000008'
             }
         },
 
@@ -878,13 +908,13 @@ export default defineComponent({
                 add: true,
                 relpy: true,
                 forward: true,
-                select: false,
+                select: true,
                 copy: true,
                 copySelect: false,
                 downloadImg: false,
-                addStoreFace: false,
                 revoke: false,
                 at: false,
+                poke: false,
                 remove: false,
                 respond: false,
                 showRespond: true
@@ -967,25 +997,79 @@ export default defineComponent({
             this.closeMsgMenu()
         },
 
+        intoMultipleSelect() {
+            if (this.selectedMsg) {
+                this.multipleSelectList.push(this.selectedMsg.message_id)
+            }
+            this.closeMsgMenu()
+        },
+
         /**
          * 转发消息
          */
         forwardMsg (data: UserFriendElem & UserGroupElem) {
-            if (this.selectedMsg) {
-                const msg = this.selectedMsg
-                const id = data.group_id ? data.group_id : data.user_id
-                // 关闭转发窗口
-                this.cancelForward()
-                // 将接收目标加入消息列表并跳转过去
-                if (runtimeData.onMsgList.indexOf(data) < 0) {
-                    runtimeData.onMsgList.push(data)
-                }
-                this.$nextTick(() => {
-                    const user = document.getElementById('user-' + id)
-                    if(user) {
-                        user.click()
+            const msg = this.selectedMsg
+            const id = data.group_id ? data.group_id : data.user_id
+            if(this.multipleSelectList.length > 0 && msg) {
+                // 构造一条假的 json 消息用来渲染
+                const msgList = this.multipleSelectList.map((item) => {
+                    const msg = runtimeData.messageList.find((msg) => {
+                        return msg.message_id == item
+                    })
+                    if(msg) {
+                        return msg
                     }
                 })
+                // 构造 titleList
+                const jsonMsg = {
+                    app: 'com.tencent.multimsg',
+                    meta: {
+                        detail: {
+                            source: '合并转发的消息',
+                            news: [
+                                ...msgList.slice(0, 3).map((item) => {
+                                    const name = item.sender.card && item.sender.card != '' ? item.sender.card : item.sender.nickname
+                                    return {
+                                        text: name + ': ' + getMsgRawTxt(item)
+                                    }
+                                })
+                            ],
+                            summary: '查看' + this.multipleSelectList.length + '条转发消息',
+                            resid: ''
+                        }
+                    }
+                }
+                msg.message = [{ type: 'json', data: JSON.stringify(jsonMsg), id: '' }]
+                msg.sender = { user_id: runtimeData.loginInfo.uin, nickname: runtimeData.loginInfo.nickname }
+                // 二次确认转发
+                const popInfo = {
+                    title: this.$t('合并转发消息'),
+                    template: MsgBody,
+                    templateValue: markRaw({data: msg, type: 'forward'}),
+                    button: [
+                        {
+                            text: this.$t('取消'),
+                            fun: () => { runtimeData.popBoxList.shift() }
+                        },
+                        {
+                            text: this.$t('确定'),
+                            master: true,
+                            fun: () => {
+                                // 构建消息体
+                                const msgBody = msgList.map((item) => {
+                                    return {
+                                        type: 'node',
+                                        id: item.message_id
+                                    }
+                                })
+                                sendMsgRaw(this.chat.show.id, this.chat.show.type, msgBody, true)
+                                runtimeData.popBoxList.shift()
+                            }
+                        }
+                    ]
+                }
+                runtimeData.popBoxList.push(popInfo)
+            } else if (this.selectedMsg && msg) {
                 // 二次确认转发
                 const popInfo = {
                     title: this.$t('转发消息'),
@@ -1008,30 +1092,18 @@ export default defineComponent({
                 }
                 runtimeData.popBoxList.push(popInfo)
             }
-        },
-
-        /**
-         * 添加商城表情
-         */
-        addStoreFace() {
-            const popInfo = new PopInfo()
-            const msg = this.selectedMsg
-            if (msg !== null) {
-            const mface = msg.message[0]
-                const storeFaceList = option.get('store_face') ?? []
-                const face = storeFaceList.find((item: any) => {
-                    return item.emoji_package_id == mface.emoji_package_id && 
-                        item.emoji_id == mface.emoji_id
-                })
-                if(face) {
-                    popInfo.add(PopType.INFO, this.$t('表情已被收藏'))
-                } else {
-                    storeFaceList.push(mface)
-                    option.save('store_face', storeFaceList)
-                    popInfo.add(PopType.INFO, this.$t('表情收藏成功'))
-                }
+            // 关闭转发窗口
+            this.cancelForward()
+            // 将接收目标加入消息列表并跳转过去
+            if (runtimeData.onMsgList.indexOf(data) < 0) {
+                runtimeData.onMsgList.push(data)
             }
-            this.closeMsgMenu()
+            this.$nextTick(() => {
+                const user = document.getElementById('user-' + id)
+                if(user) {
+                    user.click()
+                }
+            })
         },
 
         /**
@@ -1159,9 +1231,7 @@ export default defineComponent({
         closeMsgMenu () {
             // 关闭菜单
             this.tags.showMsgMenu = false
-            // 清理消息背景
-            if(this.tags.openedMenuMsg)
-                this.tags.openedMenuMsg.style.background = 'unset'
+            if(this.tags.openedMenuMsg) this.tags.openedMenuMsg = null
             setTimeout(() => {
                 // 重置菜单显示状态
                 this.initMenuDisplay()
@@ -1530,7 +1600,7 @@ export default defineComponent({
                     this.list.forEach((item: any) => {
                         if (item.message !== undefined) {
                             item.message.forEach((msg: MsgItemElem) => {
-                                if (msg.type === 'image' && !msg.asface) {
+                                if (msg.type === 'image' && msg.file != 'marketface') {
                                     const info = {
                                         index: item.message_id,
                                         message_id: item.message_id,
@@ -1565,6 +1635,48 @@ export default defineComponent({
                     }
                 })
             }
+        },
+
+        msgClick(event: Event, data: any) {
+            const message_id = data.message_id
+            if(this.multipleSelectList.length > 0) {
+                if(this.multipleSelectList.indexOf(message_id) > -1) {
+                    this.multipleSelectList = this.multipleSelectList.filter((item) => {
+                        return item != message_id
+                    })
+                } else {
+                    this.multipleSelectList.push(message_id)
+                }
+            }
+        },
+
+        delMsgs() {
+            new PopInfo().add(PopType.INFO, this.$t('欸嘿，这个按钮只是用来占位置的'))
+        },
+
+        copyMsgs() {
+            const msgList = this.list.filter((item: any) => {
+                return this.multipleSelectList.indexOf(item.message_id) > -1
+            })
+            let msg = ''
+            let lastDate = ''
+            msgList.forEach((item: any) => {
+                // 去除 item.time 时间戳中的时间，只保留日期
+                const time = new Date(getViewTime(item.time))
+                const date = time.getFullYear() + '-' + (time.getMonth() + 1) + '-' + time.getDate()
+                if(date != lastDate) {
+                    msg += '\n—— ' + date + ' ——\n'
+                    lastDate = date
+                }
+                msg += item.sender.nickname + ' ' + time.getHours() + ':' + time.getMinutes() + ':' + time.getSeconds() + '\n' + getMsgRawTxt(item) + '\n\n'
+            })
+            const popInfo = new PopInfo()
+            app.config.globalProperties.$copyText(msg).then(() => {
+                popInfo.add(PopType.INFO, this.$t('复制成功'), true)
+                this.multipleSelectList = []
+            }, () => {
+                popInfo.add(PopType.ERR, this.$t('复制失败'), true)
+            })
         },
 
         /**
@@ -1712,10 +1824,19 @@ export default defineComponent({
         /**
          * 发送戳一戳
          */
-        sendPoke() {
-            let msg = SendUtil.parseMsg('[SQ:0]', [{ type: 'poke', _type: 1, id: -1, name: '戳一戳' }], this.imgCache)
-            sendMsgRaw(this.chat.show.id, this.chat.show.type, msg)
-            this.tags.showMoreDetail = !this.tags.showMoreDetail
+        sendPoke(user_id: number) {
+            if(runtimeData.jsonMap.poke) {
+                let name = runtimeData.jsonMap.poke.name
+                if(this.chat.show.type == 'user' && runtimeData.jsonMap.poke.private_name) {
+                    name = runtimeData.jsonMap.poke.private_name
+                }
+                Connector.send(name, {
+                    user_id: user_id,
+                    group_id: this.chat.show.id
+                }, 'sendPoke')
+            }
+            this.tags.showMoreDetail = false
+            this.tags.menuDisplay.poke = false
         },
 
         /**
@@ -1764,6 +1885,7 @@ export default defineComponent({
             this.msgMenus = data.msgMenus
             this.sendCache = []
             this.imgCache = [] as string[]
+            this.multipleSelectList = []
             this.initMenuDisplay()
         }
     },

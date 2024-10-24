@@ -503,10 +503,6 @@ msgstr "{readNum} read | {isRead}"
 msgid "公告"
 msgstr "Announcements"
 
-#: src/pages/options/OptDev.vue:139
-msgid "页面测试"
-msgstr "UI test"
-
 #: src/pages/options/OptDev.vue:140
 msgid "让我康康 ~"
 msgstr "Show test interfaces"
@@ -1066,18 +1062,6 @@ msgstr ""
 msgid "下载更新…"
 msgstr ""
 
-#: src/pages/Chat.vue:336
-msgid "收藏商城表情"
-msgstr ""
-
-#: src/pages/Chat.vue:1027
-msgid "表情已被收藏"
-msgstr ""
-
-#: src/pages/Chat.vue:1031
-msgid "表情收藏成功"
-msgstr ""
-
 #: src/function/utils/appUtil.ts:69
 msgid "请不要在内嵌页面中输入敏感信息，内嵌页面并不安全。"
 msgstr ""
@@ -1442,4 +1426,12 @@ msgstr ""
 
 #: src/function/utils/msgUtil.ts:231
 msgid "视频"
+msgstr ""
+
+#: src/pages/Chat.vue:159
+msgid "合并转发"
+msgstr ""
+
+#: src/pages/Chat.vue:163
+msgid "截图"
 msgstr ""

@@ -17,8 +17,8 @@
     <div>
         <div v-if="item.type == 'xml'" v-html="View.buildXML(item.data, item.id, id)" @click="View.cardClick('xml-' + id)"></div>
         <div v-else>
-            <div v-if="info.type == 'default'" v-html="buildJSON(info, id)" @click="View.cardClick('json-' + id)"></div>
-            <div v-once v-else-if="info.type == 'tencent.map'" class="msg-comp-map" @click="View.cardClick('map-' + id)">
+            <div v-if="info?.type == 'default'" v-html="buildJSON(info, id)" @click="View.cardClick('json-' + id)"></div>
+            <div v-once v-else-if="info?.type == 'tencent.map'" class="msg-comp-map" @click="View.cardClick('map-' + id)">
                 <p>{{ info.app.title }}</p>
                 <span>{{ info.app.desc }}</span>
                 <div
@@ -44,7 +44,7 @@ export default defineComponent({
     data() {
         return {
             View: ViewFuns,
-            info: ViewFuns.getJSONType(this.item.data),
+            info: ViewFuns.getJSONType(this.item),
         }
     },
     methods: {
@@ -95,7 +95,7 @@ export default defineComponent({
                     lng: json.meta['Location.Search'].lng
                 }
             )
-            return this.info.app.url
+            return this.info?.app.url
         }
     }
 })

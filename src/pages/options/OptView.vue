@@ -211,8 +211,6 @@
 </template>
 
 <script lang="ts">
-import Umami from '@stapxs/umami-logger-typescript'
-
 import { defineComponent, toRaw } from 'vue'
 import { runtimeData } from '../../function/msg'
 import { runASWEvent as save, get } from '../../function/option'
@@ -220,6 +218,7 @@ import { BrowserInfo, detect } from 'detect-browser'
 import { getDeviceType } from '@/function/utils/systemUtil'
 
 import languages from '../../assets/l10n/_l10nconfig.json'
+import { sendStatEvent } from '@/function/utils/appUtil'
 
 export default defineComponent({
     name: 'ViewOptTheme',
@@ -240,20 +239,17 @@ export default defineComponent({
     methods: {
         gaLanguage(event: Event) {
             const sender = event.target as HTMLInputElement
-            // UM：上传语言选择
-            Umami.trackEvent('use_language', { name: sender.value })
+            sendStatEvent('use_language', { name: sender.value })
         },
 
         gaChatView(event: Event) {
             const sender = event.target as HTMLInputElement
-            // UM：上传Chat View 选择
-            Umami.trackEvent('use_chatview', { name: sender.value })
+            sendStatEvent('use_chatview', { name: sender.value })
         },
 
         gaColor(event: Event) {
             const sender = event.target as HTMLInputElement
-            // UM：上传主题颜色选择
-            Umami.trackEvent('use_theme_color', { name: this.colors[Number(sender.dataset.id)] })
+            sendStatEvent('use_theme_color', { name: this.colors[Number(sender.dataset.id)] })
         },
 
         setInitialScaleShow(event: Event) {

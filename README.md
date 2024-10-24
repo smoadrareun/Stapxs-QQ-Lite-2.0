@@ -47,7 +47,7 @@ Stapxs QQ Lite 需要一个 QQ Bot 后端提供服务，你可以参考 [📖 �
 本仓库开启了 GitHub Pages, 所有向主分支提交的代码将会自动构建并发布。你可以直接访问 [🌎 这个页面](https://stapxs.github.io/Stapxs-QQ-Lite-2.0) 来使用已经构建并部署的页面。
 
 ### > 安装应用
-除了直接使用本仓库的构建页面，你也可以下载使用 electron 打包的功能**稍稍**更丰富的客户端版本，访问 [📦️ 这儿](https://github.com/Stapxs/Stapxs-QQ-Lite-2.0/releases) 查看构建列表。
+除了直接使用本仓库的构建页面，你也可以下载使用 electron 打包的功能**稍稍**更丰富的客户端版本，访问 [📦️ 这儿](https://github.com/Stapxs/Stapxs-QQ-Lite-2.0/releases) 查看版本发布列表。
 
 当然你也可以使用包管理来安装它，使用包管理安装将会更便于更新 Stapxs QQ Lite 而不用每次都从 Github 上手动更新，访问 [💬 这儿](https://github.com/Stapxs/Stapxs-QQ-Lite-2.0/issues/99) 来查看目前支持的包管理。
 
@@ -70,8 +70,16 @@ Stapxs QQ Lite 需要一个 QQ Bot 后端提供服务，你可以参考 [📖 �
 - 如果有什么奇奇怪怪的问题, 欢迎发起 [issue](<https://github.com/Stapxs/Stapxs-QQ-Lite/issues>) 询问! 如果有什么 BUG 和优化建议也可以哦! 
 
 ## 📦️ 构建应用
+为了规范对其他仓库的引用，Stapxs QQ Lite 2.0 仓库含有一些子模块，这意味着你需要在克隆仓库的时候包含子模块：
+~~~bash
+git clone https://github.com/Stapxs/Stapxs-QQ-Lite-2.0 --recursive
+~~~
+如果你已经克隆了仓库，也可以使用这个来补全子模块：
+~~~bash
+git submodule update --init
+~~~
 ### > 构建 Web 页面
-Stapxs QQ Lite 2.0 是一个基于 Vue 的单页应用，这意味着如果你想自行部署到网页服务需要进行构建。
+Stapxs QQ Lite 2.0 是一个基于 Vue 的单页应用，这意味着如果你想自行部署到网页服务需要进行构建。当然你同样可以前往 [这儿](https://github.com/Stapxs/Stapxs-QQ-Lite-2.0/releases) 来下载预构建好的根目录文件包。
 
 注意。在正式构建前，如果你的网站运作目录并不在根域名下，你需要修改（或增加）项目根目录下 `vue.config.js` 内导出的 `publicPath` 字段的值，它代表着最终你会运行在的目录，比如它在现在是 `/Stapxs-QQ-Lite-2.0/`；如果你本来就运行在根目录下，可以直接删去它。
 
@@ -112,5 +120,5 @@ yarn electron:build --linux
 ## 🎉 鸣谢
 感谢这些小伙伴们在开发和文本中提供的支持 ——
 
-<a href="https://github.com/Logic-Accepted"><img  src="https://avatars.githubusercontent.com/u/36406453?s=48&v=4"></a>
-<a href="https://github.com/doodlehuang"><img  src="https://avatars.githubusercontent.com/u/25525621?s=48&v=4"></a>
+<a href="https://github.com/Logic-Accepted"><img src="https://avatars.githubusercontent.com/u/36406453?s=48&v=4"></a>
+<a href="https://github.com/doodlehuang"><img src="https://avatars.githubusercontent.com/u/25525621?s=48&v=4"></a>

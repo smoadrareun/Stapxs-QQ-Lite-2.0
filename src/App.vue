@@ -269,7 +269,9 @@ export default defineComponent({
          */
         changeTab (name: string, view: string, show: boolean) {
             // UM：发送页面路由分析
-            Umami.trackPageView('/' + view)
+            if (!Option.get('close_ga') && process.env.NODE_ENV == 'production') {
+                Umami.trackPageView('/' + view)
+            }
             this.tags.showChat = show
             this.tags.page = view
         },
@@ -534,7 +536,9 @@ export default defineComponent({
                 }
                 Umami.initialize(config)
             } else if (process.env.NODE_ENV == 'development') {
-                logger.debug('由于运行在调试模式下，分析组件并未加载 ……')
+                logger.debug('由于运行在调试模式下，分析组件并未初始化 ……')
+            } else if (Option.get('close_ga')) {
+                logger.debug('统计功能已被关闭，分析组件并未初始化 ……')
             }
             App.checkUpdate()                // 检查更新
             App.checkOpenTimes()             // 检查打开次数

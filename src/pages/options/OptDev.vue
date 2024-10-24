@@ -133,19 +133,6 @@
                         $t('执行')
                 }}</button>
             </div>
-            <div class="opt-item">
-                <font-awesome-icon :icon="['fas', 'mountain']" />
-                <div>
-                    <span>{{ $t('页面测试') }}</span>
-                    <span>{{ $t('让我康康 ~') }}</span>
-                </div>
-                <label class="ss-switch">
-                    <input type="checkbox" @change="save" name="ui_test" v-model="runtimeData.sysConfig.ui_test">
-                    <div>
-                        <div></div>
-                    </div>
-                </label>
-            </div>
             <template v-if="runtimeData.tags.isElectron">
                 <div class="opt-item">
                     <font-awesome-icon :icon="['fas', 'power-off']" />
@@ -197,7 +184,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { runASWEvent as save, saveAll } from '@/function/option'
+import { run, runASWEvent as save, saveAll } from '@/function/option'
 import { Connector } from '@/function/connect'
 import { PopInfo, PopType } from '@/function/base'
 import { runtimeData } from '@/function/msg'
@@ -217,6 +204,7 @@ export default defineComponent({
             BotMsgType: BotMsgType,
             runtimeData: runtimeData,
             save: save,
+            run: run,
             ws_text: '',
             appmsg_text: ''
         }

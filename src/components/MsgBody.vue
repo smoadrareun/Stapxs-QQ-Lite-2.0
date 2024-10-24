@@ -10,10 +10,10 @@
  -->
 
 <template>
-    <div :class="'message' + (type ? ' ' + type : '') + (data.revoke ? ' revoke' : '') + (isMe ? ' me': '')" :data-raw="getMsgRawTxt(data)"
+    <div :class="'message' + (type ? ' ' + type : '') + (data.revoke ? ' revoke' : '') + (isMe ? ' me': '') + (selected ? ' selected' : '')" :data-raw="getMsgRawTxt(data)"
         :id="'chat-' + data.message_id" :data-sender="data.sender.user_id" :data-time="data.time"
         @mouseleave="hiddenUserInfo">
-        <img name="avatar" :src="'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + data.sender.user_id" v-show="!isMe || type == 'merge'">
+        <img @dblclick="sendPoke" name="avatar" :src="'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + data.sender.user_id" v-show="!isMe || type == 'merge'">
         <div class="message-space" v-if="isMe && type != 'merge'"></div>
         <div :class="isMe ? (type == 'merge' ? 'message-body' : 'message-body me') : 'message-body'">
             <template v-if="runtimeData.chatInfo.show.type == 'group' && !isMe && senderInfo?.title && senderInfo?.title != ''">
@@ -32,14 +32,13 @@
                         <div v-if="item.type === undefined"></div>
                         <span v-else-if="isDebugMsg" class="msg-text">{{ item }}</span>
                         <span v-else-if="item.type == 'text'" @click="textClick" v-show="item.text !== ''" class="msg-text" v-html="parseText(item.text)"></span>
+                        <img v-else-if="item.type == 'image' && item.file == 'marketface'" @load="scrollButtom" @error="imgLoadFail" :class="imgStyle(data.message.length, index, item.asface) + ' msg-mface'" :src="item.url">
                         <img v-else-if="item.type == 'image'" :title="$t('预览图片')" :alt="$t('图片')" @load="scrollButtom" @error="imgLoadFail" @click="imgClick(data.message_id)" :class="imgStyle(data.message.length, index, item.asface)" :src="item.url">
                         <template v-else-if="item.type == 'face'">
                             <img v-if="getFace(item.id)" :alt="item.text" class="msg-face" :src="getFace(item.id)" :title="item.text">
                             <span v-else-if="item.id == 394" class="msg-face-long"><span v-for="i in 15" :key="data.message_id + '-l-' + i">🐲</span></span>
                             <font-awesome-icon v-else :class="'msg-face-svg' + (isMe ? ' me': '')" :icon="['fas', 'face-grin-wide']" />
                         </template>
-                        <img v-else-if="item.type == 'mface' && item.url" @load="scrollButtom" @error="imgLoadFail" :class="imgStyle(data.message.length, index, item.asface) + ' msg-mface'" :src="item.url">
-                        <span v-else-if="item.type == 'mface' && item.text" class="msg-unknown">{{ item.text }}</span>
                         <span v-else-if="item.type == 'bface'" style="font-style: italic;opacity: 0.7;">[ {{ $t('图片') }}：{{ item.text }} ]</span>
                         <div v-else-if="item.type == 'at'" :class="getAtClass(item.qq)">
                             <a @mouseenter="showUserInfo" :data-id="item.qq" :data-group="data.group_id">{{ getAtName(item) }}</a>
@@ -131,7 +130,6 @@
 import Option from '@/function/option'
 import CardMessage from './msg-component/CardMessage.vue'
 import app from '@/main'
-import Umami from '@stapxs/umami-logger-typescript'
 
 import { MsgBodyFuns as ViewFuns } from '@/function/model/msg-body'
 import { defineComponent } from 'vue'
@@ -140,12 +138,12 @@ import { runtimeData } from '@/function/msg'
 import { Logger, PopInfo, PopType } from '@/function/base'
 import { StringifyOptions } from 'querystring'
 import { getFace, getMsgRawTxt } from '@/function/utils/msgUtil'
-import { openLink, downloadFile } from '@/function/utils/appUtil'
+import { openLink, downloadFile, sendStatEvent } from '@/function/utils/appUtil'
 import { getSizeFromBytes } from '@/function/utils/systemUtil'
 
 export default defineComponent({
     name: 'MsgBody',
-    props: ['data', 'type'],
+    props: ['data', 'type', 'selected'],
     components: { CardMessage },
     data () {
         return {
@@ -343,25 +341,23 @@ export default defineComponent({
                             }
                             this.pageViewInfo = pageData
                         }
-                        // UM：上传使用链接预览功能的事件用于分析（成功）
                         const reg1 = /\/\/(.*?)\//g
                         const getDom = fistLink.match(reg1)
                         if (getDom !== null) {
-                            Umami.trackEvent('link_view', { domain: RegExp.$1, statue: true })
+                            sendStatEvent('link_view', { domain: RegExp.$1, statue: true })
                         } else {
-                            Umami.trackEvent('link_view', { domain: '', statue: true })
+                            sendStatEvent('link_view', { domain: '', statue: true })
                         }
                     })
                     .catch(error => {
                         if (error) {
                             logger.error(error as Error, '获取链接预览失败: ' + fistLink)
-                            // UM：上传使用链接预览功能的事件用于分析（失败）
                             const reg1 = /\/\/(.*?)\//g
                             const getDom = fistLink.match(reg1)
                             if (getDom !== null) {
-                                Umami.trackEvent('link_view', { domain: RegExp.$1, statue: false })
+                                sendStatEvent('link_view', { domain: RegExp.$1, statue: false })
                             } else {
-                                Umami.trackEvent('link_view', { domain: '', statue: false })
+                                sendStatEvent('link_view', { domain: '', statue: false })
                             }
                         }
                     })
@@ -535,6 +531,11 @@ export default defineComponent({
                     hasCard = true
             }})
             return hasCard
+        },
+
+        sendPoke() {
+            // 调用上级组件的 poke 方法
+            this.$emit('sendPoke', this.data.sender.user_id)
         }
     },
     mounted () {
