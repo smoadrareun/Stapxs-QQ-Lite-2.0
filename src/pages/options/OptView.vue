@@ -141,18 +141,6 @@
                     <span :style="`color: var(--color-font${runtimeData.sysConfig.chat_background_blur > 50 ? '-r' : ''})`">{{ runtimeData.sysConfig.chat_background_blur }} px</span>
                 </div>
             </div>
-            <div class="opt-item" v-if="runtimeData.tags.isElectron && browser.os != 'Linux'">
-                <font-awesome-icon :icon="['fas', 'border-none']" />
-                <div>
-                    <span>{{ $t('窗口透明模式') }}</span>
-                    <span>{{ $t('怎么看光还要挑三拣四的') }}</span>
-                </div>
-                <select data-reload="true" @change="save" name="vibrancy_mode" title="vibrancy_mode" v-model="runtimeData.sysConfig.vibrancy_mode">
-                    <option value="default">{{ $t('默认') }}</option>
-                    <option value="vibrancy">{{ $t('完整模糊') }}</option>
-                    <option value="transparent">{{ $t('完整透明') }}</option>
-                </select>
-            </div>
         </div>
         <div class="ss-card">
             <header>{{ $t('页面') }}</header>

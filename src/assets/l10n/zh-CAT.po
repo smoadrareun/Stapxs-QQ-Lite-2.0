@@ -426,21 +426,6 @@ msgstr "猫猫列表（{count}）"
 msgid "在 Github 上反馈问题"
 msgstr "在 Cathub 上反馈问题"
 
-#: src/pages/Scripts.vue:54
-# 新消息
-msgid "脚本类型_message"
-msgstr "新消息"
-
-#: src/pages/Scripts.vue:55
-# 好友/群列表刷新
-msgid "脚本类型_userFlush"
-msgstr "好友/群列表刷新"
-
-#: src/pages/Scripts.vue:56
-# 新通知
-msgid "脚本类型_newNotice"
-msgstr "新通知"
-
 #: src/pages/options/OptDev.vue:60
 msgid "不同框架之间的化学反应我们将其称之为达利园效应"
 msgstr "不同的喵星之间可是会打起来的！"

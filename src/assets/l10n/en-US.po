@@ -1107,35 +1107,6 @@ msgstr ""
 msgid "（获取回复消息失败）"
 msgstr ""
 
-#: src/pages/Scripts.vue:13
-#: src/pages/options/OptDev.vue:15
-msgid "脚本"
-msgstr ""
-
-#: src/pages/options/OptDev.vue:16
-msgid "脚本功能提供了一种简便的自动化操作方式，能够执行如自动回复等任务。"
-msgstr ""
-
-#: src/pages/Scripts.vue:63
-msgid "保存"
-msgstr ""
-
-#: src/pages/Scripts.vue:51
-msgid "条件"
-msgstr ""
-
-#: src/pages/Scripts.vue:34
-msgid "触发"
-msgstr ""
-
-#: src/pages/Scripts.vue:54
-msgid "新消息"
-msgstr ""
-
-#: src/pages/Scripts.vue:55
-msgid "好友/群列表刷新"
-msgstr ""
-
 #: src/pages/options/OptDev.vue:11
 msgid "进阶功能"
 msgstr ""
@@ -1146,14 +1117,6 @@ msgstr ""
 
 #: src/pages/options/OptDev.vue:29
 msgid "已禁用"
-msgstr ""
-
-#: src/pages/Scripts.vue:196
-msgid "脚本标题已存在"
-msgstr ""
-
-#: src/pages/Scripts.vue:77
-msgid "脚本方法将限制在当前页面内，你可以参考当前页面的源代码来了解可用的方法可用。"
 msgstr ""
 
 #: src/pages/options/OptDev.vue:59
@@ -1246,10 +1209,6 @@ msgstr ""
 msgid "全体成员"
 msgstr ""
 
-#: src/pages/Scripts.vue:56
-msgid "新通知"
-msgstr ""
-
 #: src/pages/options/OptView.vue:184
 msgid "置顶窗口"
 msgstr ""
@@ -1280,10 +1239,6 @@ msgstr ""
 
 #: src/function/option.ts:502
 msgid "此操作仅供娱乐，将会在下次关闭时恢复。"
-msgstr ""
-
-#: src/pages/Scripts.vue:47
-msgid "这是个内嵌示例脚本，你可以修改它并保存使用。"
 msgstr ""
 
 #: src/pages/options/OptAccount.vue:66
@@ -1397,25 +1352,6 @@ msgstr ""
 msgid "许可协议"
 msgstr ""
 
-#: src/pages/Scripts.vue:17
-msgid "脚本功能提供了一种简便的自动化操作方式，能够执行如自动回复等任务。"
-msgstr ""
-
-#: src/pages/Scripts.vue:54
-# 新消息
-msgid "脚本类型_message"
-msgstr ""
-
-#: src/pages/Scripts.vue:55
-# 好友/群列表刷新
-msgid "脚本类型_userFlush"
-msgstr ""
-
-#: src/pages/Scripts.vue:56
-# 新通知
-msgid "脚本类型_newNotice"
-msgstr ""
-
 #: src/pages/Chat.vue:191
 msgid "戳一戳"
 msgstr ""
@@ -1434,4 +1370,7 @@ msgstr ""
 
 #: src/pages/Chat.vue:163
 msgid "截图"
+msgstr ""
+
+msgid "“{body}” 以及 {num} 条消息"
 msgstr ""

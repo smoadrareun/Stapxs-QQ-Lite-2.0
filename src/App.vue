@@ -26,10 +26,7 @@
                     <font-awesome-icon :icon="['fas', 'user']" />
                 </li>
                 <div class="side-bar-space"></div>
-                <li v-show="runtimeData.sysConfig.append_scripts" id="bar-friends" @click="changeTab('脚本', 'Scripts', false)" :class="tags.page == 'Scripts' ? 'active' : ''">
-                    <font-awesome-icon :icon="['fas', 'file-code']" />
-                </li>
-                <li @click="changeTab('设置', 'Options', false);Connector.send('get_version_info', {}, 'getVersionInfo')"
+                <li @click="changeTab('设置', 'Options', false)"
                     :class="tags.page == 'Options' ? 'active' : ''">
                     <font-awesome-icon :icon="['fas', 'gear']" />
                 </li>
@@ -100,16 +97,11 @@
                         @userClick="changeChat">
                     </Friends>
                 </div>
-                <div v-show="tags.page == 'Scripts' && runtimeData.sysConfig.append_scripts">
-                    <Scripts></Scripts>
-                </div>
                 <div class="opt-main-tab">
                     <Options
                         :show="tags.page == 'Options'"
                         :class="tags.page == 'Options' ? 'active' : ''"
-                        :config="runtimeData.sysConfig"
-                        :info="runtimeData.loginInfo"
-                        :status="loginInfo">
+                        :config="runtimeData.sysConfig">
                     </Options>
                 </div>
             </div>
@@ -197,20 +189,19 @@ import Umami from '@stapxs/umami-logger-typescript'
 import { defineComponent, defineAsyncComponent } from 'vue'
 import { Connector, login as loginInfo } from '@/function/connect'
 import { Logger, popList, PopInfo } from '@/function/base'
-import { runtimeData, notificationList } from '@/function/msg'
+import { runtimeData } from '@/function/msg'
 import { BaseChatInfoElem } from '@/function/elements/information'
 import * as App from './function/utils/appUtil'
 
-import Scripts from '@/pages/Scripts.vue'
 import Options from '@/pages/Options.vue'
 import Friends from '@/pages/Friends.vue'
 import Messages from '@/pages/Messages.vue'
 import Chat from '@/pages/Chat.vue'
+import { Notify } from './function/notify'
 
 export default defineComponent({
     name: 'App',
     components: {
-        Scripts,
         Options,
         Friends,
         Messages,
@@ -228,7 +219,6 @@ export default defineComponent({
             loadHistory: App.loadHistory,
             loginInfo: loginInfo,
             runtimeData: runtimeData,
-            notificationList: notificationList,
             tags: {
                 page: 'Home',
                 showChat: false,
@@ -274,6 +264,13 @@ export default defineComponent({
             }
             this.tags.showChat = show
             this.tags.page = view
+            // 附加操作
+            switch(view) {
+                case 'Options': {
+                    Connector.send('get_version_info', {}, 'getVersionInfo')
+                    break
+                }
+            }
         },
         barMainClick() {
             if(loginInfo.status) {
@@ -547,6 +544,10 @@ export default defineComponent({
             if(new Date().getMonth() == 3 && new Date().getDate() == 1) {
                 document.getElementById('connect_btn')?.classList.add('afd')
             }
+        }
+        // 页面关闭前
+        window.onbeforeunload = () => {
+            new Notify().clear()
         }
     }
 })

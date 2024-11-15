@@ -521,6 +521,7 @@ export default defineComponent({
             selectCache: '',
             replyMsgInfo: null,
             atFindList: null as GroupMemberInfoElem[] | null,
+            getImgList: [] as { index: number, message_id: string, img_url: string }[],
             respondIds: [
                 4, 5, 8, 9, 10, 12, 14, 16, 21, 23, 24, 25, 26, 27, 28, 29, 30,
                 32, 33, 34, 38, 39, 41, 42, 43, 49, 53, 60, 63, 66, 74, 75, 76,
@@ -1596,7 +1597,9 @@ export default defineComponent({
                     }
                     // 刷新图片列表
                     // TODO: 需要优化性能
-                    let getImgList = [] as { index: number, message_id: string, img_url: string }[]
+                    let initMainList = false
+                    if(this.getImgList.length == 0) initMainList = true
+                    this.getImgList = []
                     this.list.forEach((item: any) => {
                         if (item.message !== undefined) {
                             item.message.forEach((msg: MsgItemElem) => {
@@ -1606,25 +1609,14 @@ export default defineComponent({
                                         message_id: item.message_id,
                                         img_url: msg.url
                                     }
-                                    getImgList.push(info)
+                                    this.getImgList.push(info)
                                 }
                             })
                         }
                     })
-                    if(getImgList.length != (runtimeData.chatInfo.info.image_list ? runtimeData.chatInfo.info.image_list.length : 0)) {
-                        const num = runtimeData.tags.viewer.index
-                        runtimeData.chatInfo.info.image_list = getImgList
-                        const viewer = app.config.globalProperties.$viewer
-                        if(runtimeData.tags.viewer.show) {
-                            // 重新显示新的图片位置
-                            if(num >= 0 && viewer) {
-                                const viewIndex = num + getImgList.length - (runtimeData.chatInfo.info.image_list ? runtimeData.chatInfo.info.image_list.length : 0)
-                                viewer.view(viewIndex)
-                                viewer.show()
-                                runtimeData.tags.viewer.index = viewIndex
-                                new Logger().add(LogType.UI, '重新显示图片位置：' + viewIndex)
-                            }
-                        }
+                    const viewer = app.config.globalProperties.$viewer
+                    if(!viewer.isShown || initMainList) {
+                        runtimeData.chatInfo.info.image_list = this.getImgList
                     }
                     // 处理跳入跳转预设
                     // 如果 jump 参数不是 undefined，则意味着这次加载历史记录的同时需要跳转到指定的消息
@@ -1897,6 +1889,13 @@ export default defineComponent({
         //精华消息列表刷新
         this.$watch(() => this.chat.info.jin_info.list.length, () => {
             this.tags.isJinLoading = false
+        })
+        // 为 viewer 绑定关闭事件
+        const viewer = app.config.globalProperties.$viewer
+        this.$watch(() => viewer.hiding, (newVall) => {
+            if(newVall) {
+                runtimeData.chatInfo.info.image_list = this.getImgList
+            }
         })
     }
 })

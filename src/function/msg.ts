@@ -20,15 +20,16 @@ import pinyin from 'pinyin'
 
 import Umami from '@stapxs/umami-logger-typescript'
 
-import { buildMsgList, getMsgData, parseMsgList, getMsgRawTxt, updateLastestHistory, sendMsgAppendInfo } from '@/function/utils/msgUtil'
+import { buildMsgList, getMsgData, parseMsgList, getMsgRawTxt, updateLastestHistory, sendMsgAppendInfo, orderOnMsgList } from '@/function/utils/msgUtil'
 import { getViewTime, escape2Html, randomNum } from '@/function/utils/systemUtil'
-import { reloadUsers, reloadCookies, downloadFile, updateMenu, jumpToChat, loadJsonMap, sendStatEvent } from '@/function/utils/appUtil'
+import { reloadUsers, reloadCookies, downloadFile, updateMenu, loadJsonMap, sendStatEvent } from '@/function/utils/appUtil'
 import { reactive, markRaw, defineAsyncComponent } from 'vue'
 import { PopInfo, PopType, Logger, LogType } from './base'
 import { Connector, login } from './connect'
 import { GroupMemberInfoElem, UserFriendElem, UserGroupElem, MsgItemElem, RunTimeDataElem, BotMsgType } from './elements/information'
-import { NotificationElem } from './elements/system'
+import { NotifyInfo } from './elements/system'
 import { IPinyinOptions } from 'pinyin/lib/declare'
+import { Notify } from './notify'
 
 const popInfo = new PopInfo()
 // eslint-disable-next-line
@@ -68,7 +69,6 @@ export function parse(str: string) {
         } else {
             let type = msg.post_type
             if(type == 'notice') {
-                runtimeData.watch.newNotice = msg
                 type = msg.notice_type ?? msg.sub_type
             }
             name = type
@@ -429,17 +429,22 @@ const msgFunctons = {
             if (list != undefined) {
                 list = parseMsgList(list, msgPath.message_list.type, msgPath.message_value)
                 const raw = getMsgRawTxt(list[0])
-                const sender = list[0].sender
+                // const sender = list[0].sender
                 const time = list[0].time
+                let get = false
                 // 更新消息列表
                 runtimeData.onMsgList.forEach((item) => {
-                    if (item.user_id == id) {
+                    if (item.user_id == id || item.group_id == id) {
                         item.raw_msg = raw
-                    } else if(item.group_id == id) {
-                        item.raw_msg = sender.nickname + ': ' + raw
+                        item.time = getViewTime(Number(time))
+                        get = true
                     }
-                    item.time = getViewTime(Number(time))
                 })
+                // 重新排序列表
+                if(get) {
+                const newList = orderOnMsgList(runtimeData.onMsgList)
+                runtimeData.onMsgList = newList
+                }
             }
         }
     },
@@ -818,6 +823,8 @@ const msgFunctons = {
                 user_id: data.self_id,
             }, 'setMessageRead')
         }
+        // 关闭所有通知
+        new Notify().closeAll(data.group_id ?? data.self_id)
     },
 
     /**
@@ -924,6 +931,13 @@ const msgFunctons = {
         if(!runtimeData.loginInfo.webapi[domain]) runtimeData.loginInfo.webapi[domain] = {}
         runtimeData.loginInfo.webapi[domain].cookie = cookieObject
         runtimeData.loginInfo.webapi[domain].bkn = (hash & 0x7FFFFFFF).toString()
+    },
+
+    /**
+     * 设置消息已读回调
+     */
+    setMessageRead() {
+        // do nothing
     }
 } as { [key: string]: (name: string, msg: { [key: string]: any }, echoList?: string[]) => void }
 
@@ -1129,7 +1143,6 @@ function saveMsg(msg: any, append = undefined as undefined | string) {
         runtimeData.messageList.forEach((item) => {
             sendMsgAppendInfo(item)
         })
-
         // 将消息列表的最后一条 raw_message 保存到用户列表中
         const lastMsg = runtimeData.messageList[runtimeData.messageList.length - 1]
         if (lastMsg) {
@@ -1196,19 +1209,8 @@ function revokeMsg(name: string, msg: any) {
     } else {
         logger.error(null, '没有找到这条被撤回的消息 ……')
     }
-    // 尝试撤回通知
-    const notificationIndex = notificationList.findIndex((item) => {
-        const tag = item.tag
-        const userId = Number(tag.split('/')[0])
-        return userId == chatId
-    })
-    if (notificationIndex != -1) {
-        const notification = notificationList[notificationIndex]
-        // PS：使用 close 方法关闭通知也会触发关闭事件，所以这儿需要先移除再关闭
-        // 防止一些判断用户主动关闭通知的逻辑出现问题
-        notificationList.splice(notificationIndex, 1)
-        notification.close()
-    }
+    // 撤回通知
+    new Notify().closeAll(chatId)
 }
 
 
@@ -1229,7 +1231,6 @@ function newMsg(name: string, data: any) {
             return item.user_id == sender
         })
         const isImportant = senderInfo?.class_id == 9999
-        runtimeData.watch.newMsg = data
 
         // 消息回调检查
         // PS：如果在新消息中获取到了自己的消息，则自动打开“停止消息回调”设置防止发送的消息重复
@@ -1304,6 +1305,10 @@ function newMsg(name: string, data: any) {
                     runtimeData.onMsgList[index].raw_msg = getMsgRawTxt(data)
                 }
                 runtimeData.onMsgList[index].time = getViewTime(Number(data.time))
+
+                // 重新排序列表
+                const newList = orderOnMsgList(runtimeData.onMsgList)
+                runtimeData.onMsgList = newList
                 return true
             }
             return false
@@ -1336,6 +1341,7 @@ function newMsg(name: string, data: any) {
                 // 准备消息内容
                 let raw = getMsgRawTxt(data)
                 raw = raw === '' ? data.raw_message : raw
+                logger.add(LogType.INFO, '新消息通知：' + raw, undefined, true)
                 if (data.group_name === undefined) {
                     // 检查消息内是否有群名，去列表里寻找
                     runtimeData.userList.forEach((item) => {
@@ -1354,51 +1360,16 @@ function newMsg(name: string, data: any) {
                     image: undefined as any,
                     type: data.group_id ? 'group' : 'user',
                     is_important: isImportant
-                }
+                } as NotifyInfo
                 data.message.forEach((item: MsgItemElem) => {
                     // 如果消息有图片，追加第一张图片
                     if (item.type === 'image' && msgInfo.image === undefined) {
                         msgInfo.image = item.url
                     }
                 })
-                // 检查这个用户是否有通知，有的话删除旧的
-                // PS：这儿的是 web 通知，electron 通知在 electron 里处理
-                const index = notificationList.findIndex((item) => {
-                    const tag = item.tag
-                    const userId = Number(tag.split('/')[0])
-                    return userId === id
-                })
-                if (index !== -1) {
-                    notificationList.splice(index, 1)
-                    notificationList[index].close()
-                }
                 // 发送消息
                 if (Option.get('close_notice') !== true) {
-                    if (runtimeData.tags.isElectron) {
-                        if (runtimeData.reader) {
-                            // electron：在 windows 下对任务栏图标进行闪烁
-                            runtimeData.reader.send('win:flashWindow')
-                            // electron：通过 electron 发送消息
-                            runtimeData.reader.send('sys:sendNotice', msgInfo)
-                        }
-                    } else {
-                        // Safari：在 iOS 下，如果页面没有被创建为主屏幕，通知无法被调用
-                        // 最见鬼的是它不是方法返回失败，而且整个 Notification 对象都没有
-                        const isSupported = () =>
-                            'Notification' in window &&
-                            'serviceWorker' in navigator &&
-                            'PushManager' in window
-                        if(isSupported()) {
-                            // 检查通知权限，老旧浏览器不支持这个功能
-                            if (Notification.permission === 'default') {
-                                Notification.requestPermission(() => {
-                                    sendNotice(msgInfo)
-                                })
-                            } else if (Notification.permission !== 'denied') {
-                                sendNotice(msgInfo)
-                            }
-                        }
-                    }
+                    new Notify().notify(msgInfo)
                 }
                 // MacOS：刷新 touchbar
                 if (runtimeData.tags.isElectron && runtimeData.reader) {
@@ -1442,62 +1413,8 @@ function newMsg(name: string, data: any) {
                     item.new_msg = true
                 }
             })
-            // 重新排序列表
-            const newList = [] as (UserFriendElem & UserGroupElem)[]
-            let topNum = 1
-            runtimeData.onMsgList.forEach((item) => {
-                // 排序操作
-                if (item.always_top === true) {
-                    newList.unshift(item)
-                    topNum++
-                } else if (item.new_msg === true) {
-                    newList.splice(topNum - 1, 0, item)
-                } else {
-                    newList.push(item)
-                }
-            })
-            runtimeData.onMsgList = newList
         }
     }
-}
-
-function sendNotice(info: any) {
-    // 构建通知
-    let notificationTile = ''
-    const notificationBody = {} as NotificationElem
-    notificationBody.requireInteraction = true
-    notificationTile = info.title
-    notificationBody.body = info.body
-    notificationBody.tag = info.tag
-    notificationBody.icon = info.icon
-    // 发起通知
-    const notification = new Notification(notificationTile, notificationBody)
-    notification.onclick = (event: Event) => {
-        const info = event.target as NotificationOptions
-        if (info.tag !== undefined) {
-            const userId = info.tag.split('/')[0]
-            const msgId = info.tag.substring(userId.length + 1, info.tag.length)
-            // 在通知列表中删除这条消息
-            const index = notificationList.findIndex((item) => { return item.tag === info.tag })
-            if (index !== -1) {
-                notificationList.splice(index, 1)
-            }
-            // 跳转到这条消息的发送者页面
-            window.focus()
-            jumpToChat(userId, msgId)
-        }
-    }
-    notification.onclose = (event: Event) => {
-        const info = event.target as NotificationOptions
-        if (info.tag !== undefined) {
-            // 在通知列表中删除这条消息
-            const index = notificationList.findIndex((item) => { return item.tag === info.tag })
-            if (index !== -1) {
-                notificationList.splice(index, 1)
-            }
-        }
-    }
-    notificationList.push(notification)
 }
 
 /**
@@ -1532,10 +1449,7 @@ const baseRuntime = {
         classes: [],
         darkMode: false
     },
-    watch: {
-        newMsg: {},
-        newNotice: {}
-    },
+    watch: {},
     chatInfo: {
         show: { type: '', id: 0, name: '', avatar: '' },
         info: {
@@ -1567,7 +1481,6 @@ const baseRuntime = {
 }
 
 export const runtimeData: RunTimeDataElem = reactive(baseRuntime)
-export const notificationList: Notification[] = reactive([])
 
 // 重置 Runtime，但是保留应用设置之类已经加载好的应用内容
 export function resetRimtime(resetAll = false) {

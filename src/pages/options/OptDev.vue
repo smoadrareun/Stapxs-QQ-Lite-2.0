@@ -8,23 +8,6 @@
 <template>
     <div class="opt-page">
         <div class="ss-card">
-            <header>{{ $t('进阶功能') }}</header>
-            <div class="opt-item">
-                <font-awesome-icon :icon="['fas', 'code']" />
-                <div>
-                    <span>{{ $t('脚本') }}</span>
-                    <span>{{ $t('脚本功能提供了一种简便的自动化操作方式，能够执行如自动回复等任务。') }}</span>
-                </div>
-                <label class="ss-switch">
-                    <input type="checkbox" @change="save" name="append_scripts" v-model="runtimeData.sysConfig.append_scripts">
-                    <div>
-                        <div></div>
-                    </div>
-                </label>
-            </div>
-        </div>
-
-        <div class="ss-card">
             <header>{{ $t('兼容选项') }}</header>
             <div class="tip">
                 {{ $t('这儿是兼容性相关的高级选项，包括 bot 附加功能、热插拔组件等。') }}

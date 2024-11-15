@@ -19,6 +19,7 @@ import { hslToRgb, rgbToHsl } from '@/function/utils/systemUtil'
 import { toRaw, nextTick } from 'vue'
 import { sendMsgRaw } from './msgUtil'
 import { parseMsg } from '../sender'
+import { Notify } from '../notify'
 
 const popInfo = new PopInfo()
 const logger = new Logger()
@@ -443,6 +444,7 @@ export function createIpc() {
         })
         runtimeData.reader.on('app:jumpChat', (event, info) => {
             jumpToChat(info.userId, info.msgId)
+            new Notify().closeAll(info.userId)
         })
         
         // 后端连接模式
@@ -484,29 +486,16 @@ export function loadAppendStyle() {
         const gnomeExtInfo = runtimeData.reader?.invoke('sys:getGnomeExt')
         if(gnomeExtInfo) {
             gnomeExtInfo.then((info: any) => {
-                if(info['enable-all'] == 'true' || info['whitelist'].indexOf('stapxs-qq-lite') != -1) {
+                if(info['enable-all'] == 'true' || (info['whitelist'] != undefined && info['whitelist'].indexOf('stapxs-qq-lite')) > 0) {
                     import('@/assets/css/append/append_vibrancy.css').then(() => {
                         logger.info('透明 UI 附加样式加载完成')
                     })
-                    import('@/assets/css/append/append_gnome.css').then(() => {
-                        logger.info('Blur my sell 附加样式加载完成')
+                    import('@/assets/css/append/append_linux_vibrancy.css').then(() => {
+                        logger.info('Linux 透明 UI 附加样式加载完成')
                     })
                 }
             })
         }
-    }
-    // 全透明模式
-    if(option.get('vibrancy_mode') != 'default') {
-        import('@/assets/css/append/append_full_transparent.css').then(() => {
-            logger.info('全透明 UI 附加样式加载完成')
-        })
-        // 将 card 颜色透明化
-        document.documentElement.style.setProperty('--color-bg', 'rgba(var(--color-bg-rgb), 0.5)')
-        document.documentElement.style.setProperty('--color-card', 'rgba(var(--color-card-rgb), 0.5)')
-        document.documentElement.style.setProperty('--color-card-1', 'rgba(var(--color-card-1-rgb), 0.5)')
-        document.documentElement.style.setProperty('--color-card-2', 'rgba(var(--color-card-2-rgb), 0.5)')
-        // 恢复设置项
-        option.save('vibrancy_mode', 'default')
     }
 }
 

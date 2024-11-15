@@ -14,7 +14,7 @@
                 <div :name="$t('界面')"><OptView></OptView></div>
                 <div :name="$t('功能')"><OptFunction :config="config"></OptFunction></div>
                 <div :name="$t('高级')"><OptDev></OptDev></div>
-                <div :name="$t('关于')"><AboutPan class="opt-about" showUI></AboutPan></div>
+                <div v-if="showAbout" :name="$t('关于')"><AboutPan class="opt-about" showUI></AboutPan></div>
             </BcTab>
             <div class="ss-card end-card">
                 <div>
@@ -83,8 +83,34 @@ export default defineComponent({
     data() {
         return {
             packageInfo: packageInfo,
-            openLink: openLink
+            openLink: openLink,
+            showAbout: true
         }
+    },
+    mounted() {
+        // 监听窗口大小变化
+        window.addEventListener('resize', () => {
+            this.$nextTick(() => {
+                let width = window.innerWidth
+                if(width < 700) {
+                    this.showAbout = true
+                } else {
+                    this.showAbout = false
+                }
+            })
+        })
+        this.$watch('show', (val) => {
+            if(val) {
+                this.$nextTick(() => {
+                    let width = window.innerWidth
+                    if(width < 700) {
+                        this.showAbout = true
+                    } else {
+                        this.showAbout = false
+                    }
+                })
+            }
+        })
     }
 })
 </script>

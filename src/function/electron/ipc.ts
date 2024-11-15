@@ -11,7 +11,9 @@ import { Connector } from '@/function/electron/connector'
 let connector = undefined as Connector | undefined
 const store = new Store()
 let template = [] as any[]
-export const noticeList = {} as {[key: string]: ELNotification[]}
+
+// 消息缓存，key 为 tag
+const noticeList = {} as {[key: string]: ELNotification}
 
 export function regIpcListener() {
     // 后端连接模式
@@ -165,12 +167,10 @@ export function regIpcListener() {
             win.webContents.downloadURL(downloadPath)
         }
     })
-    // 通知
+    // 发送通知
     ipcMain.on('sys:sendNotice', async (event, data) => {
         const userId = data.tag.split('/')[0]
         const msgId = data.tag.split('/')[1]
-
-        // console.log(data)
 
         let showData = {
             title: data.title,
@@ -222,8 +222,7 @@ export function regIpcListener() {
         }
         const notification = new ELNotification(showData)
         notification.show()
-        if(!noticeList[userId]) noticeList[userId] = []
-        noticeList[userId].push(notification)
+        // 通知事件
         notification.on('click', () => {
             win?.focus()
             win?.webContents.send('app:jumpChat', {
@@ -231,15 +230,7 @@ export function regIpcListener() {
                 msgId: msgId
             })
         })
-        notification.on('close', () => {
-            noticeList[userId].splice(noticeList[userId].indexOf(notification), 1)
-            // TODO: 通知关闭，愚人节彩蛋备用
-        })
-        notification.on('failed', (event, error) => {
-            win?.webContents.send('app:error', error)
-        })
         notification.on('reply', (event, reply) => {
-            noticeList[userId].splice(noticeList[userId].indexOf(notification), 1)
             win?.webContents.send('bot:quickReply', {
                 type: data.type,
                 id: userId,
@@ -247,13 +238,28 @@ export function regIpcListener() {
                 content: reply
             })
         })
+        // 保存通知对象
+        noticeList[data.tag] = notification
     })
-    ipcMain.on('sys:closeAllNotice', (event, id) => {
-        if(noticeList[id]) {
-            noticeList[id].forEach((notice) => {
-                notice.close()
-            })
+    // 关闭通知
+    ipcMain.on('sys:closeNotice', (event, tag) => {
+        if(noticeList[tag]) {
+            noticeList[tag].close()
         }
+    })
+    // 清空通知
+    ipcMain.on('sys:clearNotice', () => {
+        Object.keys(noticeList).forEach((key) => {
+            noticeList[key].close()
+        })
+    })
+    // 关闭指定 ID 的所有通知
+    ipcMain.on('sys:closeAllNotice', (event, id) => {
+        Object.keys(noticeList).forEach((key) => {
+            if(key.startsWith(id)) {
+                noticeList[key].close()
+            }
+        })
     })
     // 运行命令
     ipcMain.handle('sys:runCommand', async (event, cmd) => {

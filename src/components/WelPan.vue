@@ -63,8 +63,7 @@ export default defineComponent({
         gaLanguage(event: Event) {
             const sender = event.target as HTMLInputElement
             sendStatEvent('use_language', { name: sender.value })
-            // 刷新菜单
-            // TODO
+            // TODO: 刷新菜单
         },
         setPage(name: string) {
             this.show = name

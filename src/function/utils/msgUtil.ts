@@ -221,7 +221,7 @@ export function getMsgRawTxt(data: any): string {
                 case 'text': back += message[i].text.replaceAll('\n', ' ').replaceAll('\r', ' '); break
                 case 'face': back += '[' + $t('表情') + ']'; break
                 case 'bface': back += message[i].text; break
-                case 'image': back += message[i].summary ?? '[' + $t('图片') + ']'; break
+                case 'image': back += (message[i].summary || message[i].summary == '') ? '[' + $t('图片') + ']' : message[i].summary ; break
                 case 'record': back += '[' + $t('语音') + ']'; break
                 case 'video': back += '[' + $t('视频') + ']'; break
                 case 'file': back += '[' + $t('文件') + ']'; break
@@ -428,10 +428,35 @@ export function updateLastestHistory(item: UserFriendElem & UserGroupElem) {
     )
 }
 
+/**
+ * 对消息列表进行排序
+ * @param list 消息列表
+ */
+export function orderOnMsgList(list: (UserFriendElem & UserGroupElem)[]) {
+    // 先更具 item.always_top 是不是 true 拆为两个数组
+    const topList = list.filter((item) => item.always_top)
+    const normalList = list.filter((item) => !item.always_top)
+    // 将两个数组按照 item.time 降序排序
+    // item.time 不存在或者相同时按照 item.py_start 降序排序
+
+    const sortFun = (a: UserFriendElem & UserGroupElem, b: UserFriendElem & UserGroupElem) => {
+        if (a.time == b.time || a.time == undefined || b.time == undefined) {
+            if(a.py_start == undefined || b.py_start == undefined) {
+                return 0
+            }
+            return b.py_start.charCodeAt(0) - a.py_start.charCodeAt(0)
+        }
+        return b.time - a.time
+    }
+    topList.sort(sortFun)
+    normalList.sort(sortFun)
+    return topList.concat(normalList)
+}
+
 export function sendMsgAppendInfo(msg: any) {
     if(msg.message) {
         msg.message.forEach(() => {
-            // TODO
+            // TODO: 消息附加功能，暂时没用到
         }
         )
     }

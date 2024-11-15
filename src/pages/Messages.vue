@@ -35,7 +35,10 @@
                     <li icon="fa-solid fa-volume-xmark" id="notice_close">{{ $t('关闭通知') }}</li>
                 </ul>
             </BcMenu>
-            <div id="message-list-body" :class="(runtimeData.tags.openSideBar ? 'open' : '')" style="overflow-y: scroll;">
+            <TransitionGroup
+                name="onmsg" tag="div" id="message-list-body"
+                :class="(runtimeData.tags.openSideBar ? ' open' : '')"
+                style="overflow-y: scroll;">
                 <!-- 系统信息 -->
                 <FriendBody key="inMessage--10000"
                     v-if="runtimeData.systemNoticesList && Object.keys(runtimeData.systemNoticesList).length > 0"
@@ -53,7 +56,7 @@
                     @touchstart="showMenuStart($event, item)"
                     @touchend="showMenuEnd">
                 </FriendBody>
-            </div>
+            </TransitionGroup>
         </div>
         <div v-show="!loginInfo.status || runtimeData.chatInfo.show.id == 0" :class="'friend-list-space' + (runtimeData.tags.openSideBar ? ' open' : '')">
             <div class="ss-card">
@@ -72,7 +75,7 @@ import Menu from 'vue3-bcui/packages/bc-menu/index'
 import Option from '@/function/option'
 
 import { defineComponent } from 'vue'
-import { runtimeData, notificationList } from '@/function/msg'
+import { runtimeData } from '@/function/msg'
 import { UserFriendElem, UserGroupElem } from '@/function/elements/information'
 import { getRaw as getOpt, run as runOpt } from '@/function/option'
 import { loadHistoryMessage } from '@/function/utils/appUtil'
@@ -82,6 +85,8 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { login as loginInfo } from '@/function/connect'
 
 import { faThumbTack, faTrashCan, faCheckToSlot, faGripLines } from '@fortawesome/free-solid-svg-icons'
+import { orderOnMsgList } from '@/function/utils/msgUtil'
+import { Notify } from '@/function/notify'
 
 export default defineComponent({
     name: 'VueMessages',
@@ -133,19 +138,9 @@ export default defineComponent({
                 }
                 // 清除新消息标记
                 runtimeData.onMsgList[index].new_msg = false
-                // 清除消息通知
-                const notificationIndex = notificationList.findIndex((item) => {
-                    const tag = item.tag
-                    const userId = Number(tag.split('/')[0])
-                    return userId == data.user_id || userId == data.group_id
-                })
-                if (notificationIndex != -1) {
-                    const notification = notificationList[notificationIndex]
-                    // PS：使用 close 方法关闭通知也会触发关闭事件，所以这儿需要先移除再关闭
-                    // 防止一些判断用户主动关闭通知的逻辑出现问题
-                    notificationList.splice(notificationIndex, 1)
-                    notification.close()
-                }
+                // 关闭所有通知
+                new Notify().closeAll((runtimeData.onMsgList[index].group_id 
+                    ?? runtimeData.onMsgList[index].user_id).toString())
             }
         },
 
@@ -311,19 +306,7 @@ export default defineComponent({
             // 为消息列表内的对象刷新置顶标志
             item.always_top = value
             // 重新排序列表
-            const newList = [] as (UserFriendElem & UserGroupElem)[]
-            let topNum = 1
-            runtimeData.onMsgList.forEach((item) => {
-                // 排序操作
-                if (item.always_top === true) {
-                    newList.unshift(item)
-                    topNum++
-                } else if (item.new_msg === true) {
-                    newList.splice(topNum - 1, 0, item)
-                } else {
-                    newList.push(item)
-                }
-            })
+            const newList = orderOnMsgList(runtimeData.onMsgList)
             runtimeData.onMsgList = newList
         },
 
@@ -416,6 +399,12 @@ export default defineComponent({
 </script>
 
 <style>
+.onmsg-enter-active,
+.onmsg-leave-active,
+.onmsg-move {
+    transition: transform 0.4s;
+}
+
 .menu div.item > a {
     font-size: 0.9rem !important;
 }

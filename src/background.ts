@@ -6,7 +6,7 @@ import installExtension from 'electron-devtools-installer'
 
 import windowStateKeeper from 'electron-window-state'
 import packageInfo from '../package.json'
-import { noticeList, regIpcListener } from './function/electron/ipc'
+import { regIpcListener } from './function/electron/ipc'
 import { Menu, session, app, protocol, BrowserWindow } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import { touchBar } from './function/electron/touchbar'
@@ -50,7 +50,6 @@ async function createWindow() {
         defaultHeight: 530
     })
     const store = new Store()
-    const vibrancyMode = store.get('vibrancy_mode')
     let windowConfig = {
         x: mainWindowState.x,
         y: mainWindowState.y,
@@ -72,18 +71,16 @@ async function createWindow() {
             ...windowConfig,
             titleBarStyle: 'hidden',
             trafficLightPosition: { x: 11, y: 10 },
-            vibrancy: vibrancyMode == 'transparent' ? undefined : 'fullscreen-ui',
+            vibrancy: 'fullscreen-ui',
             transparent: true,
-
-            visualEffectState: process.env.NODE_ENV 
-                    === 'development' ? 'active' : 'followWindow'
+            visualEffectState: 'followWindow'
         }
     } else if(process.platform === 'win32') {
         // Windows
         windowConfig = {
             ...windowConfig,
             backgroundColor: '#00000000',
-            backgroundMaterial: vibrancyMode == 'transparent' ? undefined : 'acrylic',
+            backgroundMaterial: 'acrylic',
             frame: false
         }
         store.set('opt_no_window', 'true')
@@ -167,12 +164,6 @@ function sendUrlToWindow(url: string ,args: string[] = []) {
 }
 
 app.on('window-all-closed', () => {
-    // 清空通知
-    Object.keys(noticeList).forEach((key) => {
-        noticeList[key].forEach((notice) => {
-            notice.close()
-        })
-    })
     if (process.platform === 'win32')
     {
         app.removeAsDefaultProtocolClient('stapx-qq-lite')   // 取消默认协议

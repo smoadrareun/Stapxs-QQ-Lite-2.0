@@ -34,7 +34,6 @@ const optDefault: { [key: string]: any } = {
     theme_color: 0,
     chat_background_blur: 0,
     msg_type: 2,
-    vibrancy_mode: 'default',
     store_face: '[]'
 }
 
@@ -481,13 +480,7 @@ export function runASWEvent(event: Event) {
     // 有些设置项需要重启/刷新
     if(sender.dataset.reload == 'true') {
         const $t = app.config.globalProperties.$t
-
-        let html = '<span>' + $t('此操作将在重启应用后生效，现在就要重启吗？') + '</span>'
-
-        // 模糊模式的特殊情况
-        if(sender.title == 'vibrancy_mode') {
-            html += '<span>' + $t('此操作仅供娱乐，将会在下次关闭时恢复。') + '</span>'
-        }
+        const html = '<span>' + $t('此操作将在重启应用后生效，现在就要重启吗？') + '</span>'
 
         const popInfo = {
             svg: 'trash-arrow-up',
