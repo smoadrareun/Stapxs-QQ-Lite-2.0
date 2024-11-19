@@ -1,6 +1,6 @@
 html, body {
-    background: var(--color-main);
     font-family: 'Arial', 'Helvetica', 'sans-serif';
+    background: var(--color-main);
     user-select: none;
     overflow: hidden;
     height: 100%;
@@ -390,7 +390,6 @@ textarea:focus {
 }
 
 .friend-body {
-    user-select: none;
     cursor: pointer;
     display: flex;
     flex-direction: row;
@@ -643,7 +642,6 @@ textarea:focus {
 }
 .app-msg > div > a {
     color: var(--color-font-r);
-    user-select: none;
     margin: 0 10px;
 }
 .app-msg > div > div:last-child {

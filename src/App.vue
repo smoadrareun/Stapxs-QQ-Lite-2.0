@@ -168,6 +168,7 @@
         </Transition>
         <viewer
             class="viewer" ref="viewer"
+            v-show="runtimeData.tags.viewer.show"
             :options="viewerOpt"
             :images="runtimeData.chatInfo.info.image_list"
             @inited="viewerInited"

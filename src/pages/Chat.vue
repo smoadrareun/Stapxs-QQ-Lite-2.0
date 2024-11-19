@@ -1677,7 +1677,6 @@ export default defineComponent({
          */
         msgStartMove (event: TouchEvent, msg: any) {
             const logger = new Logger()
-            const sender = event.currentTarget as HTMLDivElement
             logger.add(LogType.UI, '消息触屏点击事件开始 ……')
             this.tags.msgTouch.msgOnTouchDown = true
             this.tags.msgTouch.x = event.targetTouches[0].pageX
@@ -1694,7 +1693,6 @@ export default defineComponent({
             setTimeout(() => {
                 logger.add(LogType.UI, '消息触屏长按判定：' + this.tags.msgTouch.msgOnTouchDown)
                 if (this.tags.msgTouch.msgOnTouchDown === true) {
-                    sender.style.background = '#00000008'
                     this.showMsgMeun(event, msg)
                 }
             }, 400)
@@ -1902,13 +1900,23 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* 消息移除动画 */
+/* 消息动画 */
 .msglist-move {
-    transition: all .5s;
+    transition: all .3s;
 }
 
+.msglist-enter-active {
+    transition: all .4s;
+}
 .msglist-leave-active {
-    display: none;
+    transition: all .2s;
+}
+.msglist-enter-from {
+    transform: translateX(-20px);
+    opacity: 0;
+}
+.msglist-leave-to {
+    opacity: 0;
 }
 
 /* 更多功能面板动画 */

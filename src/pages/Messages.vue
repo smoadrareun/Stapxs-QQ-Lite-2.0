@@ -47,7 +47,7 @@
                     @click="systemNoticeClick"></FriendBody>
                 <!-- 其他消息 -->
                 <FriendBody v-for="item in runtimeData.onMsgList"
-                    :key="'inMessage-' + item.user_id ? item.user_id : item.group_id"
+                    :key="'inMessage-' + (item.user_id ? item.user_id : item.group_id)"
                     :select="chat.show.id === item.user_id || (chat.show.id === item.group_id && chat.group_name != '')"
                     :menu="menu.select && menu.select == item"
                     :data="item" from="message"

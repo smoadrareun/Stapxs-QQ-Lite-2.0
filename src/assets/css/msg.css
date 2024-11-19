@@ -4,6 +4,7 @@
 */
 
 .message {
+    user-select: text;
     transition: background .3s;
     display: flex;
     padding: 5px 10px 10px 10px;
